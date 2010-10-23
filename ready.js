@@ -8,7 +8,7 @@ Readyjs = (function() {
     wd : "",
     config : {
       src : "./", // the source dir of js files
-      dest : "./", // the destination where to put them
+      dest : "./", // the destination of your minified files
       debug : false, // if debug mode
       minifiedExtension : "min", // Extension of the minified file
     },
