@@ -114,6 +114,7 @@ Readyjs = (function() {
         if (error) {
           r.debug("jslint " + file + " : ERROR");
           sys.puts(file + " : " + error);
+          process.exit(1);
         } else {
           r.debug("jslint " + file + " : OK");
         }
