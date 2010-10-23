@@ -1,8 +1,8 @@
 # Ready.js : easily run jslint and google closure compiler on your javascript files
 
 ## What does it do?
-1. Check if your javascript are valid with [[jslint|http://www.jslint.com/]]
-2. Minify your javascript with [[Closure Compiler|http://code.google.com/closure/compiler/]]
+1. Check if your javascript are valid with [jslint](http://www.jslint.com/)
+2. Minify your javascript with [Closure Compiler](http://code.google.com/closure/compiler/)
 
 ## How to install in your project (for Git)
 1. `git submodule add git://github.com/dsimard/ready.js.git ready.js`
