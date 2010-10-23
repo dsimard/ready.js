@@ -1,0 +1,112 @@
+Readyjs = (function(test) {
+  var sys = require("sys");
+  var fs = require("fs");
+  var cp = require('child_process');
+  
+  var r = {
+    /******* PROPERTIES *******/
+    wd : "",
+    config : {
+      src : "./",
+      dest : "./",
+      debug : false
+    },
+    /******* PRIVATE *******/
+    load : function() {
+      r.initWorkingDir(r.execWithArgs);
+    },
+    initWorkingDir : function(cb) {
+      // Get the working dir
+      process.chdir("../"); // one-up to get actual project
+      cp.exec("git rev-parse --show-cdup", function(error, stdout, stderr) {
+        stdout = stdout.toString().replace(/\s*$/, "")
+        r.wd = fs.realpathSync(stdout.toString());
+        if (cb) { cb() };
+      });
+    },
+    loadConfig : function() {
+      process.compile('var config = ' + process.argv[2], "execWithArgs.js");
+
+      // Extend config file
+      for (var p in r.config) {
+        r.config[p] = config[p] || r.config[p];
+      }
+      
+      // Show config
+      for (var p in r.config) {
+        r.debug("config " + p.toString() + " : " + r.config[p].toString());
+      }
+    },
+    execWithArgs : function() {
+      if (process.argv && process.argv[2]) {
+        r.for_each_js(r.jslint);
+        r.for_each_js(r.compress);
+      }
+    },
+    for_each_js : function(callback) {
+      var dir = r.absPath(r.config.src);
+      var files = fs.readdirSync(dir);
+
+      for (var i = 0; i < files.length; i++) {
+        var filename = files[i];
+        var complete = dir + filename;
+        callback(complete);
+      }
+    },
+    absPath : function(relativePath) {
+      var path = fs.realpathSync(r.wd + relativePath).toString();
+      if (!path.match(/\/$/)) { path = path + "/"; }
+      return path;
+    },
+    debug : function(msg) {
+      if (r.config.debug === true) {
+        console.log(msg);
+      }
+    },
+    /******* PUBLIC *******/
+    compress : function compress(file) {
+      var rest = require("./vendor/restler/lib/restler");
+
+      var http = require('http');
+      var google = http.createClient(80, 'http://closure-compiler.appspot.com/compile');
+      
+      var code = fs.readFileSync(file).toString();
+
+      var params = {"js_code" : code, 
+        "compilation_level" : "SIMPLE_OPTIMIZATIONS", 
+        "output_format" : "text",
+        "output_info" : "compiled_code"
+      };
+      
+      rest.post("http://closure-compiler.appspot.com/compile", {data : params})
+        .addListener('complete', function(data) {
+          var filename = file.match(/[^/]+$/i)[0];
+          filename = filename.replace(/\.js$/i, ".min.js");
+          var path = r.absPath(r.config.dest) + filename;
+          r.debug("Write compressed file to " + path);
+          fs.writeFileSync(path, data);
+        });
+    },
+    jslint : function(file) {
+      var jslintPath = fs.realpathSync("./vendor/jslint/bin/jslint.js");
+      
+      // Run jslint on each file
+      var jslint = cp.exec("node " + jslintPath + " " + file, function(error, stdout, stderr) {
+        if (error) {
+          r.debug("jslint " + file + " : ERROR");
+          sys.puts(file + " : " + error);
+        } else {
+          r.debug("jslint " + file + " : OK");
+        }
+      });
+    }
+  };
+
+  r.loadConfig();
+  r.load();
+  
+  return r;
+})();
+
+
+

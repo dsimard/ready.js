@@ -1,0 +1,6 @@
+[submodule "vendor/restler"]
+	path = vendor/restler
+	url = git://github.com/danwrong/restler.git
+[submodule "vendor/jslint"]
+	path = vendor/jslint
+	url = git://github.com/reid/node-jslint
