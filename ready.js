@@ -2,6 +2,7 @@ Readyjs = (function(test) {
   var sys = require("sys");
   var fs = require("fs");
   var cp = require('child_process');
+  var Script = process.binding('evals').Script
   
   var r = {
     /******* PROPERTIES *******/
@@ -9,7 +10,8 @@ Readyjs = (function(test) {
     config : {
       src : "./",
       dest : "./",
-      debug : false
+      debug : false,
+      createDir : true,
     },
     /******* PRIVATE *******/
     load : function() {
@@ -17,7 +19,6 @@ Readyjs = (function(test) {
     },
     initWorkingDir : function(cb) {
       // Get the working dir
-      process.chdir("../"); // one-up to get actual project
       cp.exec("git rev-parse --show-cdup", function(error, stdout, stderr) {
         stdout = stdout.toString().replace(/\s*$/, "")
         r.wd = fs.realpathSync(stdout.toString());
@@ -25,11 +26,23 @@ Readyjs = (function(test) {
       });
     },
     loadConfig : function() {
-      process.compile('var config = ' + process.argv[2], "execWithArgs.js");
+      // If the arg is a file, use it as config file. Else, load directly
+      var arg = process.argv[2];
+      var isFile = null;
+      try {
+        isFile = fs.statSync(arg).isFile();
+      } catch(err) {
+      }
+
+      if (isFile) {
+        Script.runInThisContext(arg);
+      } else {
+        process.compile('var config = ' + process.argv[2], "execWithArgs.js");
+      }
 
       // Extend config file
       for (var p in r.config) {
-        r.config[p] = config[p] || r.config[p];
+        r.config[p] = (config && config.p) || r.config[p];
       }
       
       // Show config
@@ -65,7 +78,7 @@ Readyjs = (function(test) {
     },
     /******* PUBLIC *******/
     compress : function compress(file) {
-      var rest = require("./vendor/restler/lib/restler");
+      var rest = require(__dirname + "/vendor/restler/lib/restler");
 
       var http = require('http');
       var google = http.createClient(80, 'http://closure-compiler.appspot.com/compile');
@@ -88,7 +101,7 @@ Readyjs = (function(test) {
         });
     },
     jslint : function(file) {
-      var jslintPath = fs.realpathSync("./vendor/jslint/bin/jslint.js");
+      var jslintPath = fs.realpathSync(__dirname + "/vendor/jslint/bin/jslint.js");
       
       // Run jslint on each file
       var jslint = cp.exec("node " + jslintPath + " " + file, function(error, stdout, stderr) {
