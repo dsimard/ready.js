@@ -1,17 +1,16 @@
-Readyjs = (function(test) {
+Readyjs = (function() {
   var sys = require("sys");
   var fs = require("fs");
   var cp = require('child_process');
-  var Script = process.binding('evals').Script
   
   var r = {
     /******* PROPERTIES *******/
     wd : "",
     config : {
-      src : "./",
-      dest : "./",
-      debug : false,
-      createDir : true,
+      src : "./", // the source dir of js files
+      dest : "./", // the destination where to put them
+      debug : false, // if debug mode
+      minifiedExtension : "min", // Extension of the minified file
     },
     /******* PRIVATE *******/
     load : function() {
@@ -34,15 +33,18 @@ Readyjs = (function(test) {
       } catch(err) {
       }
 
-      if (isFile) {
-        Script.runInThisContext(arg);
-      } else {
-        process.compile('var config = ' + process.argv[2], "execWithArgs.js");
-      }
+      var confJson = arg;
+
+      if (isFile === true) {
+        code = fs.readFileSync(arg).toString();
+      } 
+      
+      // Put values in variable
+      process.compile('var config = ' + code, "execWithArgs.js");
 
       // Extend config file
       for (var p in r.config) {
-        r.config[p] = (config && config.p) || r.config[p];
+        r.config[p] = (config && config[p]) || r.config[p];
       }
       
       // Show config
@@ -62,8 +64,12 @@ Readyjs = (function(test) {
 
       for (var i = 0; i < files.length; i++) {
         var filename = files[i];
-        var complete = dir + filename;
-        callback(complete);
+        
+        // If .js
+        if (filename.match(/\.js$/i)) {
+          var complete = dir + filename;
+          callback(complete);
+        }
       }
     },
     absPath : function(relativePath) {
@@ -94,7 +100,7 @@ Readyjs = (function(test) {
       rest.post("http://closure-compiler.appspot.com/compile", {data : params})
         .addListener('complete', function(data) {
           var filename = file.match(/[^/]+$/i)[0];
-          filename = filename.replace(/\.js$/i, ".min.js");
+          filename = filename.replace(/\.js$/i, "."+r.config.minifiedExtension+".js");
           var path = r.absPath(r.config.dest) + filename;
           r.debug("Write compressed file to " + path);
           fs.writeFileSync(path, data);
