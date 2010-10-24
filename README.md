@@ -1,5 +1,4 @@
 # Ready.js
-# your javascript is ready for production
 
 ## What does it do?
 1. Check if your javascript are valid with [jslint](http://www.jslint.com/).

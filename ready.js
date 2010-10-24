@@ -14,9 +14,11 @@ Readyjs = (function() {
       runJsLint : true, // if should run jsLint
       runGCompiler : true, // if should run GoogleCompiler
       watch : true, // if should watch the js files and exec ready.js each time they changes
+      aggregateFilename : "", // If a string is specified, all the .js will be aggregated
     },
     /******* PRIVATE *******/
     load : function() {
+      r.loadConfig();
       r.initWorkingDir(r.execWithArgs);
     },
     initWorkingDir : function(cb) {
@@ -47,7 +49,8 @@ Readyjs = (function() {
 
       // Extend config file
       for (var p in r.config) {
-        r.config[p] = (config && config[p]) || r.config[p];
+        //console.log(p + " " + sys.inspect(typeof(config[p]).toString()));
+        r.config[p] = typeof(config[p]) == "undefined" ? r.config[p] : config[p];
       }
       
       // Show config
@@ -57,11 +60,12 @@ Readyjs = (function() {
     },
     execWithArgs : function() {
       if (process.argv && process.argv[2]) {
+        r.debug("Watch " + r.config.watch);
         if (r.config.watch === true) {
           r.debug("Watch!");
           r.for_each_js(r.watch);
         } else { 
-          // Create a jslint     
+          // Create a jslint that will exit the whole process  
           var jslint = function(file) {
             r.jslint(file, {onError:function() {process.exit(1);}});
           }
@@ -99,6 +103,7 @@ Readyjs = (function() {
       fs.watchFile(file, function (curr, prev) {
         r.debug(file + " changed");
         
+        // create a jslint that will call compile on success
         var jslint = function() {
           r.jslint(file, {onSuccess : function() {
             r.compile(file);
@@ -130,7 +135,7 @@ Readyjs = (function() {
           var filename = file.match(/[^/]+$/i)[0];
           filename = filename.replace(/\.js$/i, "."+r.config.minifiedExtension+".js");
           var path = r.absPath(r.config.dest) + filename;
-          r.debug("Write compressed file to " + path);
+          r.debug("Write compiled file to " + path);
           fs.writeFileSync(path, data);
         });
     },
@@ -157,7 +162,6 @@ Readyjs = (function() {
     }
   };
 
-  r.loadConfig();
   r.load();
   
   return r;
