@@ -10,7 +10,10 @@ Readyjs = (function() {
       src : "./", // the source dir of js files
       dest : "./", // the destination of your minified files
       debug : false, // if debug mode
-      minifiedExtension : "min", // Extension of the minified file
+      minifiedExtension : "min", // extension of the minified file
+      runJsLint : true, // if should run jsLint
+      runGCompiler : true, // if should run GoogleCompiler
+      watch : true, // if should watch the js files and exec ready.js each time they changes
     },
     /******* PRIVATE *******/
     load : function() {
@@ -54,8 +57,18 @@ Readyjs = (function() {
     },
     execWithArgs : function() {
       if (process.argv && process.argv[2]) {
-        r.for_each_js(r.jslint);
-        r.for_each_js(r.compress);
+        if (r.config.watch === true) {
+          r.debug("Watch!");
+          r.for_each_js(r.watch);
+        } else { 
+          // Create a jslint     
+          var jslint = function(file) {
+            r.jslint(file, {onError:function() {process.exit(1);}});
+          }
+          
+          r.for_each_js(jslint);
+          r.for_each_js(r.compile);
+        }
       }
     },
     for_each_js : function(callback) {
@@ -82,8 +95,23 @@ Readyjs = (function() {
         console.log(msg);
       }
     },
+    watch : function(file) {
+      fs.watchFile(file, function (curr, prev) {
+        r.debug(file + " changed");
+        
+        var jslint = function() {
+          r.jslint(file, {onSuccess : function() {
+            r.compile(file);
+          }});
+        }
+        
+        jslint();
+      });
+    },
     /******* PUBLIC *******/
-    compress : function compress(file) {
+    compile : function compress(file) {
+      if (r.config.runGCompiler !== true) { return; }
+      
       var rest = require(__dirname + "/vendor/restler/lib/restler");
 
       var http = require('http');
@@ -106,7 +134,11 @@ Readyjs = (function() {
           fs.writeFileSync(path, data);
         });
     },
-    jslint : function(file) {
+    jslint : function(file, options) {
+      options = options || {};
+      
+      if (r.config.runJsLint !== true) { return; }
+    
       var jslintPath = fs.realpathSync(__dirname + "/vendor/jslint/bin/jslint.js");
       
       // Run jslint on each file
@@ -114,9 +146,12 @@ Readyjs = (function() {
         if (error) {
           r.debug("jslint " + file + " : ERROR");
           sys.puts(file + " : " + error);
-          process.exit(1);
+          
+          if (options.onError) { options.onError(); } 
         } else {
           r.debug("jslint " + file + " : OK");
+          
+          if (options.onSuccess) { options.onSuccess(); }
         }
       });
     }
