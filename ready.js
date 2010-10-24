@@ -13,8 +13,8 @@ Readyjs = (function() {
       minifiedExtension : "min", // extension of the minified file
       runJsLint : true, // if should run jsLint
       runGCompiler : true, // if should run GoogleCompiler
-      watch : true, // if should watch the js files and exec ready.js each time they changes
-      aggregateFilename : "", // If a string is specified, all the .js will be aggregated
+      watch : false, // if should watch the js files and exec ready.js each time they changes
+      aggregateTo : "", // If a string is specified, all the .js will be aggregated
     },
     /******* PRIVATE *******/
     load : function() {
@@ -49,33 +49,41 @@ Readyjs = (function() {
 
       // Extend config file
       for (var p in r.config) {
-        //console.log(p + " " + sys.inspect(typeof(config[p]).toString()));
         r.config[p] = typeof(config[p]) == "undefined" ? r.config[p] : config[p];
       }
       
-      // Show config
-      for (var p in r.config) {
-        r.debug("config " + p.toString() + " : " + r.config[p].toString());
+      // Check config
+      if (r.config.watch && r.shouldAggregate()) {
+        r.warn("Cannot use config.watch and config.aggregateTo. Dropped config.aggregateTo.");
+        r.config.aggregateTo = "";
       }
+      
+      // Show config
+      r.debug("== Configuration ==");
+      for (var p in r.config) {
+        r.debug(p.toString() + " : " + r.config[p].toString());
+      }
+      r.debug("");
     },
     execWithArgs : function() {
       if (process.argv && process.argv[2]) {
-        r.debug("Watch " + r.config.watch);
         if (r.config.watch === true) {
-          r.debug("Watch!");
-          r.for_each_js(r.watch);
+          r.forEachJs(r.watch);
         } else { 
           // Create a jslint that will exit the whole process  
           var jslint = function(file) {
             r.jslint(file, {onError:function() {process.exit(1);}});
-          }
+          }          
           
-          r.for_each_js(jslint);
-          r.for_each_js(r.compile);
+          r.emptyAggregate();
+          r.forEachJs(jslint);
+          r.forEachJs(r.shipToDest);
         }
       }
     },
-    for_each_js : function(callback) {
+    forEachJs : function(callback, options) {
+      options = options || {};
+    
       var dir = r.absPath(r.config.src);
       var files = fs.readdirSync(dir);
 
@@ -88,8 +96,33 @@ Readyjs = (function() {
           callback(complete);
         }
       }
+      
+      if (options.onEnd) { options.onEnd(); }
+    },
+    // Empty the aggregated file
+    emptyAggregate : function() {
+      var path = r.absPath() + r.config.aggregateTo;
+      
+      var fd = fs.openSync(path, "w");
+      fs.truncateSync(fd, 0);
+      fs.closeSync(fd);
+      r.log("Truncated " + path);
+    },
+    // Write to aggregated file
+    writeToAggregate : function(file, code) {
+      var path = r.absPath() + r.config.aggregateTo;
+      r.log("Aggregate " + file + " to " + path);
+      
+      var filename = file.match(/[^/]+$/i)[0];
+
+      var fd = fs.openSync(path, "a");
+      fs.writeSync(fd, "/* " + filename + " */\n");
+      fs.writeSync(fd, code);
+      fs.writeSync(fd, "\n");
+      fs.closeSync(fd);
     },
     absPath : function(relativePath) {
+      relativePath = relativePath || "";
       var path = fs.realpathSync(r.wd + relativePath).toString();
       if (!path.match(/\/$/)) { path = path + "/"; }
       return path;
@@ -99,23 +132,32 @@ Readyjs = (function() {
         console.log(msg);
       }
     },
-    watch : function(file) {
-      fs.watchFile(file, function (curr, prev) {
-        r.debug(file + " changed");
-        
-        // create a jslint that will call compile on success
-        var jslint = function() {
-          r.jslint(file, {onSuccess : function() {
-            r.compile(file);
-          }});
+    warn : function(msg) {
+      console.log("WARNING : " + msg);
+    },
+    log : function(msg) {
+      console.log(msg);
+    },
+    shouldAggregate : function() {
+      return r.config.aggregateTo.length > 0;
+    },
+    // Ships all files (compiled or not) to destination
+    shipToDest : function(file) {
+      // Check if we have to process the file
+      if (r.config.runGCompiler || r.shouldAggregate) {
+        if (r.config.runGCompiler) {
+          r.compile(file, {onSuccess : r.writeToAggregate});
+        } else {
+          var code = fs.readFileSync(file).toString();
+          r.writeToAggregate(file, code);
         }
-        
-        jslint();
-      });
+      }
     },
     /******* PUBLIC *******/
-    compile : function compress(file) {
+    compile : function(file, options) {
       if (r.config.runGCompiler !== true) { return; }
+      
+      options = options || {};
       
       var rest = require(__dirname + "/vendor/restler/lib/restler");
 
@@ -131,12 +173,20 @@ Readyjs = (function() {
       };
       
       rest.post("http://closure-compiler.appspot.com/compile", {data : params})
-        .addListener('complete', function(data) {
+        .addListener('complete', function(data) {        
+          // Extract filename and add suffix
           var filename = file.match(/[^/]+$/i)[0];
           filename = filename.replace(/\.js$/i, "."+r.config.minifiedExtension+".js");
+          
           var path = r.absPath(r.config.dest) + filename;
+          
           r.debug("Write compiled file to " + path);
           fs.writeFileSync(path, data);
+          
+          // Call onSuccess
+          if (options.onSuccess) {
+            options.onSuccess(path, data);
+          }
         });
     },
     jslint : function(file, options) {
@@ -159,7 +209,23 @@ Readyjs = (function() {
           if (options.onSuccess) { options.onSuccess(); }
         }
       });
-    }
+    },
+    watch : function(file) {
+      var watch = function() {
+        r.log(file + " changed");
+        
+        // create a jslint that will call compile on success
+        var jslint = function() {
+          r.jslint(file, {onSuccess : function() {
+            r.compile(file);
+          }});
+        }
+        
+        jslint();
+      };
+      
+      fs.watchFile(file, watch);
+    },
   };
 
   r.load();
