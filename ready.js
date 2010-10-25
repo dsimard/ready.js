@@ -136,10 +136,14 @@ Readyjs = (function() {
     emptyAggregate : function() {
       var path = r.absPath() + r.config.aggregateTo;
       
-      var fd = fs.openSync(path, "w");
-      fs.truncateSync(fd, 0);
-      fs.closeSync(fd);
-      r.log("Truncated " + path);
+      try {
+        var fd = fs.openSync(path, "w");
+        fs.truncateSync(fd, 0);
+        fs.closeSync(fd);
+        r.log("Truncated " + path);
+      } catch(e) {
+        r.debug("Couldn't truncate the aggregate because file doesn't exist");
+      }
     },
     // Write to aggregated file
     writeToAggregate : function(file, code) {
