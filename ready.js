@@ -11,8 +11,8 @@ Readyjs = (function() {
       dest : "./", // the destination of your minified files
       debug : false, // if debug mode
       minifiedExtension : "min", // extension of the minified file
-      runJsLint : true, // if should run jsLint
-      runGCompiler : true, // if should run GoogleCompiler
+      runJsLint : false, // if should run jsLint
+      runGCompiler : false, // if should run GoogleCompiler
       watch : false, // if should watch the js files and exec ready.js each time they changes
       aggregateTo : "", // If a string is specified, all the .js will be aggregated
     },
@@ -53,11 +53,23 @@ Readyjs = (function() {
       }
       
       // Check config
-      if (r.config.watch && r.shouldAggregate()) {
-        r.warn("Cannot use config.watch and config.aggregateTo. Dropped config.aggregateTo.");
-        r.config.aggregateTo = "";
+      if (r.config.watch) {
+        if (r.shouldAggregate()) {
+          r.warn("Cannot use config.watch and config.aggregateTo. Dropped config.aggregateTo.");
+          r.config.aggregateTo = "";
+        }
+        
+        if (r.config.runGCompiler) {
+          r.warn("Cannot use config.watch and config.runGCompiler. Dropped config.runGCompiler.");
+          r.config.runGCompiler = false;
+        }
+        
+        if (r.config.runJsLint === false) {
+          r.log("config.watch implies config.runJsLint to TRUE. Changing value.");
+          r.config.runJsLint = true;
+        }
       }
-      
+            
       // Show config
       r.debug("== Configuration ==");
       for (var p in r.config) {
