@@ -101,11 +101,17 @@ Readyjs = (function() {
 
       for (var i = 0; i < files.length; i++) {
         var filename = files[i];
-        
-        // If .js
-        if (filename.match(/\.js$/i)) {
-          var complete = dir + filename;
-          callback(complete);
+
+        filename = fs.realpathSync(dir + filename);
+        var aggTo = fs.realpathSync(r.config.aggregateTo);
+
+        if (filename != aggTo) {
+          // If .js
+          if (filename.match(/\.js$/i)) {
+            callback(filename);
+          }
+        } else {
+          r.debug("DIFF : " + filename + " == " + aggTo);
         }
       }
       
