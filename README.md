@@ -11,6 +11,9 @@
 Install [git](http://git-scm.com/) and [node.js](http://nodejs.org/#download).
 
 ## How to install in your project (for git)
+
+
+
 1. `git submodule add git://github.com/dsimard/ready.js.git ready.js`
 2. `cd ready.js && git submodule init && git submodule update && cd ..`
 3. Create config file in *your_project/ready.conf.js* :
