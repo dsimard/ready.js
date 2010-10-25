@@ -7,8 +7,8 @@ Readyjs = (function() {
     /******* PROPERTIES *******/
     wd : "",
     config : {
-      src : "./", // the source dir of js files
-      dest : "./", // the destination of your minified files
+      src : "", // the source dir of js files
+      dest : "", // the destination of your minified files
       debug : false, // if debug mode
       minifiedExtension : "min", // extension of the minified file
       runJsLint : false, // if should run jsLint
@@ -67,6 +67,16 @@ Readyjs = (function() {
         if (r.config.runJsLint === false) {
           r.log("config.watch implies config.runJsLint to TRUE. Changing value.");
           r.config.runJsLint = true;
+        }
+      }
+      
+      // Create dest directory
+      if (r.config.dest.length > 0) {
+        try {
+          fs.mkdirSync(r.config.dest, 0755);
+          r.log("Created dest directory : " + fs.realpathSync(r.config.dest));
+        } catch(e) {
+          r.debug("dest directory already exists : " + r.config.dest);
         }
       }
             
@@ -155,6 +165,10 @@ Readyjs = (function() {
     },
     log : function(msg) {
       console.log(msg);
+    },
+    error : function(msg) {
+      console.log("ERROR : " + msg);
+      process.exit(1);
     },
     shouldAggregate : function() {
       return r.config.aggregateTo.length > 0;
