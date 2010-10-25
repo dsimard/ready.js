@@ -12,8 +12,8 @@ Install [git](http://git-scm.com/) and [node.js](http://nodejs.org/#download).
 
 ## How to install in your project (for git)
 
-1. `git submodule add git://github.com/dsimard/ready.js.git ready.js`
-2. `cd ready.js && git submodule init && git submodule update && cd ..`
+1. run `git submodule add git://github.com/dsimard/ready.js.git ready.js`
+2. run `cd ready.js && git submodule init && git submodule update && cd ..`
 3. Create config file in *your_project/ready.conf.js* :
 
         { src : "./javascripts", // the source dir of js files
@@ -23,7 +23,7 @@ Install [git](http://git-scm.com/) and [node.js](http://nodejs.org/#download).
           aggregateTo : "./minified/all.js" // Which file to aggregate all javascript files 
         }
       
-4. create or open the file `your_project/.git/hooks/pre-commit` and write `node ready.js/ready.js ready.conf.js`
+4. run `echo 'node ready.js/ready.js ready.conf.js' >> .git/hooks/pre-commit`
 
 Then, **every time you commit**, ready.js will be run.
 

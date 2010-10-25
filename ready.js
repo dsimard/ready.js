@@ -148,7 +148,7 @@ Readyjs = (function() {
       
       var filename = file.match(/[^/]+$/i)[0];
 
-      var fd = fs.openSync(path, "a");
+      var fd = fs.openSync(path, "a+");
       fs.writeSync(fd, "/* " + filename + " */\n");
       fs.writeSync(fd, code);
       fs.writeSync(fd, "\n");
