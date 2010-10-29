@@ -7,12 +7,12 @@ Readyjs = (function() {
     /******* PROPERTIES *******/
     wd : "",
     config : {
-      src : "", // the source dir of js files
-      dest : "", // the destination of your minified files
+      src : "./", // the source dir of js files
+      dest : "./min", // the destination of your minified files
       debug : false, // if debug mode
       minifiedExtension : "min", // extension of the minified file
-      runJsLint : false, // if should run jsLint
-      runGCompiler : false, // if should run GoogleCompiler
+      runJsLint : true, // if should run jsLint
+      runGCompiler : true, // if should run GoogleCompiler
       watch : false, // if should watch the js files and exec ready.js each time they changes
       aggregateTo : "", // If a string is specified, all the .js will be aggregated
     },
