@@ -84,12 +84,7 @@ Readyjs = (function() {
           r.debug("dest directory already exists : " + r.config.dest);
         }
       }
-      
-      // Check that src and dest are different
-      //if (fs.realpathSync(r.config.src) == fs.realpathSync(r.config.dest)) {
-      //  r.error("config.src and config.dest can't be the same");
-      //}
-            
+                  
       // Show config
       r.debug("== Configuration ==");
       for (var p in r.config) {
@@ -132,10 +127,12 @@ Readyjs = (function() {
             var reMin = new RegExp(["\.", r.config.minifiedExtension, "\.js"].join(""));
             if (!filename.match(reMin)) {
               callback(filename);
+            } else {
+              r.debug("Don't run : " + filename);
             }
           }
         } else {
-          r.debug("DIFF : " + filename + " == " + aggTo);
+          r.debug("Aggregate file : " + aggTo);
         }
       }
       
