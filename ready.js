@@ -70,6 +70,11 @@ Readyjs = (function() {
         }
       }
       
+      if (r.config.runGCompiler && r.config.minifiedExtension.length == 0) {
+        r.log("config.minifiedExtension can't be empty. Using 'min' as default value");
+        r.config.minifiedExtension = 'min';
+      }
+      
       // Create dest directory
       if (r.config.dest.length > 0) {
         try {
@@ -81,9 +86,9 @@ Readyjs = (function() {
       }
       
       // Check that src and dest are different
-      if (fs.realpathSync(r.config.src) == fs.realpathSync(r.config.dest)) {
-        r.error("config.src and config.dest can't be the same");
-      }
+      //if (fs.realpathSync(r.config.src) == fs.realpathSync(r.config.dest)) {
+      //  r.error("config.src and config.dest can't be the same");
+      //}
             
       // Show config
       r.debug("== Configuration ==");
@@ -123,7 +128,11 @@ Readyjs = (function() {
         if (filename != aggTo) {
           // If .js
           if (filename.match(/\.js$/i)) {
-            callback(filename);
+            // Make sure it's not a compiled file
+            var reMin = new RegExp(["\.", r.config.minifiedExtension, "\.js"].join(""));
+            if (!filename.match(reMin)) {
+              callback(filename);
+            }
           }
         } else {
           r.debug("DIFF : " + filename + " == " + aggTo);

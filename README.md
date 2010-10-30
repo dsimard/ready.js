@@ -1,4 +1,4 @@
-# Ready.js
+# Ready.js : continuous integration using jslint, nodejs and git
 
 ## What does it do?
 1. Check if your javascript are valid with [jslint](http://www.jslint.com/).
