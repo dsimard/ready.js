@@ -17,15 +17,20 @@ exports = (function() {
       aggregateTo : "", // If a string is specified, all the .js will be aggregated
     },
     /******* PRIVATE *******/
-    load : function() {
-      r.loadConfig();
-      r.initWorkingDir(r.execWithArgs);
+    execute : function() {
+      if (process.argv[2]) {
+        r.loadConfig();
+        r.execWithConfig();
+      } else {
+        r.execWithConfig();
+      }
     },
     initWorkingDir : function(cb) {
       // Get the working dir
       cp.exec("git rev-parse --show-cdup", function(error, stdout, stderr) {
         stdout = stdout.toString().replace(/\s*$/, "")
         r.wd = fs.realpathSync(stdout.toString());
+        r.debug("Working directory : ", r.wd);
         if (cb) { cb() };
       });
     },
@@ -93,20 +98,18 @@ exports = (function() {
         r.debug("");
       }
     },
-    execWithArgs : function() {
-      if (process.argv[2]) {
-        if (r.config.watch === true) {
-          r.forEachJs(r.watch);
-        } else { 
-          // Create a jslint that will exit the whole process  
-          var jslint = function(file) {
-            r.jslint(file, {onError:function() {process.exit(1);}});
-          }          
-          
-          r.emptyAggregate();
-          r.forEachJs(jslint);
-          r.forEachJs(r.shipToDest);
-        }
+    execWithConfig : function() {
+      if (r.config.watch === true) {
+        r.forEachJs(r.watch);
+      } else { 
+        // Create a jslint that will exit the whole process on error
+        var jslint = function(file) {
+          r.jslint(file, {onError:function() {process.exit(1);}});
+        }          
+        
+        r.emptyAggregate();
+        r.forEachJs(jslint);
+        r.forEachJs(r.shipToDest);
       }
     },
     forEachJs : function(callback, options) {
@@ -174,6 +177,9 @@ exports = (function() {
     debug : function(msg) {
       if (r.config.debug === true) {
         console.log(msg);
+        for (var i = 1, arg; arg = arguments[i]; i++) {
+          console.log(sys.inspect(arg));
+        }
       }
     },
     warn : function(msg) {
@@ -276,7 +282,7 @@ exports = (function() {
     },
   };
 
-  r.load();
+  r.initWorkingDir(r.execute);
   
   // Export for node.js
   for (var p in r) {
