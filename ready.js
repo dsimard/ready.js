@@ -1,4 +1,4 @@
-Readyjs = (function() {
+exports = (function() {
   var sys = require("sys");
   var fs = require("fs");
   var cp = require('child_process');
@@ -29,9 +29,10 @@ Readyjs = (function() {
         if (cb) { cb() };
       });
     },
-    loadConfig : function() {
+    loadConfig : function(argv) {
       // If the arg is a file, use it as config file. Else, load directly
-      var arg = process.argv[2];
+      var arg = argv || process.argv[2];
+      
       var isFile = null;
       try {
         isFile = fs.statSync(arg).isFile();
@@ -39,61 +40,61 @@ Readyjs = (function() {
       }
 
       var confJson = arg;
-
       if (isFile === true) {
-        code = fs.readFileSync(arg).toString();
+        confJson = fs.readFileSync(arg).toString();
       } 
-      
       // Put values in variable
-      process.compile('var config = ' + code, "execWithArgs.js");
-
-      // Extend config file
-      for (var p in r.config) {
-        r.config[p] = typeof(config[p]) == "undefined" ? r.config[p] : config[p];
-      }
+      process.compile('var config = ' + confJson, "execWithArgs.js");
       
-      // Check config
-      if (r.config.watch) {
-        if (r.shouldAggregate()) {
-          r.warn("Cannot use config.watch and config.aggregateTo. Dropped config.aggregateTo.");
-          r.config.aggregateTo = "";
+      if (config) {
+        // Extend config file
+        for (var p in r.config) {
+          r.config[p] = typeof(config[p]) == "undefined" ? r.config[p] : config[p];
         }
         
-        if (r.config.runGCompiler) {
-          r.warn("Cannot use config.watch and config.runGCompiler. Dropped config.runGCompiler.");
-          r.config.runGCompiler = false;
+        // Check config
+        if (r.config.watch) {
+          if (r.shouldAggregate()) {
+            r.warn("Cannot use config.watch and config.aggregateTo. Dropped config.aggregateTo.");
+            r.config.aggregateTo = "";
+          }
+          
+          if (r.config.runGCompiler) {
+            r.warn("Cannot use config.watch and config.runGCompiler. Dropped config.runGCompiler.");
+            r.config.runGCompiler = false;
+          }
+          
+          if (r.config.runJsLint === false) {
+            r.log("config.watch implies config.runJsLint to TRUE. Changing value.");
+            r.config.runJsLint = true;
+          }
         }
         
-        if (r.config.runJsLint === false) {
-          r.log("config.watch implies config.runJsLint to TRUE. Changing value.");
-          r.config.runJsLint = true;
+        if (r.config.runGCompiler && r.config.minifiedExtension.length == 0) {
+          r.log("config.minifiedExtension can't be empty. Using 'min' as default value");
+          r.config.minifiedExtension = 'min';
         }
-      }
-      
-      if (r.config.runGCompiler && r.config.minifiedExtension.length == 0) {
-        r.log("config.minifiedExtension can't be empty. Using 'min' as default value");
-        r.config.minifiedExtension = 'min';
-      }
-      
-      // Create dest directory
-      if (r.config.dest.length > 0) {
-        try {
-          fs.mkdirSync(r.config.dest, 0755);
-          r.log("Created dest directory : " + fs.realpathSync(r.config.dest));
-        } catch(e) {
-          r.debug("dest directory already exists : " + r.config.dest);
+        
+        // Create dest directory
+        if (r.config.dest.length > 0) {
+          try {
+            fs.mkdirSync(r.config.dest, 0755);
+            r.log("Created dest directory : " + fs.realpathSync(r.config.dest));
+          } catch(e) {
+            r.debug("dest directory already exists : " + r.config.dest);
+          }
         }
+                    
+        // Show config
+        r.debug("== Configuration ==");
+        for (var p in r.config) {
+          r.debug(p.toString() + " : " + r.config[p].toString());
+        }
+        r.debug("");
       }
-                  
-      // Show config
-      r.debug("== Configuration ==");
-      for (var p in r.config) {
-        r.debug(p.toString() + " : " + r.config[p].toString());
-      }
-      r.debug("");
     },
     execWithArgs : function() {
-      if (process.argv && process.argv[2]) {
+      if (process.argv[2]) {
         if (r.config.watch === true) {
           r.forEachJs(r.watch);
         } else { 
@@ -277,8 +278,12 @@ Readyjs = (function() {
 
   r.load();
   
+  // Export for node.js
+  for (var p in r) {
+    exports[p] = r[p];
+  }
+  
   return r;
 })();
-
 
 

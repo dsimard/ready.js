@@ -1,3 +1,7 @@
-exports['test String#length'] = function(assert){
-    assert.equal(6, 'foobar'.length);
-};
+var sys = require("sys");
+var r = require(process.cwd() + "/ready");
+module.exports = {
+  "test config" : function(assert) {
+  }
+}
+
