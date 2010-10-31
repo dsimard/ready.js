@@ -17,13 +17,12 @@ exports = (function() {
       aggregateTo : "", // If a string is specified, all the .js will be aggregated
     },
     /******* PRIVATE *******/
-    execute : function() {
-      if (process.argv[2]) {
-        r.loadConfig();
-        r.execWithConfig();
-      } else {
-        r.execWithConfig();
-      }
+    execute : function(options) {
+      var execOpts = {
+        onEnd : options ? options.onEnd : null,
+      };
+      
+      r.execWithConfig(execOpts);
     },
     initWorkingDir : function(cb) {
       // Get the working dir
@@ -98,23 +97,24 @@ exports = (function() {
         r.debug("");
       }
     },
-    execWithConfig : function() {
+    execWithConfig : function(options) {
+      r.debug("Exec with config");
       if (r.config.watch === true) {
         r.forEachJs(r.watch);
       } else { 
         // Create a jslint that will exit the whole process on error
         var jslint = function(file) {
           r.jslint(file, {onError:function() {process.exit(1);}});
-        }          
-        
+        }
+                
         r.emptyAggregate();
         r.forEachJs(jslint);
-        r.forEachJs(r.shipToDest);
+        r.forEachJs(r.shipToDest, {onEnd : options.onEnd});
       }
     },
-    forEachJs : function(callback, options) {
+    forEachJs : function eachJs(callback, options) {
       options = options || {};
-    
+      
       var dir = r.absPath(r.config.src);
       var files = fs.readdirSync(dir);
 
@@ -139,7 +139,6 @@ exports = (function() {
           r.debug("Aggregate file : " + aggTo);
         }
       }
-      
       if (options.onEnd) { options.onEnd(); }
     },
     // Empty the aggregated file
@@ -282,7 +281,14 @@ exports = (function() {
     },
   };
 
-  r.initWorkingDir(r.execute);
+  var execAsCommandLine = function() {
+    if (process.argv[2]) {
+      r.loadConfig();
+      r.execute();
+    } 
+  }
+
+  r.initWorkingDir(execAsCommandLine);
   
   // Export for node.js
   for (var p in r) {
