@@ -1,8 +1,8 @@
-exports = (function() {
-  var sys = require("sys");
-  var fs = require("fs");
-  var cp = require('child_process');
-  
+var sys = require("sys"),
+    fs = require("fs"),
+    cp = require('child_process');
+    
+(function() {
   var r = {
     /******* PROPERTIES *******/
     wd : "",
@@ -15,6 +15,7 @@ exports = (function() {
       runGCompiler : true, // if should run GoogleCompiler
       watch : false, // if should watch the js files and exec ready.js each time they changes
       aggregateTo : "", // If a string is specified, all the .js will be aggregated
+      test : false, // If it's running from test environment
     },
     /******* PRIVATE *******/
     execute : function(options) {
@@ -33,9 +34,9 @@ exports = (function() {
         if (cb) { cb() };
       });
     },
-    loadConfig : function(argv) {
+    loadConfig : function() {
       // If the arg is a file, use it as config file. Else, load directly
-      var arg = argv || process.argv[2];
+      var arg = process.argv[2];
       
       var isFile = null;
       try {
@@ -106,7 +107,6 @@ exports = (function() {
         var jslint = function(file) {
           r.jslint(file, {onError:function() {process.exit(1);}});
         }
-                
         r.emptyAggregate();
         r.forEachJs(jslint);
         r.forEachJs(r.shipToDest, {onEnd : options.onEnd});
@@ -120,7 +120,8 @@ exports = (function() {
 
       for (var i = 0; i < files.length; i++) {
         var filename = files[i];
-
+        var last = i == files.length-1;
+        
         filename = fs.realpathSync(dir + filename);
         var aggTo = fs.realpathSync(r.config.aggregateTo);
 
@@ -130,7 +131,11 @@ exports = (function() {
             // Make sure it's not a compiled file
             var reMin = new RegExp(["\.", r.config.minifiedExtension, "\.js"].join(""));
             if (!filename.match(reMin)) {
-              callback(filename);
+              callback(filename, {
+                onEnd : function() {
+                  if (last && options.onEnd) { options.onEnd(); }
+                }
+              });
             } else {
               r.debug("Don't run : " + filename);
             }
@@ -139,33 +144,36 @@ exports = (function() {
           r.debug("Aggregate file : " + aggTo);
         }
       }
-      if (options.onEnd) { options.onEnd(); }
     },
     // Empty the aggregated file
     emptyAggregate : function() {
-      var path = r.absPath() + r.config.aggregateTo;
-      
-      try {
-        var fd = fs.openSync(path, "w");
-        fs.truncateSync(fd, 0);
-        fs.closeSync(fd);
-        r.log("Truncated " + path);
-      } catch(e) {
-        r.debug("Couldn't truncate the aggregate because file doesn't exist");
+      if (r.shouldAggregate()) {
+        var path = r.absPath() + r.config.aggregateTo;
+        
+        try {
+          var fd = fs.openSync(path, "w");
+          fs.truncateSync(fd, 0);
+          fs.closeSync(fd);
+          r.log("Truncated " + path);
+        } catch(e) {
+          r.debug("Couldn't truncate the aggregate because file doesn't exist");
+        }
       }
     },
     // Write to aggregated file
     writeToAggregate : function(file, code) {
-      var path = r.absPath() + r.config.aggregateTo;
-      r.log("Aggregate " + file + " to " + path);
-      
-      var filename = file.match(/[^/]+$/i)[0];
+      if (r.shouldAggregate()) {
+        var path = r.absPath() + r.config.aggregateTo;
+        r.log("Aggregate " + file + " to " + path);
+        
+        var filename = file.match(/[^/]+$/i)[0];
 
-      var fd = fs.openSync(path, "a+");
-      fs.writeSync(fd, "/* " + filename + " */\n");
-      fs.writeSync(fd, code);
-      fs.writeSync(fd, "\n");
-      fs.closeSync(fd);
+        var fd = fs.openSync(path, "a+");
+        fs.writeSync(fd, "/* " + filename + " */\n");
+        fs.writeSync(fd, code);
+        fs.writeSync(fd, "\n");
+        fs.closeSync(fd);
+      }
     },
     absPath : function(relativePath) {
       relativePath = relativePath || "";
@@ -195,16 +203,23 @@ exports = (function() {
       return r.config.aggregateTo.length > 0;
     },
     // Ships all files (compiled or not) to destination
-    shipToDest : function(file) {
+    shipToDest : function(file, options) {
+      var writeToAgg = function(file, code) {
+        r.writeToAggregate(file, code);
+        if (options.onEnd) { options.onEnd(); }
+      }
+      
       // Check if we have to process the file
       if (r.config.runGCompiler || r.shouldAggregate) {
         if (r.config.runGCompiler) {
-          r.compile(file, {onSuccess : r.writeToAggregate});
+          r.compile(file, {onSuccess : writeToAgg});
         } else {
           var code = fs.readFileSync(file).toString();
-          r.writeToAggregate(file, code);
+          writeToAgg(file, code);
         }
       }
+      
+      if (options.onEnd) { options.onEnd(); }
     },
     /******* PUBLIC *******/
     compile : function(file, options) {
@@ -218,29 +233,42 @@ exports = (function() {
       var google = http.createClient(80, 'http://closure-compiler.appspot.com/compile');
       
       var code = fs.readFileSync(file).toString();
-
-      var params = {"js_code" : code, 
-        "compilation_level" : "SIMPLE_OPTIMIZATIONS", 
-        "output_format" : "text",
-        "output_info" : "compiled_code"
-      };
       
-      rest.post("http://closure-compiler.appspot.com/compile", {data : params})
-        .addListener('complete', function(data) {        
-          // Extract filename and add suffix
-          var filename = file.match(/[^/]+$/i)[0];
-          filename = filename.replace(/\.js$/i, "."+r.config.minifiedExtension+".js");
+      // Extract filename and add suffix
+      var filename = file.match(/[^/]+$/i)[0];
+      filename = filename.replace(/\.js$/i, "."+r.config.minifiedExtension+".js");
+      var path = r.absPath(r.config.dest) + filename;
+
+      var writeFile = function(code) {  
+        r.debug("Write compiled file to " + path);
+        fs.writeFileSync(path, code);
+      }
+
+      // Don't send to google compiler in test
+      if (r.config.test) { 
+        writeFile(code);
+      } else {
+        var params = {"js_code" : code, 
+          "compilation_level" : "SIMPLE_OPTIMIZATIONS", 
+          "output_format" : "text",
+          "output_info" : "compiled_code"
+        };
+        
+        rest.post("http://closure-compiler.appspot.com/compile", {data : params})
+          .addListener('complete', function(data) {  
           
-          var path = r.absPath(r.config.dest) + filename;
-          
-          r.debug("Write compiled file to " + path);
-          fs.writeFileSync(path, data);
-          
-          // Call onSuccess
-          if (options.onSuccess) {
-            options.onSuccess(path, data);
-          }
-        });
+            writeFile(data);      
+            
+            // Call onSuccess
+            if (options.onSuccess) {
+              options.onSuccess(path, data);
+            }
+            
+            if (options.onEnd) {
+              options.onEnd();
+            }
+          });
+      }
     },
     jslint : function(file, options) {
       options = options || {};
@@ -282,20 +310,16 @@ exports = (function() {
   };
 
   var execAsCommandLine = function() {
-    if (process.argv[2]) {
       r.loadConfig();
       r.execute();
-    } 
   }
 
   r.initWorkingDir(execAsCommandLine);
-  
+
   // Export for node.js
   for (var p in r) {
     exports[p] = r[p];
   }
-  
-  return r;
 })();
 
 

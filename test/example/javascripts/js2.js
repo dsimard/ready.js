@@ -1,0 +1,2 @@
+function js2() {
+}
