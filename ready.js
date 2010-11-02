@@ -250,22 +250,26 @@ var sys = require("sys"),
       } else {
         var params = {"js_code" : code, 
           "compilation_level" : "SIMPLE_OPTIMIZATIONS", 
-          "output_format" : "text",
+          "output_format" : "json",
           "output_info" : "compiled_code"
         };
         
         rest.post("http://closure-compiler.appspot.com/compile", {data : params})
-          .addListener('complete', function(data) {  
-          
-            writeFile(data);      
-            
-            // Call onSuccess
-            if (options.onSuccess) {
-              options.onSuccess(path, data);
-            }
-            
-            if (options.onEnd) {
-              options.onEnd();
+          .addListener('complete', function(data) {            
+            data = JSON.parse(data);
+            if ((data.errors && data.errors.length > 0) || (data.serverErrors && data.serverErrors.length > 0)) {
+              r.error("Google compiler error");
+            } else {
+              writeFile(data.compiledCode);      
+              
+              // Call onSuccess
+              if (options.onSuccess) {
+                options.onSuccess(path, data.compiledCode);
+              }
+              
+              if (options.onEnd) {
+                options.onEnd();
+              }
             }
           });
       }
