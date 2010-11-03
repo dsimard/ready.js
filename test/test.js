@@ -2,8 +2,9 @@ var sys = require("sys"),
   fs = require("fs"),
   cp = require("child_process");
 
-var initTest = function(a) {
-  var rm = function(file, a) {
+// Delete all unwanted files
+function cleanUp() {
+  var rm = function(file) {
     try {
       fs.unlinkSync(file);
     } catch(e) {}
@@ -12,8 +13,6 @@ var initTest = function(a) {
     try {
       stat = fs.statSync(file);
     } catch(e) {}
-
-    if (stat && stat.isFile()) { a.eql(true, false, file + " not deleted"); }
   }
 
   files = ["./test/example/minified/js.min.js",
@@ -22,19 +21,12 @@ var initTest = function(a) {
   ];
   
   for (var f in files) {
-    rm(files[f], a);
+    rm(files[f]);
   }  
   
   try {
     fs.rmdirSync("./test/example/minified/");
   } catch(e) {}
-  
-  var stat = null;  
-  try {
-    stat = fs.statSync("./test/example/minified/");
-  } catch(e) {}
-  
-  if (stat && stat.isDirectory()) { a.eql(true, false, "folder not deleted"); }
 }
 
 // Create a default config
@@ -54,78 +46,83 @@ function getConfig(extend) {
   return c;
 }
 
+// Execute a ready.js
 function exec(config, cb) {
   if (typeof(config) != "string") {
     config = "'" + JSON.stringify(config) + "'";
   } 
   
   var cmd = ["node ready.js ", config].join(" ").toString();
-  
-  initTest();
   cp.exec(cmd, cb);
 }
 
-
-(function() {
-  var config = getConfig();
-
-  exec(config, function(error, stdout, stderr) {
-    exports["normal config"] = function(a) {
-      // Check that all files are there
-      var stat = fs.statSync("test/example/minified/js.min.js");
-      a.ok(stat.isFile());
-      
-      stat = fs.statSync("test/example/minified/js2.min.js");
-      a.ok(stat.isFile());
-
-      stat = fs.statSync("test/example/minified/all.js", "minified exists");
-      a.ok(stat.isFile());
-      
-      // Check that aggregate has no duplicate
-      var code = fs.readFileSync("test/example/minified/all.js").toString();
-      a.eql(code.match(/\sjs\.min\.js\s/).length, 1);
+exec(getConfig(), function() {
+  exports["telephone"] = function(a) { 
+    a.ok(true, "asdg");
+    exports.newOne = function(a, be) {
+      a.ok(true);
     }
-  });
-})();
+  }
+});
+
+function aaa() {
+  console.log("aaa");
+  exports["tv"] = function(a) {
+console.log("Test2");
+    a.ok(true);
+  }
+}
+
+tests = [
+  function() {
+    var config = getConfig();
+
+    exec(config, function(error, stdout, stderr) {
+      exports["normal config"] = function(a, be) {
+        // Check that all files are there
+        var stat = fs.statSync("test/example/minified/js.min.js");
+        a.ok(stat.isFile());
+        
+        stat = fs.statSync("test/example/minified/js2.min.js");
+        a.ok(stat.isFile());
+
+        stat = fs.statSync("test/example/minified/all.js", "minified exists");
+        a.ok(stat.isFile());
+        
+        // Check that aggregate has no duplicate
+        var code = fs.readFileSync("test/example/minified/all.js").toString();
+        a.eql(code.match(/\sjs\.min\.js\s/).length, 1);
+        
+        tests[1]();
+      }
+    });
+  },
+  function() {
+    var config = getConfig({runGCompiler:false});
+
+    exec(config, function(error, stdout, stderr) {
+      exports["don't compile"] = function(a) {
+console.log("IN COMPILE");
+        // Check that there's an aggregate
+        var stat = fs.statSync(config.aggregateTo);
+        var code = fs.readFileSync(config.aggregateTo).toString();
+
+        a.eql(true, stat.isFile());
+        
+        /*a.eql(code.match(/\/\* js.js \*\//g).length, 1);
+        a.eql(code.match(/\/\* js2.js \*\//g).length, 1);
+        a.eql(code.match(/\/\* .* \*\//g).length, 2);*/
+      }
+    });
+  }
+]
 
 /*
 // All the tests
 tests = {
-  "example config" : function(a) {
-    var config = getConfig();
-  
-    exec(config, function(error, stdout, stderr) {
-      // Check that all files are there
-      var stat = fs.statSync("test/example/minified/js.min.js");
-      a.eql(stat.isFile(), true);
 
-      stat = fs.statSync("test/example/minified/all.js");
-      a.eql(stat.isFile(), true);
-      
-      // Check that aggregate has no duplicate
-      var code = fs.readFileSync("test/example/minified/all.js").toString();
-      a.eql(code.match(/\sjs\.min\.js\s/).length, 1);
-    });
-  },
-  "config as a file" : function(a) {
-    exec("./test/example/example.conf.js", function(error, stdout, stderr) {
-      a.isNull(error);
-    });
-  },
   "don't compile" : function(a) {
-    var config = getConfig({runGCompiler:false});
-    
-    exec(config, function(error, stdout, stderr) {
-      // Check that there's an aggregate
-      var stat = fs.statSync(config.aggregateTo);
-      var code = fs.readFileSync(config.aggregateTo).toString();
 
-      a.eql(true, stat.isFile());
-      
-      a.eql(code.match(/\/\* js.js \*\//g).length, 1);
-      a.eql(code.match(/\/\* js2.js \*\//g).length, 1);
-      a.eql(code.match(/\/\* .* \*\//g).length, 2);
-    });
   },
   "don't aggregate" : function(a) {
     var config = getConfig({aggregateTo:""});
