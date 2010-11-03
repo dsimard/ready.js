@@ -247,6 +247,7 @@ var sys = require("sys"),
       // Don't send to google compiler in test
       if (r.config.test) { 
         writeFile(code);
+        if (options.onSuccess) { options.onSuccess(path, code); }
       } else {
         var params = {"js_code" : code, 
           "compilation_level" : "SIMPLE_OPTIMIZATIONS", 

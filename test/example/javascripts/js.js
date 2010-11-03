@@ -1,3 +1,2 @@
-function example() {
-  alert("some code");
+function load1() {
 }

@@ -54,7 +54,7 @@ function getConfig(extend) {
   return c;
 }
 
-var exec = function exec(config, cb) {
+function exec(config, cb) {
   if (typeof(config) != "string") {
     config = "'" + JSON.stringify(config) + "'";
   } 
@@ -65,6 +65,30 @@ var exec = function exec(config, cb) {
   cp.exec(cmd, cb);
 }
 
+
+(function() {
+  var config = getConfig();
+
+  exec(config, function(error, stdout, stderr) {
+    exports["normal config"] = function(a) {
+      // Check that all files are there
+      var stat = fs.statSync("test/example/minified/js.min.js");
+      a.ok(stat.isFile());
+      
+      stat = fs.statSync("test/example/minified/js2.min.js");
+      a.ok(stat.isFile());
+
+      stat = fs.statSync("test/example/minified/all.js", "minified exists");
+      a.ok(stat.isFile());
+      
+      // Check that aggregate has no duplicate
+      var code = fs.readFileSync("test/example/minified/all.js").toString();
+      a.eql(code.match(/\sjs\.min\.js\s/).length, 1);
+    }
+  });
+})();
+
+/*
 // All the tests
 tests = {
   "example config" : function(a) {
@@ -121,4 +145,4 @@ for (var t in tests) {
     }
   })(tests[t]);
 }
-
+*/

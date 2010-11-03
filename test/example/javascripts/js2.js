@@ -1,2 +1,2 @@
-function js2() {
+function load2() {
 }
