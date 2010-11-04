@@ -4,6 +4,3 @@
 [submodule "vendor/jslint"]
 	path = vendor/jslint
 	url = git://github.com/reid/node-jslint
-[submodule "vendor/expresso"]
-	path = vendor/expresso
-	url = git@github.com:dsimard/expresso.git
