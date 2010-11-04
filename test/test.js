@@ -57,9 +57,10 @@ function exec(config, cb) {
 }
 
 exec(getConfig(), function() {
+console.log("Before telephone");
   exports["telephone"] = function(a) { 
     a.ok(true, "asdg");
-    exports.newOne = function(a, be) {
+    exports["new test"] = function(a, be) {
       a.ok(true);
     }
   }
