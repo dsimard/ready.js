@@ -4,7 +4,7 @@ var sys = require("sys"),
     
 (function() {
   var r = {
-    /******* PROPERTIES *******/
+    /******* PROPERTIES ********/
     wd : "",
     config : {
       src : "./", // the source dir of js files
