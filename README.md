@@ -27,31 +27,7 @@ Then, **every time you commit**, ready.js will be run.
 
 ## Alternative installations
 
-### Watch file that your files are valid with jslint
-
-1. Create config file in *your_project/ready.watch.js* :
-
-        { src : "./javascripts",
-          watch : true }
-2. node ready.js/ready.js ready.watch.js
-
-### Use aggregated javascript file in RAILS
-1. Use this config file in *your_rails_project/ready.conf.js* :
-
-        { src : "./public/javascripts",
-          dest : "./public/javascripts/minified",
-          minifiedExtension : "min",
-          runGCompiler : true,
-          aggregateTo : "./public/javascripts/minified/all.js"
-        }
-
-2. In your layout, use this code when it's time to load your javascript files :
-
-        <% if RAILS_ENV != "production" %>
-          <%= javascript_include_tag "jquery.js", "my_javascript.js" %>
-        <% else %>
-          <%= javascript_include_tag "minified/all.js" %>
-        <% end %>
+See the wiki for [https://github.com/dsimard/ready.js/wiki](alternatives installations).
 
 ## FAQ
 
