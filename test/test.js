@@ -47,6 +47,12 @@ function getConfig(extend) {
   return c;
 }
 
+// Creates 2 js files
+function create2Files() {
+  fs.writeFileSync("./test/example/javascripts/js.js", "function() {}");
+  fs.writeFileSync("./test/example/javascripts/js2.js", "function() {}");
+}
+
 // Execute a ready.js
 function exec(config, cb) {
   if (typeof(config) != "string") {
