@@ -159,7 +159,7 @@ var tests = [
       onEnd();
     });
   },
-  // Invalid minified extension (use 'min' as default)
+  // Invalid minified extension (uses 'min' as default)
   function(onEnd) {
     createTwoFiles();
     
