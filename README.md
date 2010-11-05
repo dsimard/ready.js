@@ -27,13 +27,13 @@ Then, **every time you commit**, ready.js will be run.
 
 ## Alternative installations
 
-See the wiki for [https://github.com/dsimard/ready.js/wiki](alternatives installations).
+See the wiki for [alternatives installations](http://github.com/dsimard/ready.js/wiki).
 
 ## FAQ
 
 **Why not using ruby gems?**
 
-I don't like to have external dependencies. I mean [http://rubygems.org/](gems) are cool 
+I don't like to have external dependencies. I mean [gems](http://rubygems.org/) are cool 
 but for something that simple, it's an overkill. Plus, I didn't want to tie *ready.js* to
 the Rails or the node community. You can use it for any project that has javascript
 files in it, which mean 99.97% of web projects alive today.
