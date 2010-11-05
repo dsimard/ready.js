@@ -18,12 +18,12 @@ function cleanUp() {
 
   files = ["./test/example/minified/js.min.js",
     "./test/example/minified/js2.min.js",
-    "./test/example/minified/all.js"
+    "./test/example/minified/all.js",
+    "./test/example/minified/js.xyz.js",
+    "./test/example/minified/js2.xyz.js",
   ];
   
-  for (var f in files) {
-    rm(files[f]);
-  }  
+  files.forEach(function(file) { rm(file); });
   
   try {
     fs.rmdirSync("./test/example/minified/");
@@ -56,8 +56,10 @@ function exec(config, cb) {
   var cmd = ["node ready.js ", config].join(" ").toString();
   cp.exec(cmd, cb);
 }
-tests = [
-  function() {
+
+// All tests to run
+var tests = [
+  function(onEnd) {
     var config = getConfig();
 
     exec(config, function(error, stdout, stderr) {
@@ -75,52 +77,39 @@ tests = [
       var code = fs.readFileSync("test/example/minified/all.js").toString();
       a.equal(code.match(/\sjs\.min\.js\s/).length, 1);
       
-      test[1]();
+      onEnd();
     });
   },
-  function() {
+  function(onEnd) {
     var config = getConfig({runGCompiler:false});
     exec(config, function(error, stdout, stderr) {
       // Check that there's an aggregate
       var stat = fs.statSync(config.aggregateTo);
       var code = fs.readFileSync(config.aggregateTo).toString();
 
-      a.ok(false);
-
-      a.eql(true, stat.isFile());
+      a.ok(stat.isFile());
+      a.equal(code.match(/\/\* js.js \*\//g).length, 1);
+      a.equal(code.match(/\/\* js2.js \*\//g).length, 1);
+      a.equal(code.match(/\/\* .* \*\//g).length, 2);
       
-      a.eql(code.match(/\/\* js.js \*\//g).length, 1);
-      a.eql(code.match(/\/\* js2.js \*\//g).length, 1);
-      a.eql(code.match(/\/\* .* \*\//g).length, 2);
+      onEnd();
+    });
+  },
+  function(onEnd) {
+    exec(getConfig({minifiedExtension:"xyz"}), function() {
+      var stat = fs.statSync("./test/example/minified/js.xyz.js");
+      a.ok(stat.isFile());
+      
+      stat = fs.statSync("./test/example/minified/js2.xyz.js");
+      a.ok(stat.isFile());
+      onEnd();
     });
   }
-]
+];
 
-tests[0]();
-
-/*
-// All the tests
-tests = {
-
-  "don't compile" : function(a) {
-
-  },
-  "don't aggregate" : function(a) {
-    var config = getConfig({aggregateTo:""});
-    
-    exec(config, function(error, stdout, stderr) {
-      a.isNull(error)
-    });
-  },
-}
-
-for (var t in tests) {
-  exports[t] = (function(te) {
-    return function(a, b) {
-      initTest();
-      te(a, b);
-      initTest();
-    }
-  })(tests[t]);
-}
-*/
+(function execTest() {
+  cleanUp();
+  var test = tests.shift();
+  if (test) { test(execTest); }
+  cleanUp();
+})();
