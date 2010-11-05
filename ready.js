@@ -22,10 +22,9 @@ var sys = require("sys"),
       var execOpts = {
         onEnd : options ? options.onEnd : null,
       };
-      
       r.execWithConfig(execOpts);
     },
-    initWorkingDir : function(cb) {
+    initWorkingDir : function(cb) {    
       // Get the working dir
       cp.exec("git rev-parse --show-cdup", function(error, stdout, stderr) {
         stdout = stdout.toString().replace(/\s*$/, "")
@@ -75,8 +74,8 @@ var sys = require("sys"),
           }
         }
         
-        if (r.config.runGCompiler && r.config.minifiedExtension.length == 0) {
-          r.log("config.minifiedExtension can't be empty. Using 'min' as default value");
+        if (r.config.runGCompiler && !r.config.minifiedExtension.match(/^[0-9a-zA-Z]+$/)) {
+          r.log("config.minifiedExtension is not valid. Using 'min' as default value");
           r.config.minifiedExtension = 'min';
         }
         
@@ -107,6 +106,7 @@ var sys = require("sys"),
         var jslint = function(file) {
           r.jslint(file, {onError:function() {process.exit(1);}});
         }
+
         r.emptyAggregate();
         r.forEachJs(jslint);
         r.forEachJs(r.shipToDest, {onEnd : options.onEnd});
@@ -117,7 +117,6 @@ var sys = require("sys"),
       
       var dir = r.absPath(r.config.src);
       var files = fs.readdirSync(dir);
-
       for (var i = 0; i < files.length; i++) {
         var filename = files[i];
         var last = i == files.length-1;
