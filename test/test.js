@@ -6,12 +6,10 @@ var sys = require("sys"),
   
 const SRC = "./test/javascripts/";
 const DEST = "./test/minified/";
-const ALL = "./test/minified/all.js";
+const ALL = "all.js";
 
 // Delete all unwanted files
-function emptyDir(dir, shouldRmDir) {
-  shouldRmDir = shouldRmDir || false;
-
+function emptyDir(dir) {
   var isDir = false;
   try {
     isDir = fs.statSync(dir).isDirectory();
@@ -20,12 +18,15 @@ function emptyDir(dir, shouldRmDir) {
   if (isDir) {
     var files = fs.readdirSync(dir);
     files.forEach(function(file) {
-      fs.unlinkSync(dir + file);
+      var file = fs.realpathSync(dir + "/" + file);
+      if (fs.statSync(file).isDirectory()) {
+        emptyDir(file)
+      } else {
+        fs.unlinkSync(file);
+      }
     });
     
-    if (shouldRmDir) {
-      fs.rmdirSync(dir);
-    }
+    fs.rmdirSync(dir);
   }
   
   return isDir;
@@ -58,26 +59,36 @@ function getConfig(extend) {
   for (var p in extend) {
     c[p] = extend[p];
   }
-  
+
   return c;
 }
 
 // Create a file
 function createFile(path, data) {
-  var fd = fs.openSync(path, "w+", 0755)
+  // Create the SRC directory if not exists
+  var isDir = false;
+  try {
+    isDir = fs.statSync(SRC).isDirectory();
+  } catch(e) {}
+  
+  if (!isDir) {
+    fs.mkdirSync(SRC, 0755);
+  }
+
+  var fd = fs.openSync(SRC + path, "w+", 0755)
   fs.writeSync(fd, data);
   fs.closeSync(fd);
 }
 
 // Creates 2 js files
 function createTwoFiles() {
-  createFile(SRC + "js.js", "function load1() {}");
-  createFile(SRC + "js2.js", "function load2() {}");
+  createFile("js.js", "function load1() {}");
+  createFile("js2.js", "function load2() {}");
 }
 
 // Creates bad file
 function createBadFile() {
-  createFile(SRC + "bad.js", "{(}");
+  createFile("bad.js", "{(}");
 }
 
 // Execute a ready.js
@@ -101,19 +112,21 @@ var tests = [
   function(onEnd) {
     createTwoFiles();
 
-    exec(function(error, stdout, stderr) {
-      // Check that all files are there
-      var stat = fs.statSync(DEST + "js.min.js");
-      a.ok(stat.isFile());
+    exec(function(error, stdout, stderr) {  
+      // Check that minified files are not there
+      a.throws(function() {
+        fs.statSync(DEST + "js.min.js");
+      });
       
-      stat = fs.statSync(DEST + "js2.min.js");
-      a.ok(stat.isFile());
-
-      stat = fs.statSync(ALL, "minified exists");
+      a.throws(function() {
+        fs.statSync(DEST + "js2.min.js");
+      });
+      
+      stat = fs.statSync(DEST + ALL, "minified exists");
       a.ok(stat.isFile());
       
       // Check that aggregate has no duplicate
-      var code = fs.readFileSync(ALL).toString();
+      var code = fs.readFileSync(DEST + ALL).toString();
       a.equal(code.match(/\sjs\.min\.js\s/).length, 1);
       
       onEnd();
@@ -126,8 +139,8 @@ var tests = [
     
     exec(config, function(error, stdout, stderr) {
       // Check that there's an aggregate
-      var stat = fs.statSync(config.aggregateTo);
-      var code = fs.readFileSync(config.aggregateTo).toString();
+      var stat = fs.statSync(DEST + config.aggregateTo);
+      var code = fs.readFileSync(DEST + config.aggregateTo).toString();
       a.ok(stat.isFile());
       a.equal(code.match(/\/\* js.js \*\//g).length, 1);
       a.equal(code.match(/\/\* js2.js \*\//g).length, 1);
@@ -140,7 +153,7 @@ var tests = [
   function(onEnd) {
     createTwoFiles();
     
-    exec(getConfig({minifiedExtension:"xyz"}), function() {
+    exec(getConfig({minifiedExtension:"xyz", keepMinified:true}), function() {
       var stat = fs.statSync(DEST + "js.xyz.js");
       a.ok(stat.isFile());
       
@@ -163,7 +176,7 @@ var tests = [
   function(onEnd) {
     createTwoFiles();
     
-    exec(getConfig({minifiedExtension:".."}), function(error, stdout, stderr) {
+    exec(getConfig({minifiedExtension:"..", keepMinified:true}), function(error, stdout, stderr) {
     
       var stat = fs.statSync(DEST + "js.min.js");
       a.ok(stat.isFile());
@@ -174,6 +187,22 @@ var tests = [
       onEnd();
     });
   },
+  // src and dest are the same
+  function(onEnd) {
+    createTwoFiles();
+    
+    exec(getConfig({src:SRC,dest:SRC,keepMinified:true}), function(error, stdout, stderr) {
+      var dest = SRC + "minified/"
+
+      var stat = fs.statSync(dest + "js.min.js");
+      a.ok(stat.isFile());
+      
+      stat = fs.statSync(dest + "js2.min.js");
+      a.ok(stat.isFile());
+    
+      onEnd();
+    });
+  }
 ];
 
 (function execTest() {

@@ -8,13 +8,14 @@ var sys = require("sys"),
     wd : "",
     config : {
       src : "./", // the source dir of js files
-      dest : "./min", // the destination of your minified files
+      dest : "./minified/", // the destination of your minified files
       debug : false, // if debug mode
       minifiedExtension : "min", // extension of the minified file
       runJsLint : true, // if should run jsLint
       runGCompiler : true, // if should run GoogleCompiler
+      keepMinified : false, // if should keep the minified files
       watch : false, // if should watch the js files and exec ready.js each time they changes
-      aggregateTo : "", // If a string is specified, all the .js will be aggregated
+      aggregateTo : "", // If a string is specified, all the .js will be aggregated to this file in the config.dest
       test : false, // If it's running from test environment
     },
     /******* PRIVATE *******/
@@ -75,8 +76,17 @@ var sys = require("sys"),
         }
         
         if (r.config.runGCompiler && !r.config.minifiedExtension.match(/^[0-9a-zA-Z]+$/)) {
-          r.log("config.minifiedExtension is not valid. Using 'min' as default value");
+          r.log("config.minifiedExtension is not valid. Using 'min' as default value.");
           r.config.minifiedExtension = 'min';
+        }
+        
+        // src and dest must be different
+        if (r.config.src == r.config.dest) {
+          var src = r.config.src;
+          src = r.config.src + (r.config.src.match(/\/$/) ? "" : "/");
+          r.config.dest = src + "minified/"
+          r.log("config.src and config.dest must be different. Using '"+r.config.dest
+            +"' as default value for config.dest.");          
         }
         
         // Create dest directory
@@ -122,22 +132,17 @@ var sys = require("sys"),
         var last = i == files.length-1;
         
         filename = fs.realpathSync(dir + filename);
-        var aggTo = fs.realpathSync(r.config.aggregateTo);
+        var aggTo = fs.realpathSync(r.absPath(r.config.dest) + r.config.aggregateTo);
 
         if (filename != aggTo) {
           // If .js
           if (filename.match(/\.js$/i)) {
             // Make sure it's not a compiled file
-            var reMin = new RegExp(["\.", r.config.minifiedExtension, "\.js"].join(""));
-            if (!filename.match(reMin)) {
-              callback(filename, {
-                onEnd : function() {
-                  if (last && options.onEnd) { options.onEnd(); }
-                }
-              });
-            } else {
-              r.debug("Don't run : " + filename);
-            }
+            callback(filename, {
+              onEnd : function() {
+                if (last && options.onEnd) { options.onEnd(); }
+              }
+            });
           }
         } else {
           r.debug("Aggregate file : " + aggTo);
@@ -147,8 +152,8 @@ var sys = require("sys"),
     // Empty the aggregated file
     emptyAggregate : function() {
       if (r.shouldAggregate()) {
-        var path = r.absPath() + r.config.aggregateTo;
-        
+        var path = r.absPath(r.config.dest) + r.config.aggregateTo;
+
         try {
           var fd = fs.openSync(path, "w");
           fs.truncateSync(fd, 0);
@@ -162,7 +167,7 @@ var sys = require("sys"),
     // Write to aggregated file
     writeToAggregate : function(file, code) {
       if (r.shouldAggregate()) {
-        var path = r.absPath() + r.config.aggregateTo;
+        var path = r.absPath(r.config.dest) + r.config.aggregateTo;
         r.log("Aggregate " + file + " to " + path);
         
         var filename = file.match(/[^/]+$/i)[0];
@@ -239,8 +244,10 @@ var sys = require("sys"),
       var path = r.absPath(r.config.dest) + filename;
 
       var writeFile = function(code) {  
-        r.debug("Write compiled file to " + path);
-        fs.writeFileSync(path, code);
+        if (r.config.keepMinified === true) {
+          r.debug("Write compiled file to " + path);
+          fs.writeFileSync(path, code);
+        }
       }
 
       // Don't send to google compiler in test
