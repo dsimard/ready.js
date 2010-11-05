@@ -6,7 +6,7 @@
 3. Watch your javascript files for jslint while you're coding.
 4. Create an aggregated file of all your javascripts.
 
-## Prerequesites
+## Prerequesites 
 
 Install [git](http://git-scm.com/) and [node.js](http://nodejs.org/#download).
 
