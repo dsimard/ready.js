@@ -1,6 +1,8 @@
+#!/usr/bin/env node
 var sys = require("sys"),
     fs = require("fs"),
-    cp = require('child_process');
+    cp = require('child_process'),
+    jslint = require(__dirname + "/vendor/jslint/lib/fulljslint_export").JSLINT;
     
 (function() {
   var r = {
@@ -18,6 +20,7 @@ var sys = require("sys"),
       aggregateTo : "", // If a string is specified, all the .js will be aggregated to this file in the config.dest      
       order : [], // The order of aggregation (example : we want jquery before jquery.ui) Must not specified every file.
       test : false, // If it's running from test environment
+      exclude : [], // Files that are not compiled but still aggregated
     },
     /******* PRIVATE *******/
     execute : function(options) {
@@ -110,14 +113,14 @@ var sys = require("sys"),
         r.forEachJs(r.watch);
       } else { 
         // Create a jslint that will exit the whole process on error
-        var jslint = function(file) {
+        var newJslint = function(file) {
           r.jslint(file, {onError:function() {
             process.exit(1);
           }});
         }
 
         r.emptyAggregate();
-        r.forEachJs(jslint);
+        r.forEachJs(newJslint);
         r.forEachJs(r.shipToDest, {onEnd : options.onEnd});
       }
     },
@@ -242,6 +245,12 @@ var sys = require("sys"),
         return posA - posB;
       }         
     },
+    // If a file is excluded
+    isExcluded : function(file) {
+      if (typeof(r.config.exclude) == "string") { r.config.exclude = [r.config.exclude]; }
+      var filename = file.substring(file.lastIndexOf("/")+1);
+      return r.config.exclude.indexOf(filename) >= 0
+    },
     /******* PUBLIC *******/
     compile : function(file, options) {
       if (r.config.runGCompiler !== true) { return; }
@@ -298,42 +307,50 @@ var sys = require("sys"),
           });
       }
     },
+    // Check with jslint
     jslint : function(file, options) {
       options = options || {};
       
-      if (r.config.runJsLint !== true) { return; }
-    
-      var jslintPath = fs.realpathSync(__dirname + "/vendor/jslint/bin/jslint.js");
+      if (r.config.runJsLint !== true) { return true; }
+      if (r.isExcluded(file)) { return true; }
       
-      // Run jslint on each file
-      var jslint = cp.exec("node " + jslintPath + " " + file, function(error, stdout, stderr) {
-        if (error) {
-          r.debug("jslint " + file + " : ERROR");
-          sys.puts(file + " : " + error);
-          
-          if (options.onError) { options.onError(); } 
-        } else {
-          r.debug("jslint " + file + " : OK");
-          
-          if (options.onSuccess) { options.onSuccess(); }
-        }
-      });
+      // Get the code
+      var code = fs.readFileSync(file).toString();
+      
+      var success = jslint(code);
+      
+      if (!success) {
+        r.log("jslint error on '" + file + "'");
+        jslint.errors.reverse().forEach(function(e) {
+          if (e) {
+            r.log([e.line.toString(), ",", e.character.toString(), " : ",
+              (e.evidence || "").replace(/^\s*|\s*$/g, ""), " ===> ", e.reason].join(""));
+          }
+        });
+
+        if (options.onError) { options.onError(); }
+      } else {
+        if (options.onSuccess) { options.onSuccess(); }
+      }
+
+      return success;
     },
     watch : function(file) {
-      var watch = function() {
-        r.log(file + " changed");
-        
+      if (!r.isExcluded(file)) {
         // create a jslint that will call compile on success
-        var jslint = function() {
+        var runJslint = function() {
           r.jslint(file, {onSuccess : function() {
-            r.compile(file);
+            r.forEachJs(r.watch);
           }});
-        }
-        
-        jslint();
-      };
+        }      
       
-      fs.watchFile(file, watch);
+        var watch = function() {
+          r.log("File changed : " + file);
+          runJslint();
+        };
+
+        fs.watchFile(file, watch);
+      }
     },
   };
 
