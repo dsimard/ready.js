@@ -64,7 +64,9 @@ function getConfig(extend) {
 }
 
 // Create a file
-function createFile(path, data) {
+function createFile(path, code) {
+  code = code || ["function load", Math.round(Math.random()*100).toString(), "() {}"].join("");
+
   // Create the SRC directory if not exists
   var isDir = false;
   try {
@@ -76,19 +78,26 @@ function createFile(path, data) {
   }
 
   var fd = fs.openSync(SRC + path, "w+", 0755)
-  fs.writeSync(fd, data);
+  fs.writeSync(fd, code);
   fs.closeSync(fd);
 }
 
 // Creates 2 js files
 function createTwoFiles() {
-  createFile("js.js", "function load1() {}");
-  createFile("js2.js", "function load2() {}");
+  createFile("js.js");
+  createFile("js2.js");
 }
 
 // Creates bad file
 function createBadFile() {
   createFile("bad.js", "{(}");
+}
+
+// Create 3 alphabetical files
+function createAlphaFiles() {
+  createFile("c.js");
+  createFile("b.js");
+  createFile("a.js");
 }
 
 // Execute a ready.js
@@ -200,6 +209,40 @@ var tests = [
       stat = fs.statSync(dest + "js2.min.js");
       a.ok(stat.isFile());
     
+      onEnd();
+    });
+  },
+  // Test alphabetic order
+  function(onEnd) {
+    createAlphaFiles();
+    exec(function(error, stdout) {
+      var code = fs.readFileSync(DEST + ALL).toString();
+      var pos = [];
+      pos.push(code.match(/a\.min\.js/).index);
+      pos.push(code.match(/b\.min\.js/).index);
+      pos.push(code.match(/c\.min\.js/).index);
+      
+      pos.forEach(function(val, i) {
+        if (pos[i+1]) { a.ok(val < pos[i+1]) };
+      });
+      
+      onEnd();
+    });
+  },
+  // Test custom order
+  function(onEnd) {
+    createAlphaFiles();
+    exec(getConfig({order:["a.js", "c.js"]}), function(error, stdout) {
+      var code = fs.readFileSync(DEST + ALL).toString();
+      var pos = [];
+      pos.push(code.match(/a\.min\.js/).index);
+      pos.push(code.match(/c\.min\.js/).index);
+      pos.push(code.match(/b\.min\.js/).index);
+      
+      pos.forEach(function(val, i) {
+        if (pos[i+1]) { a.ok(val < pos[i+1]) };
+      });
+      
       onEnd();
     });
   }

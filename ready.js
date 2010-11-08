@@ -16,7 +16,7 @@ var sys = require("sys"),
       keepMinified : false, // if should keep the minified files
       watch : false, // if should watch the js files and exec ready.js each time they changes
       aggregateTo : "", // If a string is specified, all the .js will be aggregated to this file in the config.dest      
-      order : [], // The order of aggregation (example : may want jquery before jquery.ui) Must not specified every file.
+      order : [], // The order of aggregation (example : we want jquery before jquery.ui) Must not specified every file.
       test : false, // If it's running from test environment
     },
     /******* PRIVATE *******/
@@ -50,7 +50,7 @@ var sys = require("sys"),
         confJson = fs.readFileSync(arg).toString();
       } 
       // Put values in variable
-      process.compile('var config = ' + confJson, "execWithArgs.js");
+      process.compile('var config = ' + confJson, "config_file.js");
       
       if (config) {
         // Extend config file
@@ -115,7 +115,9 @@ var sys = require("sys"),
       } else { 
         // Create a jslint that will exit the whole process on error
         var jslint = function(file) {
-          r.jslint(file, {onError:function() {process.exit(1);}});
+          r.jslint(file, {onError:function() {
+            process.exit(1);
+          }});
         }
 
         r.emptyAggregate();
@@ -130,17 +132,7 @@ var sys = require("sys"),
       var files = fs.readdirSync(dir);
       
       // Sort the files if there's a specified order
-      if (r.config.order.length > 0) {
-        files.sort(function(a, b) {
-          var posA = r.config.order.indexOf(a);
-          if (posA < 0) { posA = Number.MAX_VALUE };
-          
-          var posB = r.config.order.indexOf(b);
-          if (posB < 0) { posB = Number.MAX_VALUE };
-          
-          return posA - posB;
-        })
-      }
+      files.sort(r.sortFiles);
       
       for (var i = 0; i < files.length; i++) {
         var filename = files[i];
@@ -239,6 +231,20 @@ var sys = require("sys"),
       }
       
       if (options.onEnd) { options.onEnd(); }
+    },
+    // This sorts the files before processing them
+    sortFiles : function(a, b) {
+      var posA = r.config.order.indexOf(a);
+      if (posA < 0) { posA = Number.MAX_VALUE };
+      
+      var posB = r.config.order.indexOf(b);
+      if (posB < 0) { posB = Number.MAX_VALUE };
+      
+      if (posA == posB) {
+        return (a < b) ? -1 : ((a > b) ? 1 : 0);
+      } else {
+        return posA - posB;
+      }         
     },
     /******* PUBLIC *******/
     compile : function(file, options) {
