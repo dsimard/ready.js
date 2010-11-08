@@ -28,12 +28,8 @@ var sys = require("sys"),
     },
     initWorkingDir : function(cb) {    
       // Get the working dir
-      cp.exec("git rev-parse --show-cdup", function(error, stdout, stderr) {
-        stdout = stdout.toString().replace(/\s*$/, "")
-        r.wd = fs.realpathSync(stdout.toString());
-        r.debug("Working directory : ", r.wd);
-        if (cb) { cb() };
-      });
+      r.wd = "";
+      if (cb) { cb() };
     },
     loadConfig : function() {
       // If the arg is a file, use it as config file. Else, load directly
