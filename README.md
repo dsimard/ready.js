@@ -17,8 +17,7 @@ Install [git](http://git-scm.com/) and [node.js](http://nodejs.org/#download).
 3. Create config file in *your_project/ready.conf.js* :
 
         { src : "./javascripts", // the source dir of js files
-          dest : "./minified", // the destination of your minified files
-          aggregateTo : "./minified/all.js" // Which file to aggregate all javascript files 
+          dest : "./minified", // the destination of your compiled files
         }
       
 4. run `echo 'node ready.js/ready.js ready.conf.js' >> .git/hooks/pre-commit`
