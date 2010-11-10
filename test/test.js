@@ -1,12 +1,15 @@
 var sys = require("sys"),
   fs = require("fs"),
   cp = require("child_process");
-  a = require("assert");
+  a = require("assert"),
+  r = require("../ready");
   
   
 const SRC = "./test/javascripts/";
 const DEST = "./test/minified/";
 const ALL = "all.js";
+
+var initialConfig = null;
 
 // Delete all unwanted files
 function emptyDir(dir) {
@@ -33,6 +36,12 @@ function emptyDir(dir) {
 }
 
 function cleanUp() {
+  // Keep the initial config
+  initialConfig = initialConfig || r.config;
+  
+  // Put back initial config
+  r.config = initialConfig;
+
   if (emptyDir(DEST, true)) {
     var isDir = false;
     try {
@@ -65,7 +74,7 @@ function getConfig(extend) {
 
 // Create a file
 function createFile(path, code) {
-  code = code || ["function load", Math.round(Math.random()*100).toString(), "() {}"].join("");
+  code = code || ["function load() {}"].join("");
 
   // Create the SRC directory if not exists
   var isDir = false;
@@ -117,6 +126,53 @@ function exec(config, cb) {
 
 // All tests to run
 var tests = [
+  // Check if config loads correctly
+  function(onEnd) {
+    var conf = getConfig();
+    
+    a.equal(r.config.src, "./");
+    a.equal(r.config.dest, "./compiled");
+    
+    r.loadConfig(conf);
+    
+    a.equal(r.config.src, "./test/javascripts/");
+    a.equal(r.config.dest, "./test/minified/");
+    
+    onEnd();
+  },
+  // Compile with google compiler
+  function(onEnd) {
+    createAlphaFiles();
+    
+    r.compile("function load() { var a = 1; }", function(data) {
+      a.equal(data.compiledCode, "function load(){};");
+      
+      r.compile(SRC + "a.js", function(data) {
+        a.equal(data.compiledCode, "function load(){};");
+        
+        r.compile("{(}", function(data) {
+          a.ok(data.compiledCode.length == 0);
+          onEnd();
+        });
+      });      
+    });
+  },
+  // jslint
+  function(onEnd) {
+    r.jslint("function load() {}", function(success, jslint) {
+      a.ok(success);
+      a.ok(jslint.errors.length == 0);
+
+      r.jslint("function load() {", function(success, jslint) {
+        a.ok(!success);
+        a.ok(jslint.errors.length == 1);
+        
+        onEnd();
+      });
+    });
+  },
+  // 
+  /********* COMMAND-LINE TESTS *********/
   // Default config
   function(onEnd) {
     createTwoFiles();

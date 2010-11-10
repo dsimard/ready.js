@@ -4,3 +4,4 @@
 [submodule "vendor/jslint"]
 	path = vendor/jslint
 	url = git://github.com/reid/node-jslint
+

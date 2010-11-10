@@ -20,9 +20,13 @@ Install [git](http://git-scm.com/) and [node.js](http://nodejs.org/#download).
           dest : "./minified", // the destination of your compiled files
         }
       
-4. run `echo 'node ready.js/ready.js ready.conf.js' >> .git/hooks/pre-commit`
+4. run `echo 'node ready.js/bin/ready.js ready.conf.js' >> .git/hooks/pre-commit`
 
 Then, **every time you commit**, ready.js will be run.
+
+## How to watch your javascript files for errors with jslint
+
+run `node ready.js/bin/ready.watch.js ready.conf.js`
 
 ## Alternative installations
 
