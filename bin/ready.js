@@ -36,6 +36,7 @@ var logger = {
     console.log(msg);
   },
   error : function(msg) {
+    process.exit(1);
     console.log("ERROR : " + msg);
   },
 }
@@ -47,11 +48,14 @@ function loadConfig(extConfig) {
   for (var p in config) {
     config[p] = typeof(extConfig[p]) === "undefined" ? config[p] : extConfig[p];
   }
+  
+  // If in test
+  r.test = config.test;
 
   // Minified extension must be letters or numbers
   if (config.runGCompiler && !config.compiledExtension.match(/^[0-9a-zA-Z]+$/)) {
-    logger.log("config.minifiedExtension is not valid. Using 'min' as default value.");
-    config.minifiedExtension = 'min';
+    logger.log("config.compiledExtension is not valid. Using 'min' as default value.");
+    config.compiledExtension = "min";
   }
         
   // src and dest must be different
@@ -103,9 +107,12 @@ function sortAggregates(a, b) {
   var posB = config.order.indexOf(b);
   if (posB < 0) { posB = Number.MAX_VALUE };
   
+console.log("Sort2 " + a + " " + b);
+  
   if (posA == posB) {
     return (a < b) ? -1 : ((a > b) ? 1 : 0);
   } else {
+console.log("Sort " + posA + " " + posB);
     return posA - posB;
   }         
 }
@@ -140,6 +147,7 @@ function compile(file, callback) {
 
 function aggregate(file, code) {
   var filename = file.match(/[^\/]+$/g)[0];
+  var minfilename = filename.replace(/\.js$/i, "."+config.compiledExtension+".js");
   
   aggregates.push({filename : filename, code : code});
   
@@ -149,9 +157,8 @@ function aggregate(file, code) {
 
   // Save the file to dest
   if (config.keepCompiled) {
-    var minfilename = filename.replace(/\.js$/i, "."+config.compiledExtension+".js");
     // Create dest
-    fs.mkdir(config.dest, 0755, function() {
+    fs.mkdir(config.dest, 0755, function(err) {
       fs.open(config.dest + "/" + minfilename, "w+", 0755, function(err, fd) {
         if (!err) {
           fs.write(fd, code, null, null, function(err, written) {
@@ -179,41 +186,37 @@ function aggregateAll() {
     var createCode = function(agg) {
       return [["/*", agg.filename, "*/"].join(" "), agg.code].join("\n");
     }
-  
+
     // Sort by the order
-    var code = aggregates
-      .sort(sortAggregates)
-      .reduce(function(a, b) {
+    aggregates = aggregates.sort(sortAggregates);
+   console.log(sys.inspect(config.order));
+console.log(sys.inspect(aggregates.map(function(a){a.filename})));
+    var code = 
+      aggregates.reduce(function(a, b) {
         if (typeof(a) !== "string") { a = createCode(a); };
         b = createCode(b);
         return [a, b].join("\n");
       });
   
     // Write aggregate file
-    var filepath = config.dest + "/" + config.aggregateTo;
-    fs.open(filepath, "w", 0755, function(err, fd) {
-      if (!err) {
-        fs.write(fd, code, null, null, function(err) {
-          fs.close(fd);
-        });
-      } else {
-        logger.error("Can't write aggregate file");
-      }
+    fs.mkdir(config.dest, 0755, function(err) {
+      var filepath = config.dest + "/" + config.aggregateTo;
+      fs.open(filepath, "w+", 0755, function(err, fd) {
+        if (!err) {
+          fs.write(fd, code, null, null, function(err) {
+            fs.close(fd);
+          });
+        } else {
+          logger.error("Can't write aggregate file");
+        }
+      });
     });
   }
 }
 
 // Load the config file
 if (process.argv[2]) {
-  // Read the config file
-  fs.readFile(process.argv[2], function(err, text) {
-    var conf = JSON.stringify({});
-    if (err) {
-      conf = JSON.parse(process.argv[2]);
-    } else {
-      conf = text.toString();
-    }
-
+  var startProcessing = function(conf) {
     // Put values in variable
     process.compile('var extConfig = ' + conf, "config_file.js");
     loadConfig(extConfig);
@@ -227,14 +230,26 @@ if (process.argv[2]) {
             logger.log("JSLINT success : " + file);
             compile(file, aggregate);
           } else {
-            console.log("Error on jslint : " + sys.inspect(jslint));
+            log.error("Error on jslint : " + sys.inspect(jslint));
           }
         });
       } else {
         compile(file, aggregate);
       }
     });
-  }); 
+  };
+
+  fs.stat(process.argv[2], function(err, stats) {
+    if (!err && stats.isFile()) {
+      fs.readFile(process.argv[2], function(err, text) {
+        var conf = text.toString();
+        startProcessing(conf);
+      });
+    } else {
+      conf = process.argv[2];
+      startProcessing(conf);
+    }
+  });
 } else {
   logger.error("No configuration file specified");
 }

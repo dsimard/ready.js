@@ -2,7 +2,8 @@ var sys = require("sys"),
   fs = require("fs"),
   cp = require("child_process");
   a = require("assert"),
-  r = require("../ready");
+  r = require("../ready"),
+  ins = sys.inspect;
   
   
 const SRC = "./test/javascripts/";
@@ -120,38 +121,26 @@ function exec(config, cb) {
     config = "'" + JSON.stringify(config) + "'";
   }
   
-  var cmd = ["node ready.js ", config].join(" ").toString();
+  var cmd = ["node bin/ready.js ", config].join(" ").toString();
+  console.log("EXEC : " + cmd);
   cp.exec(cmd, cb);
 }
 
 // All tests to run
 var tests = [
-  // Check if config loads correctly
-  function(onEnd) {
-    var conf = getConfig();
-    
-    a.equal(r.config.src, "./");
-    a.equal(r.config.dest, "./compiled");
-    
-    r.loadConfig(conf);
-    
-    a.equal(r.config.src, "./test/javascripts/");
-    a.equal(r.config.dest, "./test/minified/");
-    
-    onEnd();
-  },
   // Compile with google compiler
   function(onEnd) {
     createAlphaFiles();
     
-    r.compile("function load() { var a = 1; }", function(data) {
-      a.equal(data.compiledCode, "function load(){};");
+    r.compile("function load() { var a = 1; }", function(success, compiledCode, data) {
+      a.equal(compiledCode, "function load(){};");
       
-      r.compile(SRC + "a.js", function(data) {
-        a.equal(data.compiledCode, "function load(){};");
+      r.compile(SRC + "a.js", function(success, compiledCode, data) {
+        a.equal(compiledCode, "function load(){};");
         
-        r.compile("{(}", function(data) {
-          a.ok(data.compiledCode.length == 0);
+        r.compile("{(}", function(success, compiledCode, data) {
+          a.ok(!success);
+          a.ok(compiledCode.length == 0);
           onEnd();
         });
       });      
@@ -186,13 +175,13 @@ var tests = [
       a.throws(function() {
         fs.statSync(DEST + "js2.min.js");
       });
-      
+
       stat = fs.statSync(DEST + ALL, "minified exists");
       a.ok(stat.isFile());
       
       // Check that aggregate has no duplicate
       var code = fs.readFileSync(DEST + ALL).toString();
-      a.equal(code.match(/\sjs\.min\.js\s/).length, 1);
+      a.equal(code.match(/\sjs\.js\s/).length, 1);
       
       onEnd();
     });
@@ -218,7 +207,7 @@ var tests = [
   function(onEnd) {
     createTwoFiles();
     
-    exec(getConfig({minifiedExtension:"xyz", keepMinified:true}), function() {
+    exec(getConfig({compiledExtension:"xyz", keepCompiled:true}), function() {
       var stat = fs.statSync(DEST + "js.xyz.js");
       a.ok(stat.isFile());
       
@@ -241,8 +230,7 @@ var tests = [
   function(onEnd) {
     createTwoFiles();
     
-    exec(getConfig({minifiedExtension:"..", keepMinified:true}), function(error, stdout, stderr) {
-    
+    exec(getConfig({compiledExtension:"..", keepCompiled:true}), function(error, stdout, stderr) {
       var stat = fs.statSync(DEST + "js.min.js");
       a.ok(stat.isFile());
       
@@ -256,7 +244,7 @@ var tests = [
   function(onEnd) {
     createTwoFiles();
     
-    exec(getConfig({src:SRC,dest:SRC,keepMinified:true}), function(error, stdout, stderr) {
+    exec(getConfig({src:SRC,dest:SRC,keepCompiled:true}), function(error, stdout, stderr) {
       var dest = SRC + "minified/"
 
       var stat = fs.statSync(dest + "js.min.js");
@@ -274,9 +262,9 @@ var tests = [
     exec(function(error, stdout) {
       var code = fs.readFileSync(DEST + ALL).toString();
       var pos = [];
-      pos.push(code.match(/a\.min\.js/).index);
-      pos.push(code.match(/b\.min\.js/).index);
-      pos.push(code.match(/c\.min\.js/).index);
+      pos.push(code.match(/a\.js/).index);
+      pos.push(code.match(/b\.js/).index);
+      pos.push(code.match(/c\.js/).index);
       
       pos.forEach(function(val, i) {
         if (pos[i+1]) { a.ok(val < pos[i+1]) };
@@ -291,10 +279,10 @@ var tests = [
     exec(getConfig({order:["a.js", "c.js"]}), function(error, stdout) {
       var code = fs.readFileSync(DEST + ALL).toString();
       var pos = [];
-      pos.push(code.match(/a\.min\.js/).index);
-      pos.push(code.match(/c\.min\.js/).index);
-      pos.push(code.match(/b\.min\.js/).index);
-      
+      pos.push(code.match(/a\.js/).index);
+      pos.push(code.match(/c\.js/).index);
+      pos.push(code.match(/b\.js/).index);
+ 
       pos.forEach(function(val, i) {
         if (pos[i+1]) { a.ok(val < pos[i+1]) };
       });

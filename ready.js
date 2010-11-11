@@ -3,33 +3,9 @@ var sys = require("sys"),
     cp = require('child_process'),
     jslint = require(__dirname + "/vendor/jslint/lib/fulljslint_export").JSLINT,
     rest = require(__dirname + "/vendor/restler/lib/restler");
-    
+
 var r = {
-  // Returns an absolute path
-  absPath : function(relativePath) {
-    relativePath = relativePath || "";
-    var path = fs.realpathSync(r.wd + relativePath).toString();
-    if (!path.match(/\/$/)) { path = path + "/"; }
-    return path;
-  },
-  // Ships all files (compiled or not) to destination
-  shipToDest : function(file) {
-    var writeToAgg = function(file, code) {
-      r.writeToAggregate(file, code);
-    }
-    
-    // Check if we have to process the file
-    if (r.config.runGCompiler || r.shouldAggregate) {
-      if (r.config.runGCompiler) {
-        r.compile(file, {onSuccess : writeToAgg});
-      } else {
-        var code = fs.readFileSync(file).toString();
-        writeToAgg(file, code);
-      }
-    }
-    
-    if (options.onEnd) { options.onEnd(); }
-  },
+  test : false, // If in test
   // Get the code from fileOrCode
   getCode : function(fileOrCode, callback) {
     // Check if it's a file or code
@@ -41,7 +17,6 @@ var r = {
       callback(fileOrCode);
     }
   },
-  /******* PUBLIC *******/
   // Compile the code
   compile : function(fileOrCode, callback) {
     r.getCode(fileOrCode, function(code) {
@@ -51,11 +26,16 @@ var r = {
         "output_format" : "json",
         "output_info" : "compiled_code"
       };
-        
-      rest.post("http://closure-compiler.appspot.com/compile", {data : params})
+      
+      var url = r.test ? "http://www.azanka.ca" : "http://closure-compiler.appspot.com/compile";
+      if (r.test) { params = {} } ;
+      rest.post(url, {data : params})
         .addListener('complete', function(data) {
-          data = JSON.parse(data);
-          callback(data.compiledCode.length > 0, data.compiledCode, data);
+
+          var newData = {compiledCode : code};
+          if (!r.test) { newData = JSON.parse(data); }
+
+          callback(newData.compiledCode.length > 0, newData.compiledCode, newData);
         });
     });
   },
@@ -76,9 +56,6 @@ var r = {
   },
 };
 
-// Export for node.js
-for (var p in r) {
-  exports[p] = r[p];
-}
+module.exports = r;
 
 
