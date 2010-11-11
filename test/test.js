@@ -1,12 +1,16 @@
 var sys = require("sys"),
   fs = require("fs"),
   cp = require("child_process");
-  a = require("assert");
+  a = require("assert"),
+  r = require("../ready"),
+  ins = sys.inspect;
   
   
 const SRC = "./test/javascripts/";
 const DEST = "./test/minified/";
 const ALL = "all.js";
+
+var initialConfig = null;
 
 // Delete all unwanted files
 function emptyDir(dir) {
@@ -33,6 +37,12 @@ function emptyDir(dir) {
 }
 
 function cleanUp() {
+  // Keep the initial config
+  initialConfig = initialConfig || r.config;
+  
+  // Put back initial config
+  r.config = initialConfig;
+
   if (emptyDir(DEST, true)) {
     var isDir = false;
     try {
@@ -65,7 +75,7 @@ function getConfig(extend) {
 
 // Create a file
 function createFile(path, code) {
-  code = code || ["function load", Math.round(Math.random()*100).toString(), "() {}"].join("");
+  code = code || ["function load() {}"].join("");
 
   // Create the SRC directory if not exists
   var isDir = false;
@@ -111,12 +121,47 @@ function exec(config, cb) {
     config = "'" + JSON.stringify(config) + "'";
   }
   
-  var cmd = ["node ready.js ", config].join(" ").toString();
+  var cmd = ["node bin/ready.js ", config].join(" ").toString();
+  console.log("EXEC : " + cmd);
   cp.exec(cmd, cb);
 }
 
 // All tests to run
 var tests = [
+  // Compile with google compiler
+  function(onEnd) {
+    createAlphaFiles();
+    
+    r.compile("function load() { var a = 1; }", function(success, compiledCode, data) {
+      a.equal(compiledCode, "function load(){};");
+      
+      r.compile(SRC + "a.js", function(success, compiledCode, data) {
+        a.equal(compiledCode, "function load(){};");
+        
+        r.compile("{(}", function(success, compiledCode, data) {
+          a.ok(!success);
+          a.ok(compiledCode.length == 0);
+          onEnd();
+        });
+      });      
+    });
+  },
+  // jslint
+  function(onEnd) {
+    r.jslint("function load() {}", function(success, jslint) {
+      a.ok(success);
+      a.ok(jslint.errors.length == 0);
+
+      r.jslint("function load() {", function(success, jslint) {
+        a.ok(!success);
+        a.ok(jslint.errors.length == 1);
+        
+        onEnd();
+      });
+    });
+  },
+  // 
+  /********* COMMAND-LINE TESTS *********/
   // Default config
   function(onEnd) {
     createTwoFiles();
@@ -136,7 +181,7 @@ var tests = [
       
       // Check that aggregate has no duplicate
       var code = fs.readFileSync(DEST + ALL).toString();
-      a.equal(code.match(/\sjs\.min\.js\s/).length, 1);
+      a.equal(code.match(/\sjs\.js\s/).length, 1);
       
       onEnd();
     });
@@ -162,7 +207,7 @@ var tests = [
   function(onEnd) {
     createTwoFiles();
     
-    exec(getConfig({minifiedExtension:"xyz", keepMinified:true}), function() {
+    exec(getConfig({compiledExtension:"xyz", keepCompiled:true}), function() {
       var stat = fs.statSync(DEST + "js.xyz.js");
       a.ok(stat.isFile());
       
@@ -185,8 +230,7 @@ var tests = [
   function(onEnd) {
     createTwoFiles();
     
-    exec(getConfig({minifiedExtension:"..", keepMinified:true}), function(error, stdout, stderr) {
-    
+    exec(getConfig({compiledExtension:"..", keepCompiled:true}), function(error, stdout, stderr) {
       var stat = fs.statSync(DEST + "js.min.js");
       a.ok(stat.isFile());
       
@@ -200,7 +244,7 @@ var tests = [
   function(onEnd) {
     createTwoFiles();
     
-    exec(getConfig({src:SRC,dest:SRC,keepMinified:true}), function(error, stdout, stderr) {
+    exec(getConfig({src:SRC,dest:SRC,keepCompiled:true}), function(error, stdout, stderr) {
       var dest = SRC + "minified/"
 
       var stat = fs.statSync(dest + "js.min.js");
@@ -218,9 +262,9 @@ var tests = [
     exec(function(error, stdout) {
       var code = fs.readFileSync(DEST + ALL).toString();
       var pos = [];
-      pos.push(code.match(/a\.min\.js/).index);
-      pos.push(code.match(/b\.min\.js/).index);
-      pos.push(code.match(/c\.min\.js/).index);
+      pos.push(code.match(/a\.js/).index);
+      pos.push(code.match(/b\.js/).index);
+      pos.push(code.match(/c\.js/).index);
       
       pos.forEach(function(val, i) {
         if (pos[i+1]) { a.ok(val < pos[i+1]) };
@@ -235,10 +279,10 @@ var tests = [
     exec(getConfig({order:["a.js", "c.js"]}), function(error, stdout) {
       var code = fs.readFileSync(DEST + ALL).toString();
       var pos = [];
-      pos.push(code.match(/a\.min\.js/).index);
-      pos.push(code.match(/c\.min\.js/).index);
-      pos.push(code.match(/b\.min\.js/).index);
-      
+      pos.push(code.match(/a\.js/).index);
+      pos.push(code.match(/c\.js/).index);
+      pos.push(code.match(/b\.js/).index);
+ 
       pos.forEach(function(val, i) {
         if (pos[i+1]) { a.ok(val < pos[i+1]) };
       });
