@@ -175,7 +175,7 @@ var tests = [
       a.throws(function() {
         fs.statSync(DEST + "js2.min.js");
       });
-
+      
       stat = fs.statSync(DEST + ALL, "minified exists");
       a.ok(stat.isFile());
       

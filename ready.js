@@ -27,16 +27,19 @@ var r = {
         "output_info" : "compiled_code"
       };
       
-      var url = r.test ? "http://www.azanka.ca" : "http://closure-compiler.appspot.com/compile";
-      if (r.test) { params = {} } ;
-      rest.post(url, {data : params})
-        .addListener('complete', function(data) {
+      var completed = function(data) {
+        var newData = {compiledCode : code};
+        if (data) { newData = JSON.parse(data); }
 
-          var newData = {compiledCode : code};
-          if (!r.test) { newData = JSON.parse(data); }
-
-          callback(newData.compiledCode.length > 0, newData.compiledCode, newData);
-        });
+        callback(newData.compiledCode.length > 0, newData.compiledCode, newData);
+      }
+      
+      if (r.test) {
+        completed();
+      } else {
+        var url = "http://closure-compiler.appspot.com/compile";
+        rest.post(url, {data : params}).addListener('complete', completed);
+      }
     });
   },
   // Check with jslint
@@ -47,12 +50,9 @@ var r = {
     });
   },
   // Watch a file
-  watch : function(file) {
-    var watch = function() {
-      jslint(file);
-    };
-
-    fs.watchFile(file, jslint(file));
+  watch : function(file, callback) {
+    r.jslint(file, callback);
+    fs.watchFile(file, function() {r.jslint(file, callback);});
   },
 };
 
