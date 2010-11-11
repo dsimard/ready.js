@@ -17,6 +17,9 @@ var config = {
   debug : false, // If in debug mode
 }
 
+var allJsFiles = [];
+var aggregates = [];
+
 var logger = {
   debug : function(msg) {
     if (config.debug === true) {
@@ -68,11 +71,11 @@ function loadConfig(extConfig) {
 }
 
 // Run through all js
-function forEachJs(callback, onEnd) {
+function forEachJs(callback) {
   fs.readdir(config.src, function(err, files) {
     if (!err) {
       // Sort the files if there's a specified order
-      files = files.sort(sortFiles).filter(function(f) {
+      allJsFiles = files.filter(function(f) {
         // It it's a js
         return f.match(/\.js$/i);
       }).map(function(f) {
@@ -80,7 +83,7 @@ function forEachJs(callback, onEnd) {
       });
       
       // For each file, callback
-      files.forEach(function(f, i) {
+      allJsFiles.forEach(function(f, i) {
         callback(f);
       });
       
@@ -90,7 +93,10 @@ function forEachJs(callback, onEnd) {
   });
 }
 
-function sortFiles(a, b) {
+function sortAggregates(a, b) {
+  a = a.filename;
+  b = b.filename;
+  
   var posA = config.order.indexOf(a);
   if (posA < 0) { posA = Number.MAX_VALUE };
   
@@ -104,14 +110,18 @@ function sortFiles(a, b) {
   }         
 }
 
-var aggregates = [];
+// If a file is excluded
+function isExcluded(file) {
+  if (typeof(config.exclude) == "string") { config.exclude = [config.exclude]; }
+  var filename = file.substring(file.lastIndexOf("/")+1);
+  return config.exclude.indexOf(filename) >= 0
+}
 
 function compile(file, callback) {
-  if (config.runGCompiler) {
+  if (config.runGCompiler && !isExcluded(file)) {
     r.compile(file, function(success, code, data) {
       if (success) {
         callback(file, code);
-        console.log(code);
       } else {
         console.log("Error on compile : " + sys.inspect(data));
       }
@@ -120,7 +130,7 @@ function compile(file, callback) {
     // Get the code directly from the file
     fs.readFile(file, function(err, text) {
       if (!err) {
-        aggregate(file, text.toString());
+        callback(file, text.toString());
       } else {
         r.log("Error reading file : " + file);
       }
@@ -129,12 +139,68 @@ function compile(file, callback) {
 }
 
 function aggregate(file, code) {
-  // Save the file to dest
-  if (keepCompiled) {
-  }
+  var filename = file.match(/[^\/]+$/g)[0];
   
-  var filename = file.match(/[^\/]+$/g);
-  aggregates.push(["/* " + filename + " */", code].join("\n"));
+  aggregates.push({filename : filename, code : code});
+  
+  var end = function() {
+    if (allJsFiles.length == aggregates.length) { aggregateAll(); }
+  }  
+
+  // Save the file to dest
+  if (config.keepCompiled) {
+    var minfilename = filename.replace(/\.js$/i, "."+config.compiledExtension+".js");
+    // Create dest
+    fs.mkdir(config.dest, 0755, function() {
+      fs.open(config.dest + "/" + minfilename, "w+", 0755, function(err, fd) {
+        if (!err) {
+          fs.write(fd, code, null, null, function(err, written) {
+            if (err) {
+              logger.error("Can't write compiled file : " + minfilename);
+            }
+
+            end();
+            fs.close(fd);
+          });
+        } else {
+          logger.error("Can't save compiled file : " + minfilename);
+          end();
+        }
+      });
+    });
+  } else {
+    end();
+  }
+}
+
+// Aggregate all
+function aggregateAll() {
+  if (config.aggregateTo.length > 0) {
+    var createCode = function(agg) {
+      return [["/*", agg.filename, "*/"].join(" "), agg.code].join("\n");
+    }
+  
+    // Sort by the order
+    var code = aggregates
+      .sort(sortAggregates)
+      .reduce(function(a, b) {
+        if (typeof(a) !== "string") { a = createCode(a); };
+        b = createCode(b);
+        return [a, b].join("\n");
+      });
+  
+    // Write aggregate file
+    var filepath = config.dest + "/" + config.aggregateTo;
+    fs.open(filepath, "w", 0755, function(err, fd) {
+      if (!err) {
+        fs.write(fd, code, null, null, function(err) {
+          fs.close(fd);
+        });
+      } else {
+        logger.error("Can't write aggregate file");
+      }
+    });
+  }
 }
 
 // Load the config file
@@ -154,7 +220,7 @@ if (process.argv[2]) {
     
     // Start the process
     forEachJs(function(file) {
-      if (config.runJslint) {
+      if (config.runJslint && !isExcluded(file)) {
         // Run jslint
         r.jslint(file, function(success, jslint) {
           if (success) {
@@ -172,16 +238,4 @@ if (process.argv[2]) {
 } else {
   logger.error("No configuration file specified");
 }
-
-// Aggregate on exit
-// I don't like it!
-process.on("exit", function() {
-  if (config.aggregateTo.length > 0) {
-    // Write aggregate file
-    var filepath = config.dest + "/" + config.aggregateTo;
-    var fd = fs.openSync(filepath, "w", 0755);
-    var code = aggregates.join("\n"); 
-    fs.closeSync(fd);
-  }
-});
 

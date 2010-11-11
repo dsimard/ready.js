@@ -30,12 +30,6 @@ var r = {
     
     if (options.onEnd) { options.onEnd(); }
   },
-  // If a file is excluded
-  isExcluded : function(file) {
-    if (typeof(r.config.exclude) == "string") { r.config.exclude = [r.config.exclude]; }
-    var filename = file.substring(file.lastIndexOf("/")+1);
-    return r.config.exclude.indexOf(filename) >= 0
-  },
   // Get the code from fileOrCode
   getCode : function(fileOrCode, callback) {
     // Check if it's a file or code
