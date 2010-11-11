@@ -1,84 +1,187 @@
 #!/usr/bin/env node
-r = require("../ready"),
-log = require("../vendor/logging/lib/logging").from(__filename);
+var r = require("../ready"),
+  fs = require("fs"),
+  sys = require("sys");
 
 var config = {
   src : "./", // the source dir of js files
   dest : "./compiled", // the destination of your minified files
-  minifiedExtension : "min", // extension of the minified file
-  runJsLint : true, // if should run jsLint
+  compiledExtension : "min", // extension of the minified file
+  runJslint : true, // if should run jsLint
   runGCompiler : true, // if should run GoogleCompiler
-  keepMinified : false, // if should keep the minified files
+  keepCompiled : false, // if should keep the minified files
   aggregateTo : "", // If a string is specified, all the .js will be aggregated to this file in the config.dest      
   order : [], // The order of aggregation (example : we want jquery before jquery.ui) Must not specified every file.
   exclude : [], // Files that are not compiled but still aggregated
   test : false, // If it's running from test environment
+  debug : false, // If in debug mode
 }
 
-function loadConfig(config) {
-  config |= {};
+var logger = {
+  debug : function(msg) {
+    if (config.debug === true) {
+      console.log(msg);
+      for (var i = 1, arg; arg = arguments[i]; i++) {
+        console.log(sys.inspect(arg));
+      }
+    }
+  },
+  warn : function(msg) {
+    console.log("WARNING : " + msg);
+  },
+  log : function(msg) {
+    console.log(msg);
+  },
+  error : function(msg) {
+    console.log("ERROR : " + msg);
+  },
+}
 
+function loadConfig(extConfig) {
+  extConfig = extConfig || {};
+  
   // Extend config file
-  for (var p in r.config) {
-    r.config[p] = typeof(config[p]) === "undefined" ? r.config[p] : config[p];
+  for (var p in config) {
+    config[p] = typeof(extConfig[p]) === "undefined" ? config[p] : extConfig[p];
   }
 
   // Minified extension must be letters or numbers
-  if (r.config.runGCompiler && !r.config.minifiedExtension.match(/^[0-9a-zA-Z]+$/)) {
-    r.log("config.minifiedExtension is not valid. Using 'min' as default value.");
-    r.config.minifiedExtension = 'min';
+  if (config.runGCompiler && !config.compiledExtension.match(/^[0-9a-zA-Z]+$/)) {
+    logger.log("config.minifiedExtension is not valid. Using 'min' as default value.");
+    config.minifiedExtension = 'min';
   }
         
   // src and dest must be different
-  if (r.config.src == r.config.dest) {
-    var src = r.config.src;
-    src = r.config.src + (r.config.src.match(/\/$/) ? "" : "/");
-    r.config.dest = src + "minified/"
-    r.log("config.src and config.dest must be different. Using '"+r.config.dest
+  if (config.src == config.dest) {
+    var src = config.src;
+    src = config.src + (config.src.match(/\/$/) ? "" : "/");
+    config.dest = src + "minified/"
+    logger.log("config.src and config.dest must be different. Using '"+config.dest
       +"' as default value for config.dest.");          
   }
                 
   // Show config
-  r.debug("== Configuration ==");
-  for (var p in r.config) {
-    r.debug(p.toString() + " : " + r.config[p].toString());
+  logger.debug("== Configuration ==");
+  for (var p in config) {
+    logger.debug(p.toString() + " : " + config[p].toString());
   }
 }
 
 // Run through all js
-function forEachJs(callback, options) {
-  options = options || {};
-  
-  var dir = r.absPath(r.config.src);
-  var files = fs.readdirSync(dir);
-  
-  // Sort the files if there's a specified order
-  files.sort(r.sortFiles);
-  
-  for (var i = 0; i < files.length; i++) {
-    var filename = files[i];
-    var last = i == files.length-1;
-    
-    filename = fs.realpathSync(dir + filename);
-    var aggTo = fs.realpathSync(r.absPath(r.config.dest) + r.config.aggregateTo);
+function forEachJs(callback, onEnd) {
+  fs.readdir(config.src, function(err, files) {
+    if (!err) {
+      // Sort the files if there's a specified order
+      files = files.sort(sortFiles).filter(function(f) {
+        // It it's a js
+        return f.match(/\.js$/i);
+      }).map(function(f) {
+        return fs.realpathSync(config.src + "/" + f);
+      });
+      
+      // For each file, callback
+      files.forEach(function(f, i) {
+        callback(f);
+      });
+      
+    } else {
+      logger.warn("No files to process");
+    }
+  });
+}
 
-    if (filename != aggTo) {
-      // If .js
-      if (filename.match(/\.js$/i)) {
-        // Make sure it's not a compiled file
-        callback(filename, {
-          onEnd : function() {
-            if (last && options.onEnd) { options.onEnd(); }
-          }
-        });
+function sortFiles(a, b) {
+  var posA = config.order.indexOf(a);
+  if (posA < 0) { posA = Number.MAX_VALUE };
+  
+  var posB = config.order.indexOf(b);
+  if (posB < 0) { posB = Number.MAX_VALUE };
+  
+  if (posA == posB) {
+    return (a < b) ? -1 : ((a > b) ? 1 : 0);
+  } else {
+    return posA - posB;
+  }         
+}
+
+var aggregates = [];
+
+function compile(file, callback) {
+  if (config.runGCompiler) {
+    r.compile(file, function(success, code, data) {
+      if (success) {
+        callback(file, code);
+        console.log(code);
+      } else {
+        console.log("Error on compile : " + sys.inspect(data));
       }
-    } 
+    });
+  } else {
+    // Get the code directly from the file
+    fs.readFile(file, function(err, text) {
+      if (!err) {
+        aggregate(file, text.toString());
+      } else {
+        r.log("Error reading file : " + file);
+      }
+    });
   }
+}
+
+function aggregate(file, code) {
+  // Save the file to dest
+  if (keepCompiled) {
+  }
+  
+  var filename = file.match(/[^\/]+$/g);
+  aggregates.push(["/* " + filename + " */", code].join("\n"));
 }
 
 // Load the config file
 if (process.argv[2]) {
+  // Read the config file
+  fs.readFile(process.argv[2], function(err, text) {
+    var conf = JSON.stringify({});
+    if (err) {
+      conf = JSON.parse(process.argv[2]);
+    } else {
+      conf = text.toString();
+    }
+
+    // Put values in variable
+    process.compile('var extConfig = ' + conf, "config_file.js");
+    loadConfig(extConfig);
+    
+    // Start the process
+    forEachJs(function(file) {
+      if (config.runJslint) {
+        // Run jslint
+        r.jslint(file, function(success, jslint) {
+          if (success) {
+            logger.log("JSLINT success : " + file);
+            compile(file, aggregate);
+          } else {
+            console.log("Error on jslint : " + sys.inspect(jslint));
+          }
+        });
+      } else {
+        compile(file, aggregate);
+      }
+    });
+  }); 
 } else {
-  
+  logger.error("No configuration file specified");
 }
+
+// Aggregate on exit
+// I don't like it!
+process.on("exit", function() {
+  if (config.aggregateTo.length > 0) {
+    // Write aggregate file
+    var filepath = config.dest + "/" + config.aggregateTo;
+    var fd = fs.openSync(filepath, "w", 0755);
+    var code = aggregates.join("\n"); 
+    fs.closeSync(fd);
+  }
+});
 
