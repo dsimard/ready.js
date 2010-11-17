@@ -74,7 +74,9 @@ function getConfig(extend) {
 }
 
 // Create a file
-function createFile(path, code) {
+function createFile(path, code, options) {
+  options = options || {};
+
   code = code || ["function load() {}"].join("");
 
   // Create the SRC directory if not exists
@@ -82,12 +84,22 @@ function createFile(path, code) {
   try {
     isDir = fs.statSync(SRC).isDirectory();
   } catch(e) {}
-  
+    
   if (!isDir) {
     fs.mkdirSync(SRC, 0755);
   }
+  
+  // If there's a subdir, create it
+  if (options.subdir) {
+    try {
+      fs.mkdirSync(SRC + options.subdir, 0755);
+    } catch(e) {}
+  }
 
-  var fd = fs.openSync(SRC + path, "w+", 0755)
+  var dir = SRC;
+  dir += options.subdir ? options.subdir + "/" : "";
+
+  var fd = fs.openSync(dir + path, "w+", 0755)
   fs.writeSync(fd, code);
   fs.closeSync(fd);
 }
@@ -289,7 +301,23 @@ var tests = [
       
       onEnd();
     });
-  }
+  },
+  // Subdirectories
+  function(onEnd) {
+    createTwoFiles();
+    createFile("subdir.js", "function subdir() {}", {subdir:"subdir"});
+    
+    exec(function(error, stdout) {
+      a.ok(fs.statSync(SRC + "subdir/subdir.js").isFile());
+      var code = fs.readFileSync(DEST + ALL).toString();
+      
+      a.ok(code.match(/js\.js/gi));
+      a.ok(code.match(/js2\.js/gi));
+      a.ok(code.match(/subdir\.js/gi));
+      
+      onEnd();
+    });
+  },
 ];
 
 (function execTest() {

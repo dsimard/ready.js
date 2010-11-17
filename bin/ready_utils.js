@@ -86,18 +86,35 @@ var r = {
     });
   },
   // Run through all js
-  forEachJs : function(callback) {
-    fs.readdir(r.config.src, function(err, files) {
+  forEachJs : function(callback, dir) {
+    dir = dir || r.config.src;
+  
+    fs.readdir(dir, function(err, files) {
       if (!err) {
+        // Get real path
+        files = files.map(function(f) {
+          return fs.realpathSync(dir + "/" + f);
+        })
+      
         // Only process js files
-        r.allJsFiles = files.filter(function(f) {
+        var jsFiles = files.filter(function(f) {
           return f.match(/\.js$/i);
-        }).map(function(f) {
-          return fs.realpathSync(r.config.src + "/" + f);
+        });
+        
+        // Add files to all files
+        r.allJsFiles = r.allJsFiles.concat(jsFiles);
+        
+        // Check subfolders
+        files.forEach(function(f) {
+          fs.stat(f, function(err, stats) {
+            if (stats.isDirectory()) {
+              r.forEachJs(callback, f);
+            }
+          });
         });
         
         // For each file, callback
-        r.allJsFiles.forEach(function(f, i) {
+        jsFiles.forEach(function(f, i) {
           callback(f);
         });
         
