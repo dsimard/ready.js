@@ -28,19 +28,25 @@ var r = {
       };
       
       var completed = function(data) {
-        var newData = {compiledCode : code};
-        if (data) { newData = JSON.parse(data); }
-
-        callback(newData.compiledCode.length > 0, newData.compiledCode, newData);
+        r.compileCompleted(data, code, callback);
       }
       
       if (r.test) {
-        completed();
+        r.compileCompleted();
       } else {
         var url = "http://closure-compiler.appspot.com/compile";
         rest.post(url, {data : params}).addListener('complete', completed);
       }
     });
+  },
+  // On compile completed
+  compileCompleted : function(data, code, callback) {
+    var newData = {compiledCode : code};
+    if (data) { newData = JSON.parse(data); }
+
+    var success = newData.compiledCode && newData.compiledCode.length > 0 && !serverErrors;
+
+    callback(success, newData.compiledCode, newData);
   },
   // Check with jslint
   jslint : function(fileOrCode, callback) {

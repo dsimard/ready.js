@@ -139,9 +139,9 @@ function exec(config, cb) {
 }
 
 // All tests to run
-var tests = [
+var tests = {
   // Compile with google compiler
-  function(onEnd) {
+  "Compile with google compiler" : function(onEnd) {
     createAlphaFiles();
     
     r.compile("function load() { var a = 1; }", function(success, compiledCode, data) {
@@ -159,7 +159,7 @@ var tests = [
     });
   },
   // jslint
-  function(onEnd) {
+  "jslint" : function(onEnd) {
     r.jslint("function load() {}", function(success, jslint) {
       a.ok(success);
       a.ok(jslint.errors.length == 0);
@@ -175,7 +175,7 @@ var tests = [
   // 
   /********* COMMAND-LINE TESTS *********/
   // Default config
-  function(onEnd) {
+  "Default config" : function(onEnd) {
     createTwoFiles();
 
     exec(function(error, stdout, stderr) {  
@@ -199,7 +199,7 @@ var tests = [
     });
   },
   // Do not run compiler
-  function(onEnd) {
+  "Do not run compiler" : function(onEnd) {
     var config = getConfig({runGCompiler:false});
     createTwoFiles();
     
@@ -216,7 +216,7 @@ var tests = [
     });
   },
   // Change minified extension
-  function(onEnd) {
+  "Change minified extension" : function(onEnd) {
     createTwoFiles();
     
     exec(getConfig({compiledExtension:"xyz", keepCompiled:true}), function() {
@@ -229,7 +229,7 @@ var tests = [
     });
   },
   // JSLint doesn't pass
-  function(onEnd) {
+  "JSLint doesn't pass" : function(onEnd) {
     createBadFile();
     
     exec(function(error, stdout, stderr) {
@@ -239,7 +239,7 @@ var tests = [
     });
   },
   // Invalid minified extension (uses 'min' as default)
-  function(onEnd) {
+  "Invalid minified extension (uses 'min' as default)" : function(onEnd) {
     createTwoFiles();
     
     exec(getConfig({compiledExtension:"..", keepCompiled:true}), function(error, stdout, stderr) {
@@ -253,7 +253,7 @@ var tests = [
     });
   },
   // src and dest are the same
-  function(onEnd) {
+  "src and dest are the same" : function(onEnd) {
     createTwoFiles();
     
     exec(getConfig({src:SRC,dest:SRC,keepCompiled:true}), function(error, stdout, stderr) {
@@ -269,7 +269,7 @@ var tests = [
     });
   },
   // Test alphabetic order
-  function(onEnd) {
+  "Test alphabetic order" : function(onEnd) {
     createAlphaFiles();
     exec(function(error, stdout) {
       var code = fs.readFileSync(DEST + ALL).toString();
@@ -286,7 +286,7 @@ var tests = [
     });
   },
   // Test custom order
-  function(onEnd) {
+  "Test custom order" : function(onEnd) {
     createAlphaFiles();
     exec(getConfig({order:["a.js", "c.js"]}), function(error, stdout) {
       var code = fs.readFileSync(DEST + ALL).toString();
@@ -303,7 +303,7 @@ var tests = [
     });
   },
   // Subdirectories
-  function(onEnd) {
+  "Subdirectories" : function(onEnd) {
     createTwoFiles();
     createFile("subdir.js", "function subdir() {}", {subdir:"subdir"});
     
@@ -318,12 +318,47 @@ var tests = [
       onEnd();
     });
   },
-];
+  // Google compiler server error
+  "Google compiler server error" : function(onEnd) {
+    var _completed = r.compileCompleted;
+    
+    r.compileCompleted = function(data, code, callback) {
+      data = {serverErrors:[{code:22, error:"Too many compiles performed recently.  Try again later."}]};
+      _completed(data, code, callback);
+    }
+    
+    createTwoFiles();
+    exec(function(error, stdout) {
+      a.throws(function() {
+        fs.statSync(DEST + "js.min.js");
+      });
+      
+      a.throws(function() {
+        fs.statSync(DEST + "js2.min.js");
+      });
+    
+      r.compileCompleted = _completed;
+      onEnd();
+    });    
+  },
+  // Google compiler error
+  "Google compiler error" : function(onEnd) {
+  },
+};
+
+//tests[tests.length-2](function() {});
+
+var keys = [];
+for (var p in tests) {
+  keys.push(p);
+}
+
+console.log(sys.inspect(keys));
 
 (function execTest() {
   cleanUp();
-  var test = tests.shift();
-  if (test) { 
-    test(execTest);
+  var key = keys.shift();
+  if (tests[key]) { 
+    tests[key](execTest);
   }
 })();
