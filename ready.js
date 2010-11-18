@@ -32,7 +32,7 @@ var r = {
       }
       
       if (r.test) {
-        r.compileCompleted();
+        completed();
       } else {
         var url = "http://closure-compiler.appspot.com/compile";
         rest.post(url, {data : params}).addListener('complete', completed);
@@ -42,10 +42,10 @@ var r = {
   // On compile completed
   compileCompleted : function(data, code, callback) {
     var newData = {compiledCode : code};
+    
     if (data) { newData = JSON.parse(data); }
-
-    var success = newData.compiledCode && newData.compiledCode.length > 0 && !serverErrors;
-
+    
+    var success = newData.compiledCode && newData.compiledCode.length > 0 && !newData.serverErrors;
     callback(success, newData.compiledCode, newData);
   },
   // Check with jslint

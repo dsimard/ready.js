@@ -38,7 +38,11 @@ function compile(file, callback) {
       if (success) {
         callback(file, code);
       } else {
-        console.log("Error on compile : " + sys.inspect(data));
+        if (data.compiledCode !== null) {
+          console.log("Error compiling '" + file + "' : code does not seem valid.");
+        } else {
+          console.log("Error compiling '" + file + "' : " + sys.inspect(data));
+        }
       }
     });
   } else {

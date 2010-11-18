@@ -343,22 +343,33 @@ var tests = {
   },
   // Google compiler error
   "Google compiler error" : function(onEnd) {
+    createBadFile();
+    exec(getConfig({test:false, runJslint:false}), function(error, stdout) {
+      a.throws(function() {
+        fs.statSync(DEST + "js.min.js");
+      });
+      
+      a.throws(function() {
+        fs.statSync(DEST + "js2.min.js");
+      });
+    
+      onEnd();
+    }); 
   },
 };
-
-//tests[tests.length-2](function() {});
 
 var keys = [];
 for (var p in tests) {
   keys.push(p);
 }
 
-console.log(sys.inspect(keys));
-
 (function execTest() {
   cleanUp();
   var key = keys.shift();
-  if (tests[key]) { 
-    tests[key](execTest);
+  if (key) {
+    console.log("Running " + key + "...");
+    if (tests[key]) { 
+      tests[key](execTest);
+    }
   }
 })();
