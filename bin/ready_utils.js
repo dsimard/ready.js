@@ -122,6 +122,12 @@ var r = {
         r.logger.warn("No files to process");
       }
     });
+  },
+  // If a file is excluded
+  isExcluded : function(file) {
+    if (typeof(r.config.exclude) == "string") { r.config.exclude = [r.config.exclude]; }
+    var filename = file.substring(file.lastIndexOf("/")+1);
+    return r.config.exclude.indexOf(filename) >= 0
   }
 }
 

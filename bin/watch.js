@@ -16,14 +16,16 @@ function showErrors(jslint) {
 
 function watchFiles() {
   util.forEachJs(function(file) {
-    r.watch(file, function(success, jslint) {
-      if (success) {
-        logger.log("JSLint on '" + file + "' : OK");
-      } else {
-        logger.log("JSLint error on '" + file + "'");
-        showErrors(jslint);
-      }
-    });
+    if (!util.isExcluded(file)) {
+      r.watch(file, function(success, jslint) {
+        if (success) {
+          logger.log("JSLint on '" + file + "' : OK");
+        } else {
+          logger.log("JSLint error on '" + file + "'");
+          showErrors(jslint);
+        }
+      });
+    }
   });
 }
   

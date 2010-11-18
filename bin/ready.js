@@ -25,15 +25,8 @@ function sortAggregates(a, b) {
   }         
 }
 
-// If a file is excluded
-function isExcluded(file) {
-  if (typeof(config.exclude) == "string") { config.exclude = [config.exclude]; }
-  var filename = file.substring(file.lastIndexOf("/")+1);
-  return config.exclude.indexOf(filename) >= 0
-}
-
 function compile(file, callback) {
-  if (config.runGCompiler && !isExcluded(file)) {
+  if (config.runGCompiler && !util.isExcluded(file)) {
     r.compile(file, function(success, code, data) {
       if (success) {
         callback(file, code);
@@ -131,7 +124,7 @@ if (process.argv[2]) {
     
     // Start the process
     util.forEachJs(function(file) {
-      if (config.runJslint && !isExcluded(file)) {
+      if (config.runJslint && !util.isExcluded(file)) {
         // Run jslint
         r.jslint(file, function(success, jslint) {
           if (success) {
