@@ -5,15 +5,6 @@ var r = require(__dirname + "/../ready"),
   util = require(__dirname + "/ready_utils"),
   logger = util.logger;
 
-function showErrors(jslint) {
-  jslint.errors.reverse().forEach(function(e) {
-    if (e) {
-      logger.log([e.line.toString(), ",", e.character.toString(), " : ",
-        (e.evidence || "").replace(/^\s*|\s*$/g, ""), " ===> ", e.reason].join(""));
-    }
-  });
-}
-
 function watchFiles() {
   util.forEachJs(function(file) {
     if (!util.isExcluded(file)) {
@@ -22,7 +13,7 @@ function watchFiles() {
           logger.log("JSLint on '" + file + "' : OK");
         } else {
           logger.log("JSLint error on '" + file + "'");
-          showErrors(jslint);
+          util.showJslintErrors(jslint);
         }
       });
     }

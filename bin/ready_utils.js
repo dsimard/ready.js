@@ -13,6 +13,7 @@ var r = {
     aggregateTo : "all.js", // If a string is specified, all the .js will be aggregated to this file in the config.dest      
     order : [], // The order of aggregation (example : we want jquery before jquery.ui) Must not specified every file.
     exclude : [], // Files that are not compiled but still aggregated
+    recursive : false, // Should look for javascript recursively
     test : false, // If it's running from test environment
     debug : false, // If in debug mode
   },
@@ -32,8 +33,8 @@ var r = {
       console.log(msg);
     },
     error : function(msg) {
-      process.exit(1);
       console.log("ERROR : " + msg);
+      process.exit(1);
     },
   },
   loadConfig : function(extConfig) {
@@ -100,18 +101,20 @@ var r = {
         var jsFiles = files.filter(function(f) {
           return f.match(/\.js$/i);
         });
-        
+
         // Add files to all files
         r.allJsFiles = r.allJsFiles.concat(jsFiles);
         
         // Check subfolders
-        files.forEach(function(f) {
-          fs.stat(f, function(err, stats) {
-            if (stats.isDirectory()) {
-              r.forEachJs(callback, f);
-            }
+        if (r.config.recursive) {
+          files.forEach(function(f) {
+            fs.stat(f, function(err, stats) {
+              if (stats.isDirectory()) {
+                r.forEachJs(callback, f);
+              }
+            });
           });
-        });
+        }
         
         // For each file, callback
         jsFiles.forEach(function(f, i) {
@@ -128,6 +131,14 @@ var r = {
     if (typeof(r.config.exclude) == "string") { r.config.exclude = [r.config.exclude]; }
     var filename = file.substring(file.lastIndexOf("/")+1);
     return r.config.exclude.indexOf(filename) >= 0
+  },
+  showJslintErrors : function (jslint) {
+    jslint.errors.reverse().forEach(function(e) {
+      if (e) {
+        r.logger.log([e.line.toString(), ",", e.character.toString(), " : ",
+          (e.evidence || "").replace(/^\s*|\s*$/g, ""), " ===> ", e.reason].join(""));
+      }
+    });
   }
 }
 

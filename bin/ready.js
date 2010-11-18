@@ -131,7 +131,8 @@ if (process.argv[2]) {
             logger.log("JSLINT success : " + file);
             compile(file, aggregate);
           } else {
-            logger.error("Error on jslint : " + sys.inspect(jslint));
+            logger.log("JSLINT error : " + file);
+            util.showJslintErrors(jslint);
           }
         });
       } else {
