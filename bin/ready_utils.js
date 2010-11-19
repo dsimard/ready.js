@@ -13,7 +13,7 @@ var r = {
     aggregateTo : "all.js", // If a string is specified, all the .js will be aggregated to this file in the config.dest      
     order : [], // The order of aggregation (example : we want jquery before jquery.ui) Must not specified every file.
     exclude : [], // Files that are not compiled but still aggregated
-    recursive : false, // Should look for javascript recursively
+    recursive : true, // Should look for javascript recursively
     test : false, // If it's running from test environment
     debug : false, // If in debug mode
   },
@@ -107,11 +107,19 @@ var r = {
         
         // Check subfolders
         if (r.config.recursive) {
-          files.forEach(function(f) {
-            fs.stat(f, function(err, stats) {
-              if (stats.isDirectory()) {
-                r.forEachJs(callback, f);
-              }
+          // Get the real path of the dest
+          fs.realpath(r.config.dest + "/", function(err, destPath) {
+            files.forEach(function(f) {
+              fs.stat(f, function(err, stats) {
+                if (stats.isDirectory()) {
+                  // Check that dest and this path are not the same
+                  fs.realpath(f + "/", function(err, currentPath) {
+                    if (currentPath != destPath) {
+                      r.forEachJs(callback, f);
+                    }
+                  });
+                }
+              });
             });
           });
         }

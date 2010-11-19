@@ -144,6 +144,15 @@ function exec(config, cb) {
   cp.exec(cmd, cb);
 }
 
+// Get code from all.js
+function getAggCode(config) {
+  if (config) {
+    return fs.readFileSync(config.dest + "/" + config.aggregateTo).toString();
+  } else {
+    return fs.readFileSync(DEST + ALL).toString();
+  }
+}
+
 // All tests to run
 var tests = {
   // Compile with google compiler
@@ -362,22 +371,46 @@ var tests = {
     }); 
   },
   "Recursive doesn't go into DEST directory" : function(onEnd) {
+    createSubdir();
     
+    var cfg = getConfig({recursive:true, dest:"./test/javascripts/minified/"});
+    
+    exec(cfg, function(error, stdout) {
+      a.ok(fs.statSync(cfg.dest + cfg.aggregateTo).isFile());
+  
+      // Recall to make sure it doesn't go in minified    
+      exec(cfg, function(error, stdout) {
+        var code = getAggCode(cfg);
+        a.ok(!code.match(/all\.js/));
+        
+        onEnd();
+      });
+    });
   }
 };
 
-var keys = [];
-for (var p in tests) {
-  keys.push(p);
-}
-
-(function execTest() {
-  cleanUp();
-  var key = keys.shift();
-  if (key) {
-    console.log("Running " + key + "...");
-    if (tests[key]) { 
-      tests[key](execTest);
-    }
+if (process.argv[2]) {
+  var t = process.argv[2];
+  if (tests[t]) {
+    cleanUp();
+    tests[t](cleanUp);
+  } else {
+    console.log("ERROR : '"+t+"' does not exist")
   }
-})();
+} else {
+  var keys = [];
+  for (var p in tests) {
+    keys.push(p);
+  }
+
+  (function execTest() {
+    cleanUp();
+    var key = keys.shift();
+    if (key) {
+      console.log("Running " + key + "...");
+      if (tests[key]) { 
+        tests[key](execTest);
+      }
+    }
+  })();
+}
