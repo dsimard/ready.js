@@ -133,6 +133,7 @@ if (process.argv[2]) {
           } else {
             logger.log("JSLINT error : " + file);
             util.showJslintErrors(jslint);
+            process.exit(1);
           }
         });
       } else {

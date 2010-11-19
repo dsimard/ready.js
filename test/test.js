@@ -122,6 +122,12 @@ function createAlphaFiles() {
   createFile("a.js");
 }
 
+// Create with a subdir
+function createSubdir() {
+  createTwoFiles();
+  createFile("subdir.js", "function subdir() {}", {subdir:"subdir"});
+}
+
 // Execute a ready.js
 function exec(config, cb) {
   if (typeof(config) == "function") {
@@ -304,10 +310,9 @@ var tests = {
   },
   // Subdirectories
   "Subdirectories" : function(onEnd) {
-    createTwoFiles();
-    createFile("subdir.js", "function subdir() {}", {subdir:"subdir"});
+    createSubdir();
     
-    exec(function(error, stdout) {
+    exec(getConfig({recursive:true}), function(error, stdout) {
       a.ok(fs.statSync(SRC + "subdir/subdir.js").isFile());
       var code = fs.readFileSync(DEST + ALL).toString();
       
@@ -356,6 +361,9 @@ var tests = {
       onEnd();
     }); 
   },
+  "Recursive doesn't go into DEST directory" : function(onEnd) {
+    
+  }
 };
 
 var keys = [];
