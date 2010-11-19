@@ -373,7 +373,7 @@ var tests = {
   "Recursive doesn't go into DEST directory" : function(onEnd) {
     createSubdir();
     
-    var cfg = getConfig({recursive:true, dest:"./test/javascripts/minified/"});
+    var cfg = getConfig({dest:"./test/javascripts/minified/"});
     
     exec(cfg, function(error, stdout) {
       a.ok(fs.statSync(cfg.dest + cfg.aggregateTo).isFile());
