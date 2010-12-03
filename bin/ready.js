@@ -100,7 +100,8 @@ function aggregateAll() {
         b = createCode(b);
         return [a, b].join("\n");
       });
-  
+    if (typeof(code) !== "string") { code = createCode(code); }
+
     // Write aggregate file
     fs.mkdir(config.dest, 0755, function(err) {
       var filepath = config.dest + "/" + config.aggregateTo;
