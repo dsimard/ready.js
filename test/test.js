@@ -386,7 +386,15 @@ var tests = {
         onEnd();
       });
     });
-  }
+  },
+  "If there's only one file" : function(onEnd) {
+    createFile("onefile.js", "function onefile() {}");
+    exec(function(error, stdout) {
+      var code = getAggCode();
+      a.ok(code.match(/onefile\(\)/));
+      onEnd();
+    });
+  },
 };
 
 if (process.argv[2]) {
