@@ -2,9 +2,9 @@
 
 ## What does it do?
 1. Check if your javascript are valid with [jslint](http://www.jslint.com/).
-2. Minify your javascript with [Closure Compiler](http://code.google.com/closure/compiler/) (optimize and minify your code).
+2. Minify your javascript with [Closure Compiler](http://code.google.com/closure/compiler/) and your CSS or javascript with [YUI Compressor](http://developer.yahoo.com/yui/compressor/) (optimize and minify your code).
 3. Watch your javascript files for jslint while you're coding.
-4. Create an aggregated file of all your javascripts.
+4. Create an aggregated file of all your javascripts / CSS.
 
 ## Prerequesites 
 

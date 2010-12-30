@@ -7,6 +7,7 @@ var r = require(__dirname + "/../ready"),
   logger = util.logger;
 
 var aggregates = [];
+var aggregatesCss = [];
 
 function sortAggregates(a, b) {
   a = a.filename;
@@ -25,9 +26,26 @@ function sortAggregates(a, b) {
   }         
 }
 
-function compile(file, callback) {
-  if (config.runGCompiler && !util.isExcluded(file)) {
-    r.compile(file, function(success, code, data) {
+function sortAggregatesCss(a, b) {
+  a = a.filename;
+  b = b.filename;
+  
+  var posA = config.orderCss.indexOf(a);
+  if (posA < 0) { posA = Number.MAX_VALUE };
+  
+  var posB = config.orderCss.indexOf(b);
+  if (posB < 0) { posB = Number.MAX_VALUE };
+  
+  if (posA == posB) {
+    return (a < b) ? -1 : ((a > b) ? 1 : 0);
+  } else {
+    return posA - posB;
+  }         
+}
+
+function compile(file, callback, type) {
+  var type = type || 'js';
+  var compileCallback = function(success, code, data) {
       if (success) {
         callback(file, code);
       } else {
@@ -37,16 +55,32 @@ function compile(file, callback) {
           console.log("Error compiling '" + file + "' : " + sys.inspect(data));
         }
       }
-    });
+  }
+  if ( type == 'js' && config.compileJs && (config.runYUICompiler || config.runGCompiler) && !util.isExcluded(file) ) {
+	logger.log('Compiling JS: ' + file);
+	// prefer YUI as it is local and has no usage limits
+	if(config.runYUICompiler){
+	  logger.log('...using YUI');
+	  r.compileYUI(file, compileCallback);
+	}else{
+	  logger.log('...using remote Google Compiler')
+      r.compile(file, compileCallback);
+	}
+  } else if ( type == 'css' && config.compileCss && !util.isExcludedCss(file) ) {
+	logger.log('Compiling CSS: ' + file);
+	r.compileYUI(file, compileCallback, 'css');
   } else {
-    // Get the code directly from the file
-    fs.readFile(file, function(err, text) {
-      if (!err) {
-        callback(file, text.toString());
-      } else {
-        r.log("Error reading file : " + file);
-      }
-    });
+	if( (type == 'css' && config.compileCss) || (type == 'js' && config.compileJs) ){
+		logger.log('Skipping compilation: ' + file)
+	    // Get the code directly from the file
+	    fs.readFile(file, function(err, text) {
+	      if (!err) {
+	        callback(file, text.toString());
+	      } else {
+	        r.log("Error reading file : " + file);
+	      }
+	    });
+	}
   }
 }
 
@@ -70,6 +104,40 @@ function aggregate(file, code) {
             if (err) {
               logger.error("Can't write compiled file : " + minfilename);
             }
+            end();
+            fs.close(fd);
+          });
+        } else {
+          logger.error("Can't save compiled file : " + minfilename);
+          end();
+        }
+      });
+    });
+  } else {
+    end();
+  }
+}
+
+function aggregateCss(file, code) {
+  var filename = file.match(/[^\/]+$/g)[0];
+  var minfilename = filename.replace(/\.css$/i, "."+config.compiledExtension+".css");
+  
+  aggregatesCss.push({filename : filename, code : code});
+  
+  var end = function() {
+    if (util.allCssFiles.length == aggregatesCss.length) { aggregateAll('css'); }
+  }  
+
+  // Save the file to dest
+  if (config.keepCompiled) {
+    // Create dest
+    fs.mkdir(config.destCss, 0755, function(err) {
+      fs.open(config.destCss + "/" + minfilename, "w+", 0755, function(err, fd) {
+        if (!err) {
+          fs.write(fd, code, null, null, function(err, written) {
+            if (err) {
+              logger.error("Can't write compiled file : " + minfilename);
+            }
 
             end();
             fs.close(fd);
@@ -86,28 +154,51 @@ function aggregate(file, code) {
 }
 
 // Aggregate all
-function aggregateAll() {
-  if (config.aggregateTo.length > 0) {
+function aggregateAll(type) {
+  var type = type || 'js',
+  aggTo,
+  aggs,
+  dest,
+  sort;
+  
+  if(type == 'js'){
+  	aggTo = config.aggregateTo;
+    aggs = aggregates;
+    dest = config.dest;
+    comment = config.aggregatedHeadingComment;
+    sort = sortAggregates;
+  }else{
+	aggTo = config.aggregateToCss;
+    aggs = aggregatesCss;
+    dest = config.destCss;
+    comment = config.aggregatedHeadingCommentCss;
+	sort = sortAggregatesCss;
+  }
+  
+  if (aggTo.length > 0) {
     var createCode = function(agg) {
       return [["/*", agg.filename, "*/"].join(" "), agg.code].join("\n");
     }
-
+	
     // Sort by the order
-    aggregates = aggregates.sort(sortAggregates);
+    aggs = aggs.sort(sort);
     var code = 
-      aggregates.reduce(function(a, b) {
+      aggs.reduce(function(a, b) {
         if (typeof(a) !== "string") { a = createCode(a); };
         b = createCode(b);
         return [a, b].join("\n");
       });
     if (typeof(code) !== "string") { code = createCode(code); }
 
-    // Write aggregate file
-    fs.mkdir(config.dest, 0755, function(err) {
-      var filepath = config.dest + "/" + config.aggregateTo;
+    // Write aggregate file	
+    fs.mkdir(dest, 0755, function(err) {
+      var filepath = dest + "/" + aggTo;
+	  logger.log('');
+	  logger.log('Aggregating ' + type.toUpperCase() + ' to: ' + filepath);
+	  logger.log('');
       fs.open(filepath, "w+", 0755, function(err, fd) {
         if (!err) {
-          fs.write(fd, code, null, null, function(err) {
+          fs.write(fd, createCode({ code: code, filename: comment}), null, null, function(err) {
             fs.close(fd);
           });
         } else {
@@ -115,6 +206,7 @@ function aggregateAll() {
         }
       });
     });
+
   }
 }
 
@@ -123,7 +215,7 @@ if (process.argv[2]) {
   var startProcessing = function() {
     r.test = config.test; // If in test
     
-    // Start the process
+    // Start the process for js
     util.forEachJs(function(file) {
       if (config.runJslint && !util.isExcluded(file)) {
         // Run jslint
@@ -140,6 +232,11 @@ if (process.argv[2]) {
       } else {
         compile(file, aggregate);
       }
+    });
+	
+	// Start the process for css
+    util.forEachCss(function(file) {
+      compile(file, aggregateCss, 'css');
     });
   };
 
