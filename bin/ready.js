@@ -56,31 +56,40 @@ function compile(file, callback, type) {
         }
       }
   }
-  if ( type == 'js' && config.compileJs && (config.runYUICompiler || config.runGCompiler) && !util.isExcluded(file) ) {
-	logger.log('Compiling JS: ' + file);
-	// prefer YUI as it is local and has no usage limits
-	if(config.runYUICompiler){
-	  logger.log('...using YUI');
-	  r.compileYUI(file, compileCallback);
-	}else{
-	  logger.log('...using remote Google Compiler')
-      r.compile(file, compileCallback);
-	}
-  } else if ( type == 'css' && config.compileCss && !util.isExcludedCss(file) ) {
-	logger.log('Compiling CSS: ' + file);
-	r.compileYUI(file, compileCallback, 'css');
-  } else {
-	if( (type == 'css' && config.compileCss) || (type == 'js' && config.compileJs) ){
-		logger.log('Skipping compilation: ' + file)
-	    // Get the code directly from the file
-	    fs.readFile(file, function(err, text) {
-	      if (!err) {
-	        callback(file, text.toString());
-	      } else {
-	        r.log("Error reading file : " + file);
-	      }
-	    });
-	}
+  
+  if(!util.isIgnored(file, type)){
+	  if ( type == 'js' && config.compileJs && !util.isExcluded(file) ) {
+		logger.log('Compiling JS: ' + file);
+		// prefer YUI as it is local and has no usage limits
+		if(config.runGCompiler){
+		  logger.log('...using remote Google Compiler')
+	      r.compile(file, compileCallback);
+		}else{
+		  logger.log('...using YUI');
+		  r.compileYUI(file, compileCallback);
+		}
+		logger.log('');
+	  } else if ( type == 'css' && config.compileCss && !util.isExcluded(file, 'css')  ) {
+		logger.log('Compiling CSS: ' + file);
+		logger.log('');
+		r.compileYUI(file, compileCallback, 'css');
+	  } else {
+		if( (type == 'css' && config.compileCss ) || (type == 'js' && config.compileJs ) ){
+			logger.log('Skipping compression: ' + file)
+		    // Get the code directly from the file
+		    fs.readFile(file, function(err, text) {
+		      if (!err) {
+		        callback(file, text.toString());
+		      } else {
+		        r.log("Error reading file : " + file);
+		      }
+		    });
+			logger.log('');
+		}
+	  }
+  }else{
+	  logger.log('Ignoring: ' + file);
+	  logger.log('');
   }
 }
 
@@ -217,11 +226,12 @@ if (process.argv[2]) {
     
     // Start the process for js
     util.forEachJs(function(file) {
-      if (config.runJslint && !util.isExcluded(file)) {
+      if (config.runJslint && !util.isExcluded(file) && !util.isIgnored(file)) {
         // Run jslint
         r.jslint(file, function(success, jslint) {
           if (success) {
             logger.log("JSLINT success : " + file);
+			logger.log('');
             compile(file, aggregate);
           } else {
             logger.log("JSLINT error : " + file);
@@ -230,13 +240,13 @@ if (process.argv[2]) {
           }
         });
       } else {
-        compile(file, aggregate);
+       compile(file, aggregate);
       }
     });
 	
 	// Start the process for css
     util.forEachCss(function(file) {
-      compile(file, aggregateCss, 'css');
+	  compile(file, aggregateCss, 'css');
     });
   };
 

@@ -7,7 +7,7 @@ var r = require(__dirname + "/../ready"),
 
 function watchFiles() {
   util.forEachJs(function(file) {
-    if (!util.isExcluded(file)) {
+    if (!util.isExcluded(file) && !util.isIgnored(file)) {
       r.watch(file, function(success, jslint) {
         if (success) {
           logger.log("JSLint on '" + file + "' : OK");
@@ -15,6 +15,7 @@ function watchFiles() {
           logger.log("JSLint error on '" + file + "'");
           util.showJslintErrors(jslint);
         }
+		logger.log('');
       });
     }
   });

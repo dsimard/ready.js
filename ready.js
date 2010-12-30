@@ -6,7 +6,8 @@ var sys = require("sys"),
 	util = require("util"),
 	exec = cp.exec,
 	yui = __dirname + "/vendor/yuicompressor/yuicompressor-2.4.2.jar",
-	logger = require(__dirname + "/bin/ready_utils").logger;
+	r_util = require(__dirname + "/bin/ready_utils"),
+	logger = r_util.logger;
 
 var r = {
   test : false, // If in test
@@ -92,7 +93,7 @@ var r = {
   // Check with jslint
   jslint : function(fileOrCode, callback) {
     r.getCode(fileOrCode, function(code) {
-      var success = jslint(code);
+      var success = jslint(code, r_util.jsLintOptions);
       callback(success, jslint);
     });
   },

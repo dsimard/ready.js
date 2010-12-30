@@ -13,8 +13,7 @@ var r = {
 	destCss: "./compiled_css",
     compiledExtension : "min", // extension of the minified file
     runJslint : true, // if should run jsLint
-    runGCompiler : true, // if should run GoogleCompiler
-	runYUICompiler : false, // if should run YUICompressor
+    runGCompiler : false, // if should run GoogleCompiler rather than YUI
     keepCompiled : false, // if should keep the minified files
     aggregateTo : "all.js", // If a string is specified, all the .js will be aggregated to this file in the config.dest 
     aggregateToCss : "all.css",
@@ -22,12 +21,44 @@ var r = {
 	orderCss : [],
     exclude : [], // Files that are not compiled but still aggregated
 	excludeCss : [],
+	ignore : [], // Files that are not compiled or aggregated...completely ignored
+	ignoreCss : [],
     recursive : true, // Should look for javascript recursively
 	recursiveCss : true,
     test : false, // If it's running from test environment
     debug : false, // If in debug mode
 	aggregatedHeadingComment: "Aggregated JS",
-	aggregatedHeadingCommentCss: "Aggregated CSS"
+	aggregatedHeadingCommentCss: "Aggregated CSS",
+	jsLintOptions : {
+        adsafe     : false, // if ADsafe should be enforced
+        bitwise    : false, // if bitwise operators should not be allowed
+        browser    : false, // if the standard browser globals should be predefined
+        cap        : false, // if upper case HTML should be allowed
+        css        : false, // if CSS workarounds should be tolerated
+        debug      : false, // if debugger statements should be allowed
+        devel      : false, // if logging should be allowed (console, alert, etc.)
+        eqeqeq     : false, // if === should be required
+        evil       : false, // if eval should be allowed
+        forin      : false, // if for in statements must filter
+        fragment   : false, // if HTML fragments should be allowed
+        immed      : false, // if immediate invocations must be wrapped in parens
+        laxbreak   : false, // if line breaks should not be checked
+        newcap     : false, // if constructor names must be capitalized
+        nomen      : false, // if names should be checked
+        on         : false, // if HTML event handlers should be allowed
+        onevar     : false, // if only one var statement per function should be allowed
+        passfail   : false, // if the scan should stop on first error
+        plusplus   : false, // if increment/decrement should not be allowed
+        regexp     : false, // if the . should not be allowed in regexp literals
+        rhino      : false, // if the Rhino environment globals should be predefined
+        undef      : false, // if variables should be declared before used
+        safe       : false, // if use of some browser features should be restricted
+        sidebar    : false, // if the System object should be predefined
+        strict     : false, // require the "use strict"; pragma
+        sub        : false, // if all forms of subscript notation are tolerated
+        white      : false, // if strict whitespace rules apply
+        widget     : false  // if the Yahoo Widgets globals should be predefined
+    }
   },
   logger : {
     debug : function(msg) {
@@ -58,7 +89,7 @@ var r = {
     }
 
     // Minified extension must be letters or numbers
-    if ( ( ( r.config.compileJs && (r.config.runGCompiler || r.config.runYUICompiler) ) || r.config.compileCss ) && !r.config.compiledExtension.match(/^[0-9a-zA-Z]+$/)) {
+    if ( ( r.config.compileJs || r.config.compileCss ) && !r.config.compiledExtension.match(/^[0-9a-zA-Z]+$/)) {
       r.logger.log("config.compiledExtension is not valid. Using 'min' as default value.");
       r.config.compiledExtension = "min";
     }
@@ -120,12 +151,16 @@ var r = {
         })
       
         // Only process js files
-        var jsFiles = files.filter(function(f) {
+		var allJsFiles = files.filter(function(f) {
           return f.match(/\.js$/i);
+        });
+		// Remove ignored from those to check against for aggregation
+        var jsFilesToBeAggregated = allJsFiles.filter(function(f) {
+          return !r.isIgnored(f);
         });
 
         // Add files to all files
-        r.allJsFiles = r.allJsFiles.concat(jsFiles);
+        r.allJsFiles = r.allJsFiles.concat(jsFilesToBeAggregated);
         
         // Check subfolders
         if (r.config.recursive) {
@@ -147,7 +182,7 @@ var r = {
         }
         
         // For each file, callback
-        jsFiles.forEach(function(f, i) {
+        allJsFiles.forEach(function(f, i) {
           callback(f);
         });
         
@@ -162,20 +197,25 @@ var r = {
     dir = dir || r.config.srcCss;
 
     fs.readdir(dir, function(err, files) {
+	  var allfiles = files;
       if (!err) {
         // Get real path
         files = files.map(function(f) {
           return fs.realpathSync(dir + "/" + f);
         })
 
-        // Only process js files
-        var cssFiles = files.filter(function(f) {
+        // Only process css files
+        var allCssFiles = files.filter(function(f) {
           return f.match(/\.css$/i);
+        });
+		// Remove ignored from those to check against for aggregation
+		var cssFilesToBeAggregated = allCssFiles.filter(function(f) {
+          return !r.isIgnored(f, 'css');
         });
 
         // Add files to all files
-        r.allCssFiles = r.allCssFiles.concat(cssFiles);
-
+        r.allCssFiles = r.allCssFiles.concat(cssFilesToBeAggregated);
+		
         // Check subfolders
         if (r.config.recursiveCss) {
           // Get the real path of the dest
@@ -196,7 +236,7 @@ var r = {
         }
 
         // For each file, callback
-        cssFiles.forEach(function(f, i) {
+        allCssFiles.forEach(function(f, i) {
           callback(f);
         });
 
@@ -207,15 +247,18 @@ var r = {
   },
 
   // If a file is excluded
-  isExcluded : function(file) {
-    if (typeof(r.config.exclude) == "string") { r.config.exclude = [r.config.exclude]; }
-    var filename = file.substring(file.lastIndexOf("/")+1);
-    return r.config.exclude.indexOf(filename) >= 0
+  isExcluded : function(file, type) {
+	var excluded = (type && type == 'css') ? r.config.excludeCss : r.config.exclude,
+	filename = file.substring(file.lastIndexOf("/")+1);
+    if (typeof(excluded) == "string") { excluded = [excluded]; }
+    return excluded.indexOf(filename) >= 0
   },
-  isExcludedCss : function(file) {
-    if (typeof(r.config.excludeCss) == "string") { r.config.excludeCss = [r.config.excludeCss]; }
-    var filename = file.substring(file.lastIndexOf("/")+1);
-    return r.config.excludeCss.indexOf(filename) >= 0
+  // If a file is ignored
+  isIgnored : function(file, type) {
+	var ignored = (type == 'css') ? r.config.ignoreCss : r.config.ignore,
+	filename = file.substring(file.lastIndexOf("/")+1);
+    if (typeof(ignored) == "string") { ignored = [ignored]; }
+    return ignored.indexOf(filename) >= 0
   },
   showJslintErrors : function (jslint) {
     jslint.errors.reverse().forEach(function(e) {
