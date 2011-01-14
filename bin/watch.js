@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-var r = require(__dirname + "/../ready"),
+var r = require("../lib/ready"),
   fs = require("fs"),
   sys = require("sys"),
-  util = require(__dirname + "/ready_utils"),
+  util = require("../lib/utils"),
   logger = util.logger;
 
 function watchFiles() {
