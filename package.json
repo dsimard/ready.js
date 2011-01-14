@@ -11,7 +11,7 @@
   },
   dependencies : {
     'jslint' : '0.0.3',
-    'restler' : '1.0.0'
+    'restler-aaronblohowiak' : '0.0.2'
   },
   engines : {'node' : '>=0.3.0'},
 }

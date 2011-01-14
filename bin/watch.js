@@ -22,5 +22,7 @@ function watchFiles() {
   
 if (process.argv[2]) {
   util.loadConfigFromArg(watchFiles);
+} else {
+  logger.error("No configuration file specified");
 }
 
