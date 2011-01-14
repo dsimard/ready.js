@@ -1,8 +1,9 @@
+#!/usr/bin/env node
 var sys = require("sys"),
   fs = require("fs"),
   cp = require("child_process");
   a = require("assert"),
-  r = require("../ready"),
+  r = require("../lib/ready"),
   ins = sys.inspect;
   
   
