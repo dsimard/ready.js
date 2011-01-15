@@ -12,19 +12,22 @@ Install [git](http://git-scm.com/) and [node.js](http://nodejs.org/#download).
 
 ## How to install in your project (for git)
 
-1. run `git submodule add git://github.com/dsimard/ready.js.git ready.js`
-2. run `cd ready.js && git submodule init && git submodule update && cd ..`
+1. run `npm install ready`
 3. Create config file in *your_project/ready.conf.js* :
 
         { src : "./javascripts", dest : "./minified" }
       
-4. run `echo 'node ready.js/bin/ready.js ready.conf.js' >> .git/hooks/pre-commit`
+4. run `echo 'readyjs ready.conf.js' >> .git/hooks/pre-commit`
 
 Then, **every time you commit**, ready.js will be run.
 
 ## How to watch your javascript files for errors with jslint
 
-run `node ready.js/bin/ready.watch.js ready.conf.js`
+run `watchjs ready.conf.js`
+
+## How to use ready.js
+By installing with npm, you can call `readyjs` and `watchjs` like this :
+    readyjs ready.conf.js
 
 ## Want to know more?
 
