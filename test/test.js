@@ -195,6 +195,7 @@ var tests = {
     createTwoFiles();
 
     exec(function(error, stdout, stderr) {  
+      console.log(stdout);
       // Check that minified files are not there
       a.throws(function() {
         fs.statSync(DEST + "js.min.js");
@@ -419,6 +420,7 @@ if (process.argv[2]) {
       console.log("Running " + key + "...");
       if (tests[key]) { 
         tests[key](execTest);
+        console.log("----------");
       }
     }
   })();
