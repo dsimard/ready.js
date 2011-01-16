@@ -157,7 +157,7 @@ function getAggCode(config) {
 // All tests to run
 var tests = {
   // Compile with google compiler
-  "Compile with google compiler" : function(onEnd) {
+  /*"Compile with google compiler" : function(onEnd) {
     createAlphaFiles();
     
     r.compile("function load() { var a = 1; }", function(success, compiledCode, data) {
@@ -173,7 +173,7 @@ var tests = {
         });
       });      
     });
-  },
+  },*/
   // jslint
   "jslint" : function(onEnd) {
     r.jslint("function load() {}", function(success, jslint) {
