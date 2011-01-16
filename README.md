@@ -6,13 +6,11 @@
 3. Watch your javascript files for jslint while you're coding.
 4. Create an aggregated file of all your javascripts.
 
-## Prerequesites 
+## Installation
 
-Install [git](http://git-scm.com/) and [node.js](http://nodejs.org/#download).
+run `npm install ready`
 
-## How to install in your project (for git)
-
-1. run `npm install ready`
+## Configuration
 3. Create config file in *your_project/ready.conf.js* :
 
         { src : "./javascripts", dest : "./minified" }
