@@ -8,7 +8,7 @@
 
 ## Installation
 
-run `npm install ready`
+run `npm install ready.js`
 
 ## Configuration
 1. run `npm install ready.js`
