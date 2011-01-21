@@ -20,6 +20,12 @@ run `npm install ready`
 
 Then, **every time you commit**, ready.js will be run.
 
+## Install offline Google Closure Compiler
+If you want to use your own [compiler](http://code.google.com/closure/compiler/) :
+
+1. [Download it](http://closure-compiler.googlecode.com/files/compiler-latest.zip)
+2. run `readyjs -installcompiler path/to/compiler.jar`
+
 ## How to watch your javascript files for errors with jslint
 
 run `watchjs ready.conf.js`
