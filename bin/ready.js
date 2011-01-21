@@ -3,7 +3,9 @@ var r = require("../lib/ready"),
   fs = require("fs"),
   sys = require("sys"),
   util = require("../lib/utils"),
+  argv = require('optimist').argv,
   config = util.config,
+  inspect = require("util").inspect,
   logger = util.logger;
 
 var aggregates = [];
@@ -100,6 +102,7 @@ function aggregateAll() {
         b = createCode(b);
         return [a, b].join("\n");
       });
+      
     if (typeof(code) !== "string") { code = createCode(code); }
 
     // Write aggregate file
@@ -119,7 +122,7 @@ function aggregateAll() {
 }
 
 // Load the config file
-if (process.argv[2]) {
+if (argv._.length == 1) {
   var startProcessing = function() {
     r.test = config.test; // If in test
     
@@ -144,7 +147,9 @@ if (process.argv[2]) {
   };
 
   util.loadConfigFromArg(startProcessing);
-  
+// install compiler.jar
+} else if (argv.installcompiler || argv.i) {
+  util.installCompiler(argv.installcompiler || argv.i);
 } else {
   logger.error("No configuration file specified");
 }

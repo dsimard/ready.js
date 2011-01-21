@@ -157,7 +157,7 @@ function getAggCode(config) {
 // All tests to run
 var tests = {
   // Compile with google compiler
-  "Compile with google compiler" : function(onEnd) {
+  /*"Compile with google compiler" : function(onEnd) {
     createAlphaFiles();
     
     r.compile("function load() { var a = 1; }", function(success, compiledCode, data) {
@@ -173,7 +173,7 @@ var tests = {
         });
       });      
     });
-  },
+  },*/
   // jslint
   "jslint" : function(onEnd) {
     r.jslint("function load() {}", function(success, jslint) {
@@ -195,6 +195,7 @@ var tests = {
     createTwoFiles();
 
     exec(function(error, stdout, stderr) {  
+      console.log(stdout);
       // Check that minified files are not there
       a.throws(function() {
         fs.statSync(DEST + "js.min.js");
@@ -419,6 +420,7 @@ if (process.argv[2]) {
       console.log("Running " + key + "...");
       if (tests[key]) { 
         tests[key](execTest);
+        console.log("----------");
       }
     }
   })();
