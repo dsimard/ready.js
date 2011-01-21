@@ -151,6 +151,9 @@ if (argv._.length == 1) {
 } else if (argv.installcompiler || argv.i) {
   util.installCompiler(argv.installcompiler || argv.i);
 } else {
-  logger.error("No configuration file specified");
+  var msg = ["\nusage : readyjs [path/to/config]",
+    "\n-i, --installcompiler path/to/compiler.jar : install google closure compiler for offline compilation",
+    "\n \n"].join("\n");
+  logger.log(msg)
 }
 
