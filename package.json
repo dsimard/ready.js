@@ -1,6 +1,6 @@
 {
-  name : 'ready',
-  version : '1.0.0',
+  name : 'ready.js',
+  version : '1.1.0',
   description : 'continuous javascript integration using JSLint, Google Compiler and Node.js',
   keywords : ['continuous integration', 'jslint', 'javascript', 'minifier', 'compiler'],
   author : 'dsimard <dsimard@azanka.ca> (http://github.com/dsimard)',
@@ -11,7 +11,8 @@
   },
   dependencies : {
     'readyjslint' : '0.0.4',
-    'restler-aaronblohowiak' : '0.0.2'
+    'restler-aaronblohowiak' : '0.0.2',
+    'optimist' : '0.1.3'
   },
   engines : {'node' : '>=0.3.0'},
 }

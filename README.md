@@ -12,7 +12,7 @@ Install [git](http://git-scm.com/) and [node.js](http://nodejs.org/#download).
 
 ## How to install in your project (for git)
 
-1. run `npm install ready`
+1. run `npm install ready.js`
 3. Create config file in *your_project/ready.conf.js* :
 
         { src : "./javascripts", dest : "./minified" }
