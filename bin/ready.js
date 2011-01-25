@@ -121,39 +121,44 @@ function aggregateAll() {
   }
 }
 
-// Load the config file
-if (argv._.length == 1) {
-  var startProcessing = function() {
-    r.test = config.test; // If in test
-    
-    // Start the process
-    util.forEachJs(function(file) {
-      if (config.runJslint && !util.isExcluded(file)) {
-        // Run jslint
-        r.jslint(file, function(success, jslint) {
-          if (success) {
-            logger.log("JSLINT success : " + file);
-            compile(file, aggregate);
-          } else {
-            logger.log("JSLINT error : " + file);
-            util.showJslintErrors(jslint);
-            process.exit(1);
-          }
-        });
-      } else {
-        compile(file, aggregate);
-      }
-    });
-  };
+function startProcessing() {
+  r.test = config.test; // If in test
+  
+  // Start the process
+  util.forEachJs(function(file) {
+    if (config.runJslint && !util.isExcluded(file)) {
+      // Run jslint
+      r.jslint(file, function(success, jslint) {
+        if (success) {
+          logger.log("JSLINT success : " + file);
+          compile(file, aggregate);
+        } else {
+          logger.log("JSLINT error : " + file);
+          util.showJslintErrors(jslint);
+          process.exit(1);
+        }
+      });
+    } else {
+      compile(file, aggregate);
+    }
+  });
+}
 
-  util.loadConfigFromArg(startProcessing);
-// install compiler.jar
-} else if (argv.installcompiler || argv.i) {
-  util.installCompiler(argv.installcompiler || argv.i);
-} else {
-  var msg = ["\nusage : readyjs [path/to/config]",
-    "\n-i, --installcompiler path/to/compiler.jar : install google closure compiler for offline compilation",
-    "\n \n"].join("\n");
+// If no arg, show usage
+if (process.argv.length == 2) {
+  var msg = ["\nusage : readyjs [path/to/config] - see : http://j.mp/readyjsconfig",
+    "-i, --installcompiler path/to/compiler.jar : install google closure compiler for offline compilation",
+    "-s, --src path/to/js : the path of the source of javascript files",
+    "-d, --dest path/to/dest : the destination of the compiled javascript files",
+    "\n"].join("\n \n");
   logger.log(msg)
+} else if (argv._.length == 1) {
+  // Load the config file
+  util.loadConfigFromArg(argv, startProcessing);
+} else if (argv.installcompiler || argv.i) {
+  // install compiler.jar
+  util.installCompiler(argv.installcompiler || argv.i);
+} else  {
+  
 }
 

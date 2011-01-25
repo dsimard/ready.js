@@ -130,9 +130,10 @@ function createSubdir() {
 }
 
 // Execute a ready.js
-function exec(config, cb) {
+function exec(config, callback, argv) {
   if (typeof(config) == "function") {
-    cb = config;
+    argv = callback;
+    callback = config;
     config = getConfig();
   }
   
@@ -140,9 +141,9 @@ function exec(config, cb) {
     config = "'" + JSON.stringify(config) + "'";
   }
   
-  var cmd = ["node bin/ready.js ", config].join(" ").toString();
+  var cmd = ["node bin/ready.js ", config, argv].join(" ").toString();
   console.log("EXEC : " + cmd);
-  cp.exec(cmd, cb);
+  cp.exec(cmd, callback);
 }
 
 // Get code from all.js
@@ -397,6 +398,30 @@ var tests = {
       onEnd();
     });
   },
+  "Override defaults" : function(onEnd) {
+    createTwoFiles();
+    var cfg = getConfig({src:'void', dest:'void'});
+    exec(cfg, function(error, stdout) {
+      console.log(stdout);
+      // Check that minified files are not there
+      a.throws(function() {
+        fs.statSync(DEST + "js.min.js");
+      });
+      
+      a.throws(function() {
+        fs.statSync(DEST + "js2.min.js");
+      });
+      
+      stat = fs.statSync(DEST + ALL, "minified exists");
+      a.ok(stat.isFile());
+      
+      // Check that aggregate has no duplicate
+      var code = fs.readFileSync(DEST + ALL).toString();
+      a.equal(code.match(/\sjs\.js\s/).length, 1);
+      
+      onEnd();
+    }, "--src " + SRC + " -d " + DEST);    
+  }
 };
 
 if (process.argv[2]) {
