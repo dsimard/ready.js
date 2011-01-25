@@ -195,8 +195,7 @@ var tests = {
   "Default config" : function(onEnd) {
     createTwoFiles();
 
-    exec(function(error, stdout, stderr) {  
-      console.log(stdout);
+    exec(function(error, stdout, stderr) {
       // Check that minified files are not there
       a.throws(function() {
         fs.statSync(DEST + "js.min.js");
