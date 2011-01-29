@@ -159,6 +159,6 @@ if (process.argv.length == 2) {
   // install compiler.jar
   util.installCompiler(argv.installcompiler || argv.i);
 } else  {
-  
+  util.loadConfigFromArg(argv, startProcessing);
 }
 

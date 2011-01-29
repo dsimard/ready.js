@@ -4,7 +4,7 @@ var sys = require("sys"),
   cp = require("child_process");
   a = require("assert"),
   r = require("../lib/ready"),
-  ins = sys.inspect;
+  inspect = sys.inspect;
   
   
 const SRC = "./test/javascripts/";
@@ -130,15 +130,22 @@ function createSubdir() {
 }
 
 // Execute a ready.js
-function exec(config, callback, argv) {
-  if (typeof(config) == "function") {
-    argv = callback;
-    callback = config;
-    config = getConfig();
-  }
+function execNoConfig(argv, callback) {
+  return execArgv(null, argv, callback);
+}
+
+function exec(config, callback) {
+  config = config || getConfig();
+  return execArgv(config, null, callback);
+}
+
+function execArgv(config, argv, callback) {
+  argv = argv || "";
   
-  if (typeof(config) != "string") {
+ if (config && typeof(config) != "string") {
     config = "'" + JSON.stringify(config) + "'";
+  } else {
+    config = "";
   }
   
   var cmd = ["node bin/ready.js ", config, argv].join(" ").toString();
@@ -195,7 +202,7 @@ var tests = {
   "Default config" : function(onEnd) {
     createTwoFiles();
 
-    exec(function(error, stdout, stderr) {
+    exec(null, function(error, stdout, stderr) {
       // Check that minified files are not there
       a.throws(function() {
         fs.statSync(DEST + "js.min.js");
@@ -249,7 +256,7 @@ var tests = {
   "JSLint doesn't pass" : function(onEnd) {
     createBadFile();
     
-    exec(function(error, stdout, stderr) {
+    exec(null, function(error, stdout, stderr) {
       a.notEqual(error, null);
       
       onEnd();
@@ -288,7 +295,7 @@ var tests = {
   // Test alphabetic order
   "Test alphabetic order" : function(onEnd) {
     createAlphaFiles();
-    exec(function(error, stdout) {
+    exec(null, function(error, stdout) {
       var code = fs.readFileSync(DEST + ALL).toString();
       var pos = [];
       pos.push(code.match(/a\.js/).index);
@@ -344,7 +351,7 @@ var tests = {
     }
     
     createTwoFiles();
-    exec(function(error, stdout) {
+    exec(null, function(error, stdout) {
       a.throws(function() {
         fs.statSync(DEST + "js.min.js");
       });
@@ -391,7 +398,7 @@ var tests = {
   },
   "If there's only one file" : function(onEnd) {
     createFile("onefile.js", "function onefile() {}");
-    exec(function(error, stdout) {
+    exec(null, function(error, stdout) {
       var code = getAggCode();
       a.ok(code.match(/onefile\(\)/));
       onEnd();
@@ -400,7 +407,7 @@ var tests = {
   "Override defaults" : function(onEnd) {
     createTwoFiles();
     var cfg = getConfig({src:'void', dest:'void'});
-    exec(cfg, function(error, stdout) {
+    execArgv(cfg, "--src " + SRC + " -d " + DEST, function(error, stdout) {
       // Check that minified files are not there
       a.throws(function() {
         fs.statSync(DEST + "js.min.js");
@@ -416,14 +423,13 @@ var tests = {
       // Check that aggregate has no duplicate
       var code = fs.readFileSync(DEST + ALL).toString();
       a.equal(code.match(/\sjs\.js\s/).length, 1);
-      
       onEnd();
-    }, "--src " + SRC + " -d " + DEST);    
+    });    
   },
   "no dest" : function(onEnd) {
     createTwoFiles();
     var cfg = getConfig({src:'void'});
-    exec(cfg, function(error, stdout) {
+    execArgv(cfg, "-s " + SRC, function(error, stdout) {
       // Check that minified files are not there
       a.throws(function() {
         fs.statSync(DEST + "js.min.js");
@@ -441,7 +447,29 @@ var tests = {
       a.equal(code.match(/\sjs\.js\s/).length, 1);
       
       onEnd();
-    }, "-s " + SRC);    
+    });    
+  },
+  "no configuration"  : function(onEnd) {
+    createTwoFiles();
+    execNoConfig("-s " + SRC + " --dest " + DEST, function(error, stdout) {
+      // Check that minified files are not there
+      a.throws(function() {
+        fs.statSync(DEST + "js.min.js");
+      });
+      
+      a.throws(function() {
+        fs.statSync(DEST + "js2.min.js");
+      });
+      
+      stat = fs.statSync(DEST + ALL, "minified exists");
+      a.ok(stat.isFile());
+      
+      // Check that aggregate has no duplicate
+      var code = fs.readFileSync(DEST + ALL).toString();
+      a.equal(code.match(/\sjs\.js\s/).length, 1);
+      
+      onEnd();
+    });    
   }
 };
 
@@ -468,6 +496,6 @@ if (process.argv[2]) {
         tests[key](execTest);
         console.log("----------");
       }
-    }
+    } 
   })();
 }
