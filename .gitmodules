@@ -5,3 +5,6 @@
 	path = vendor/jslint
 	url = git://github.com/reid/node-jslint
 
+[submodule "vendor/optimist"]
+	path = vendor/optimist
+	url = git://github.com/substack/node-optimist.git
