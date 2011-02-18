@@ -1,6 +1,6 @@
 {
   name : 'ready.js',
-  version : '1.2.0',
+  version : '1.2.1',
   description : 'continuous javascript integration using JSLint, Google Compiler and Node.js',
   keywords : ['continuous integration', 'jslint', 'javascript', 'minifier', 'compiler'],
   author : 'dsimard <dsimard@azanka.ca> (http://github.com/dsimard)',
