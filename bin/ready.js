@@ -3,19 +3,12 @@ var r = require("../lib/ready"),
   fs = require("fs"),
   sys = require("sys"),
   util = require("../lib/utils"),
+  optimist = require('optimist'),
+  logger = require("../lib/logger"),
   optimist = null,
   config = util.config,
   inspect = require("util").inspect,
-  logger = util.logger;
-  
-try {
-  // Try to load from npm
-  optimist = require('optimist');
-} catch(err) {
-  optimist = require("../vendor/optimist");
-}
-
-argv = optimist.argv
+  argv = optimist.argv;
 
 var aggregates = [];
 

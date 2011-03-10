@@ -3,7 +3,7 @@ var r = require("../lib/ready"),
   fs = require("fs"),
   sys = require("sys"),
   util = require("../lib/utils"),
-  logger = util.logger;
+  logger = require("../lib/logger");
 
 function watchFiles() {
   util.forEachJs(function(file) {
