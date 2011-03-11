@@ -495,6 +495,15 @@ var tests = {
       
       onEnd();
     });    
+  },
+  "override jslint with args"  : function(onEnd) {
+    createBadFile();
+    
+    execArgv(getConfig(), "--nojslint", function(error, stdout, stderr) {
+      a.notEqual(error, null);
+      
+      onEnd();
+    }); 
   }
 };
 

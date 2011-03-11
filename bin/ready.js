@@ -143,7 +143,7 @@ function startProcessing() {
 }
 
 // If no arg, show usage
-if (process.argv.length == 2) {
+if (argv.length == 0) {
   var msg = ["\nusage : readyjs [path/to/config] - see : http://j.mp/readyjsconfig",
     "-i, --installcompiler path/to/compiler.jar : install google closure compiler for offline compilation",
     "-s, --src path/to/js : the path of the source of javascript files",
