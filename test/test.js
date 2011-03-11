@@ -473,6 +473,28 @@ var tests = {
       
       onEnd();
     });    
+  },
+  "two arg"  : function(onEnd) {
+    createTwoFiles();
+    execNoConfig(SRC + " " + DEST, function(error, stdout) {
+      // Check that minified files are not there
+      a.throws(function() {
+        fs.statSync(DEST + "js.min.js");
+      });
+      
+      a.throws(function() {
+        fs.statSync(DEST + "js2.min.js");
+      });
+      
+      stat = fs.statSync(DEST + ALL, "minified exists");
+      a.ok(stat.isFile());
+      
+      // Check that aggregate has no duplicate
+      var code = fs.readFileSync(DEST + ALL).toString();
+      a.equal(code.match(/\sjs\.js\s/).length, 1);
+      
+      onEnd();
+    });    
   }
 };
 
