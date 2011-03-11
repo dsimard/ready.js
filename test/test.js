@@ -153,9 +153,11 @@ function execArgv(config, argv, callback) {
   }
   
   callExec = function() {
-    var cmd = ["node bin/ready.js ", argv];
+    var cmd = ["node bin/ready.js"];
     if (config != "") { cmd.push(confPath); }
-    var cmd = cmd.join(" ").toString();
+    cmd.push(argv);
+    cmd = cmd.join(" ").toString();
+    
     console.log("EXEC : " + cmd);
     cp.exec(cmd, callback);
   }
@@ -497,10 +499,14 @@ var tests = {
     });    
   },
   "override jslint with args"  : function(onEnd) {
+    createTwoFiles();
     createBadFile();
     
-    execArgv(getConfig(), "--nojslint", function(error, stdout, stderr) {
-      a.notEqual(error, null);
+    execArgv(getConfig(), "--nojslint --nocompiler", function(error, stdout, stderr) {
+      // It just dumped to all.js
+      var code = fs.readFileSync(DEST + ALL).toString();
+      a.equal(code.match(/\sbad\.js\s/).length, 1);
+      a.equal(code.match(/\js\.js\s/).length, 1);
       
       onEnd();
     }); 
