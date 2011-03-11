@@ -4,6 +4,7 @@ var sys = require("sys"),
   cp = require("child_process");
   a = require("assert"),
   r = require("../lib/ready"),
+  path = require("path"),
   inspect = sys.inspect;
   
   
@@ -43,6 +44,9 @@ function cleanUp() {
   
   // Put back initial config
   r.config = initialConfig;
+  
+  // Delete conf.js
+  fs.unlink(path.join(__dirname, "conf.js"));
 
   if (emptyDir(DEST, true)) {
     var isDir = false;
@@ -142,15 +146,32 @@ function exec(config, callback) {
 function execArgv(config, argv, callback) {
   argv = argv || "";
   
- if (config && typeof(config) != "string") {
-    config = "'" + JSON.stringify(config) + "'";
+  if (config && typeof(config) != "string") {
+    config = JSON.stringify(config);
   } else {
     config = "";
   }
   
-  var cmd = ["node bin/ready.js ", config, argv].join(" ").toString();
-  console.log("EXEC : " + cmd);
-  cp.exec(cmd, callback);
+  callExec = function() {
+    var cmd = ["node bin/ready.js ", argv];
+    if (config != "") { cmd.push(confPath); }
+    var cmd = cmd.join(" ").toString();
+    console.log("EXEC : " + cmd);
+    cp.exec(cmd, callback);
+  }
+  
+  if (config != "") {
+    // Save the config file
+    var confPath = path.join(__dirname, "conf.js")
+    fs.open(confPath, "w", 0755, function(err, fd) {
+      fs.write(fd, config, null, null, function(err) {
+        fs.close(fd);
+        callExec();
+      }); 
+    });
+  } else {
+    callExec();
+  }
 }
 
 // Get code from all.js
@@ -164,24 +185,6 @@ function getAggCode(config) {
 
 // All tests to run
 var tests = {
-  // Compile with google compiler
-  /*"Compile with google compiler" : function(onEnd) {
-    createAlphaFiles();
-    
-    r.compile("function load() { var a = 1; }", function(success, compiledCode, data) {
-      a.equal(compiledCode, "function load(){};");
-      
-      r.compile(SRC + "a.js", function(success, compiledCode, data) {
-        a.equal(compiledCode, "function load(){};");
-        
-        r.compile("{(}", function(success, compiledCode, data) {
-          a.ok(!success);
-          a.ok(compiledCode.length == 0);
-          onEnd();
-        });
-      });      
-    });
-  },*/
   // jslint
   "jslint" : function(onEnd) {
     r.jslint("function load() {}", function(success, jslint) {
@@ -201,7 +204,7 @@ var tests = {
   // Default config
   "Default config" : function(onEnd) {
     createTwoFiles();
-
+    
     exec(null, function(error, stdout, stderr) {
       // Check that minified files are not there
       a.throws(function() {

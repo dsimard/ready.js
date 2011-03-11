@@ -122,8 +122,6 @@ function aggregateAll() {
 }
 
 function startProcessing() {
-  r.test = config.test; // If in test
-  
   // Start the process
   util.forEachJs(function(file) {
     if (config.runJslint && !util.isExcluded(file)) {
