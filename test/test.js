@@ -474,7 +474,7 @@ var tests = {
       onEnd();
     });    
   },
-  "two arg"  : function(onEnd) {
+  "two args"  : function(onEnd) {
     createTwoFiles();
     execNoConfig(SRC + " " + DEST, function(error, stdout) {
       // Check that minified files are not there
