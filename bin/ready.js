@@ -3,12 +3,10 @@ var r = require("../lib/ready"),
   fs = require("fs"),
   sys = require("sys"),
   util = require("../lib/utils"),
-  optimist = require('optimist'),
+  argv = require('optimist').argv,
   logger = require("../lib/logger"),
-  optimist = null,
-  config = util.config,
-  inspect = require("util").inspect,
-  argv = optimist.argv;
+  config = require("../lib/config"),
+  inspect = require("util").inspect;
 
 var aggregates = [];
 
@@ -154,13 +152,9 @@ if (process.argv.length == 2) {
     "-d, --dest path/to/dest : the destination of the compiled javascript files",
     "\n"].join("\n \n");
   logger.log(msg)
-} else if (argv._.length == 1) {
-  // Load the config file
-  util.loadConfigFromArg(argv, startProcessing);
 } else if (argv.installcompiler || argv.i) {
   // install compiler.jar
   util.installCompiler(argv.installcompiler || argv.i);
-} else  {
-  util.loadConfigFromArg(argv, startProcessing);
+} else {
+  startProcessing();
 }
-
