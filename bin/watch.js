@@ -3,7 +3,8 @@ var r = require("../lib/ready"),
   fs = require("fs"),
   sys = require("sys"),
   util = require("../lib/utils"),
-  logger = require("../lib/logger");
+  logger = require("../lib/logger"),
+  argv = require('optimist').argv;
 
 function watchFiles() {
   util.forEachJs(function(file) {
@@ -20,9 +21,14 @@ function watchFiles() {
   });
 }
   
-if (process.argv[2]) {
-  util.loadConfigFromArg(watchFiles);
-} else {
-  logger.error("No configuration file specified");
+if (argv.length == 0) {
+  var msg = ["\nusage : readyjs [path/to/config] - see : http://j.mp/readyjsconfig",
+    "-i, --installcompiler path/to/compiler.jar : install google closure compiler for offline compilation",
+    "-s, --src path/to/js : the path of the source of javascript files",
+    "-d, --dest path/to/dest : the destination of the compiled javascript files",
+    "\n"].join("\n \n");
+  logger.log(msg)
+} else if (argv.v || argv.version) {
+  util.version();
 }
 

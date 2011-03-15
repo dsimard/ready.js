@@ -153,6 +153,8 @@ if (argv.length == 0) {
 } else if (argv.installcompiler || argv.i) {
   // install compiler.jar
   util.installCompiler(argv.installcompiler || argv.i);
+} else if (argv.v || argv.version) {
+  util.version();
 } else {
   startProcessing();
 }
