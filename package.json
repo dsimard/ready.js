@@ -4,7 +4,7 @@
   "description" : "continuous javascript integration using JSLint, Google Compiler and Node.js",
   "keywords" : ["continuous integration", "jslint", "javascript", "minifier", "compiler"],
   "author" : "dsimard <dsimard@azanka.ca> (http://github.com/dsimard)",
-  "bin" : { "readyjs" : "./bin/ready.js", "watchjs" : "./bin/watch.js" },
+  "bin" : { "readyjs" : "./bin/ready.js" },
   "repository" : {
     "type" : "git",
     "url" : "https://dsimard@github.com/dsimard/ready.js.git"

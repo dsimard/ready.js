@@ -142,6 +142,22 @@ function startProcessing() {
   });
 }
 
+function watchFiles() {
+  util.forEachJs(function(file) {
+    if (!util.isExcluded(file)) {
+      r.watch(file, function(success, jslint) {
+        if (success) {
+          logger.log("JSLint on '" + file + "' : OK");
+        } else {
+          logger.log("JSLint error on '" + file + "'");
+          util.showJslintErrors(jslint);
+        }
+      });
+    }
+  });
+}
+
+
 // If no arg, show usage
 if (argv.length == 0) {
   var msg = ["\nusage : readyjs [path/to/config] - see : http://j.mp/readyjsconfig",
@@ -153,6 +169,8 @@ if (argv.length == 0) {
 } else if (argv.installcompiler || argv.i) {
   // install compiler.jar
   util.installCompiler(argv.installcompiler || argv.i);
+} else if (argv.w || argv.watch) {
+  watchFiles();
 } else if (argv.v || argv.version) {
   util.version();
 } else {
