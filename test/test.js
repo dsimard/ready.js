@@ -4,9 +4,7 @@ var sys = require("sys"),
   cp = require("child_process");
   a = require("assert"),
   r = require("../lib/ready"),
-  path = require("path"),
-  inspect = sys.inspect;
-  
+  path = require("path");
   
 const SRC = "./test/javascripts/";
 const DEST = "./test/minified/";
