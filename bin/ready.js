@@ -160,7 +160,7 @@ if (process.argv.length == 2) {
     "-s, --src path/to/js : the path of the source of javascript files",
     "-d, --dest path/to/dest : the destination of the compiled javascript files",
     "\n"].join("\n \n");
-  logger.log(msg)
+  logger.log(msg)  
 } else if (argv._.length == 1) {
   // Load the config file
   util.loadConfigFromArg(argv, startProcessing);
