@@ -29,6 +29,7 @@ function sortAggregates(a, b) {
 
 function compile(file, callback) {
   if (config.runGCompiler && !util.isExcluded(file)) {
+    logger.log("Compiling '" + file + "'");
     r.compile(file, function(success, code, data) {
       if (success) {
         callback(file, code);
@@ -55,6 +56,8 @@ function compile(file, callback) {
 function aggregate(file, code) {
   var filename = file.match(/[^\/]+$/g)[0];
   var minfilename = filename.replace(/\.js$/i, "."+config.compiledExtension+".js");
+  
+  logger.log("Aggregating '" + file + "'")
   
   aggregates.push({filename : filename, code : code});
   

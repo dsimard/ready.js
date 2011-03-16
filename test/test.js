@@ -165,6 +165,7 @@ function execArgv(config, argv, callback) {
     var confPath = path.join(__dirname, "conf.js")
     fs.open(confPath, "w", 0755, function(err, fd) {
       fs.write(fd, config, null, null, function(err) {
+        console.log("Config is : " + config);
         fs.close(fd);
         callExec();
       }); 
@@ -325,6 +326,44 @@ var tests = {
       pos.forEach(function(val, i) {
         if (pos[i+1]) { a.ok(val < pos[i+1]) };
       });
+            
+      onEnd();
+    });
+  },
+  "Test custom order args" : function(onEnd) {
+    createAlphaFiles();
+    execArgv(getConfig(), "--order '  a.js ,  c.js'", function(error, stdout) {
+      var code = fs.readFileSync(DEST + ALL).toString();
+      var pos = [];
+      pos.push(code.match(/a\.js/).index);
+      pos.push(code.match(/c\.js/).index);
+      pos.push(code.match(/b\.js/).index);
+ 
+      pos.forEach(function(val, i) {
+        if (pos[i+1]) { a.ok(val < pos[i+1]) };
+      });
+      
+      onEnd();
+    });
+  },
+  // Test custom order
+  "Test exclude" : function(onEnd) {
+    createAlphaFiles();
+    exec(getConfig({exclude:["a.js"]}), function(error, stdout) {
+      var code = fs.readFileSync(DEST + ALL).toString();
+      a.equal(code.match(/load\(\)\s\{\}/).length, 1);
+      a.equal(code.match(/load\(\)\{\}\;/g).length, 2);
+      
+      onEnd();
+    });
+  },
+  // Test custom order
+  "Test exclude args" : function(onEnd) {
+    createAlphaFiles();
+    execArgv(getConfig(), "--exclude 'a.js'", function(error, stdout) {
+      var code = fs.readFileSync(DEST + ALL).toString();
+      a.equal(code.match(/load\(\)\s\{\}/).length, 1);
+      a.equal(code.match(/load\(\)\{\}\;/g).length, 2);
       
       onEnd();
     });
