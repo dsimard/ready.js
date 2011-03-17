@@ -162,15 +162,15 @@ function watchFiles() {
 
 
 // If no arg, show usage
-if (argv._.length == 0 || argv.h || argv.help) {
-  util.usage();
-} else if (argv.installcompiler || argv.i) {
+if (argv.installcompiler || argv.i) {
   // install compiler.jar
   util.installCompiler(argv.installcompiler || argv.i);
 } else if (argv.w || argv.watch) {
   watchFiles();
 } else if (argv.v || argv.version) {
   util.version();
+} else if (argv._.length == 0 || argv.h || argv.help) {
+  util.usage();
 } else {
   startProcessing();
 }
