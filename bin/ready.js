@@ -162,13 +162,8 @@ function watchFiles() {
 
 
 // If no arg, show usage
-if (argv.length == 0) {
-  var msg = ["\nusage : readyjs [path/to/config] - see : http://j.mp/readyjsconfig",
-    "-i, --installcompiler path/to/compiler.jar : install google closure compiler for offline compilation",
-    "-s, --src path/to/js : the path of the source of javascript files",
-    "-d, --dest path/to/dest : the destination of the compiled javascript files",
-    "\n"].join("\n \n");
-  logger.log(msg)
+if (argv._.length == 0 || argv.h || argv.help) {
+  util.usage();
 } else if (argv.installcompiler || argv.i) {
   // install compiler.jar
   util.installCompiler(argv.installcompiler || argv.i);
