@@ -3,8 +3,6 @@ usage:
   readyjs path/to/src path/to/dest [options] 
 
 options:
-  -s | --src              SRC       the source of javascript files
-  -d | --dest             DEST      the destination of compiled javascript files
   -w | --watch            SRC       watch the files with JSLint in SRC
   -o | --order            FILES     specify an order (ex : --order "jquery.js, jquery.ui.js")
   -e | --exclude          FILES     exclude the FILES from JSLint and compilation (ex : -e "jquery.js")
