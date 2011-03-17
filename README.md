@@ -31,7 +31,7 @@
       --norecursive           will not look for files recursively
 
     [Use a config file]
-    readyjs path/to/config.file.js [options] (see [j.mp/readyjsconfig](http://j.mp/readyjsconfig))
+    readyjs path/to/config.file.js [options] (see http://j.mp/readyjsconfig)
 
 
 
