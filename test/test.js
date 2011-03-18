@@ -4,8 +4,7 @@ var sys = require("sys"),
   cp = require("child_process");
   a = require("assert"),
   r = require("../lib/ready"),
-  inspect = sys.inspect;
-  
+  path = require("path");
   
 const SRC = "./test/javascripts/";
 const DEST = "./test/minified/";
@@ -43,6 +42,9 @@ function cleanUp() {
   
   // Put back initial config
   r.config = initialConfig;
+  
+  // Delete conf.js
+  fs.unlink(path.join(__dirname, "conf.js"));
 
   if (emptyDir(DEST, true)) {
     var isDir = false;
@@ -142,15 +144,35 @@ function exec(config, callback) {
 function execArgv(config, argv, callback) {
   argv = argv || "";
   
- if (config && typeof(config) != "string") {
-    config = "'" + JSON.stringify(config) + "'";
+  if (config && typeof(config) != "string") {
+    config = JSON.stringify(config);
   } else {
     config = "";
   }
   
-  var cmd = ["node bin/ready.js ", config, argv].join(" ").toString();
-  console.log("EXEC : " + cmd);
-  cp.exec(cmd, callback);
+  callExec = function() {
+    var cmd = ["node bin/ready.js"];
+    if (config != "") { cmd.push(confPath); }
+    cmd.push(argv);
+    cmd = cmd.join(" ").toString();
+    
+    console.log("EXEC : " + cmd);
+    cp.exec(cmd, callback);
+  }
+  
+  if (config != "") {
+    // Save the config file
+    var confPath = path.join(__dirname, "conf.js")
+    fs.open(confPath, "w", 0755, function(err, fd) {
+      fs.write(fd, config, null, null, function(err) {
+        console.log("Config is : " + config);
+        fs.close(fd);
+        callExec();
+      }); 
+    });
+  } else {
+    callExec();
+  }
 }
 
 // Get code from all.js
@@ -164,24 +186,6 @@ function getAggCode(config) {
 
 // All tests to run
 var tests = {
-  // Compile with google compiler
-  /*"Compile with google compiler" : function(onEnd) {
-    createAlphaFiles();
-    
-    r.compile("function load() { var a = 1; }", function(success, compiledCode, data) {
-      a.equal(compiledCode, "function load(){};");
-      
-      r.compile(SRC + "a.js", function(success, compiledCode, data) {
-        a.equal(compiledCode, "function load(){};");
-        
-        r.compile("{(}", function(success, compiledCode, data) {
-          a.ok(!success);
-          a.ok(compiledCode.length == 0);
-          onEnd();
-        });
-      });      
-    });
-  },*/
   // jslint
   "jslint" : function(onEnd) {
     r.jslint("function load() {}", function(success, jslint) {
@@ -201,7 +205,7 @@ var tests = {
   // Default config
   "Default config" : function(onEnd) {
     createTwoFiles();
-
+    
     exec(null, function(error, stdout, stderr) {
       // Check that minified files are not there
       a.throws(function() {
@@ -322,6 +326,44 @@ var tests = {
       pos.forEach(function(val, i) {
         if (pos[i+1]) { a.ok(val < pos[i+1]) };
       });
+            
+      onEnd();
+    });
+  },
+  "Test custom order args" : function(onEnd) {
+    createAlphaFiles();
+    execArgv(getConfig(), "--order '  a.js ,  c.js'", function(error, stdout) {
+      var code = fs.readFileSync(DEST + ALL).toString();
+      var pos = [];
+      pos.push(code.match(/a\.js/).index);
+      pos.push(code.match(/c\.js/).index);
+      pos.push(code.match(/b\.js/).index);
+ 
+      pos.forEach(function(val, i) {
+        if (pos[i+1]) { a.ok(val < pos[i+1]) };
+      });
+      
+      onEnd();
+    });
+  },
+  // Test custom order
+  "Test exclude" : function(onEnd) {
+    createAlphaFiles();
+    exec(getConfig({exclude:["a.js"]}), function(error, stdout) {
+      var code = fs.readFileSync(DEST + ALL).toString();
+      a.equal(code.match(/load\(\)\s\{\}/).length, 1);
+      a.equal(code.match(/load\(\)\{\}\;/g).length, 2);
+      
+      onEnd();
+    });
+  },
+  // Test custom order
+  "Test exclude args" : function(onEnd) {
+    createAlphaFiles();
+    execArgv(getConfig(), "--exclude 'a.js'", function(error, stdout) {
+      var code = fs.readFileSync(DEST + ALL).toString();
+      a.equal(code.match(/load\(\)\s\{\}/).length, 1);
+      a.equal(code.match(/load\(\)\{\}\;/g).length, 2);
       
       onEnd();
     });
@@ -452,6 +494,13 @@ var tests = {
   "no configuration"  : function(onEnd) {
     createTwoFiles();
     execNoConfig("-s " + SRC + " --dest " + DEST, function(error, stdout) {
+      a.equal(stdout.match(/usage\:/).length, 1);
+      onEnd();
+    });    
+  },
+  "two args"  : function(onEnd) {
+    createTwoFiles();
+    execNoConfig(SRC + " " + DEST, function(error, stdout) {
       // Check that minified files are not there
       a.throws(function() {
         fs.statSync(DEST + "js.min.js");
@@ -470,6 +519,19 @@ var tests = {
       
       onEnd();
     });    
+  },
+  "override jslint with args"  : function(onEnd) {
+    createTwoFiles();
+    createBadFile();
+    
+    execArgv(getConfig(), "--nojslint --nocompiler", function(error, stdout, stderr) {
+      // It just dumped to all.js
+      var code = fs.readFileSync(DEST + ALL).toString();
+      a.equal(code.match(/\sbad\.js\s/).length, 1);
+      a.equal(code.match(/\js\.js\s/).length, 1);
+      
+      onEnd();
+    }); 
   }
 };
 

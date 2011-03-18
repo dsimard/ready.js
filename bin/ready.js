@@ -3,19 +3,10 @@ var r = require("../lib/ready"),
   fs = require("fs"),
   sys = require("sys"),
   util = require("../lib/utils"),
-  optimist = null,
-  config = util.config,
-  inspect = require("util").inspect,
-  logger = util.logger;
-  
-try {
-  // Try to load from npm
-  optimist = require('optimist');
-} catch(err) {
-  optimist = require("../vendor/optimist");
-}
-
-argv = optimist.argv
+  argv = require('optimist').argv,
+  logger = require("../lib/logger"),
+  config = require("../lib/config"),
+  inspect = require("util").inspect;
 
 var aggregates = [];
 
@@ -38,6 +29,7 @@ function sortAggregates(a, b) {
 
 function compile(file, callback) {
   if (config.runGCompiler && !util.isExcluded(file)) {
+    logger.log("Compiling '" + file + "'");
     r.compile(file, function(success, code, data) {
       if (success) {
         callback(file, code);
@@ -64,6 +56,8 @@ function compile(file, callback) {
 function aggregate(file, code) {
   var filename = file.match(/[^\/]+$/g)[0];
   var minfilename = filename.replace(/\.js$/i, "."+config.compiledExtension+".js");
+  
+  logger.log("Aggregating '" + file + "'")
   
   aggregates.push({filename : filename, code : code});
   
@@ -131,8 +125,6 @@ function aggregateAll() {
 }
 
 function startProcessing() {
-  r.test = config.test; // If in test
-  
   // Start the process
   util.forEachJs(function(file) {
     if (config.runJslint && !util.isExcluded(file)) {
@@ -153,21 +145,32 @@ function startProcessing() {
   });
 }
 
-// If no arg, show usage
-if (process.argv.length == 2) {
-  var msg = ["\nusage : readyjs [path/to/config] - see : http://j.mp/readyjsconfig",
-    "-i, --installcompiler path/to/compiler.jar : install google closure compiler for offline compilation",
-    "-s, --src path/to/js : the path of the source of javascript files",
-    "-d, --dest path/to/dest : the destination of the compiled javascript files",
-    "\n"].join("\n \n");
-  logger.log(msg);  
-} else if (argv._.length == 1) {
-  // Load the config file
-  util.loadConfigFromArg(argv, startProcessing);
-} else if (argv.installcompiler || argv.i) {
-  // install compiler.jar
-  util.installCompiler(argv.installcompiler || argv.i);
-} else  {
-  util.loadConfigFromArg(argv, startProcessing);
+function watchFiles() {
+  util.forEachJs(function(file) {
+    if (!util.isExcluded(file)) {
+      r.watch(file, function(success, jslint) {
+        if (success) {
+          logger.log("JSLint on '" + file + "' : OK");
+        } else {
+          logger.log("JSLint error on '" + file + "'");
+          util.showJslintErrors(jslint);
+        }
+      });
+    }
+  });
 }
 
+
+// If no arg, show usage
+if (argv.installcompiler || argv.i) {
+  // install compiler.jar
+  util.installCompiler(argv.installcompiler || argv.i);
+} else if (argv.w || argv.watch) {
+  watchFiles();
+} else if (argv.v || argv.version) {
+  util.version();
+} else if (argv._.length == 0 || argv.h || argv.help) {
+  util.usage();
+} else {
+  startProcessing();
+}
