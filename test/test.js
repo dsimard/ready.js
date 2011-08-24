@@ -4,7 +4,8 @@ var sys = require("sys"),
   cp = require("child_process");
   a = require("assert"),
   r = require("../lib/ready"),
-  path = require("path");
+  path = require("path"),
+  inspect = require("util").inspect;
   
 const SRC = "./test/javascripts/";
 const DEST = "./test/minified/";
@@ -186,6 +187,13 @@ function getAggCode(config) {
 
 // All tests to run
 var tests = {
+  // Check if compiler.jar is present in vendor
+  "check compiler.jar"  : function(onEnd) {
+    path.exists("vendor/compiler.jar", function(exists) {
+      a.ok(exists, "Compiler.jar MUST exist in 'vendor'");
+      onEnd();
+    });
+  },
   // jslint
   "jslint" : function(onEnd) {
     r.jslint("function load() {}", function(success, jslint) {
