@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 var r = require("../lib/ready"),
   fs = require("fs"),
   sys = require("sys"),
