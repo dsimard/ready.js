@@ -138,7 +138,7 @@ function startProcessing() {
           util.showJslintErrors(jslint);
           process.exit(1);
         }
-      });
+      }, config.jslintOptions);
     } else {
       compile(file, aggregate);
     }

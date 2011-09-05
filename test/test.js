@@ -67,7 +67,7 @@ function getConfig(extend) {
    dest : DEST,
    aggregateTo : ALL,
    test : true,
-   debug: true,
+   debug: true
   };
   
   for (var p in extend) {
@@ -208,6 +208,15 @@ var tests = {
       });
     });
   },
+  
+  "jslint with options" : function(onEnd) {
+    r.jslint("var f = new Function('');", function(success, jslint) {
+      a.ok(success);
+      a.ok(jslint.errors.length == 0);
+      onEnd();
+    }, {evil:true});
+  },
+  
   // 
   /********* COMMAND-LINE TESTS *********/
   // Default config
