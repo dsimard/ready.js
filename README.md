@@ -16,8 +16,6 @@
       readyjs path/to/src path/to/dest [options] 
 
     options:
-      -s | --src              SRC       the source of javascript files
-      -d | --dest             DEST      the destination of compiled javascript files
       -w | --watch            SRC       watch the files with JSLint in SRC
       -o | --order            FILES     specify an order (ex : --order "jquery.js, jquery.ui.js")
       -e | --exclude          FILES     exclude the FILES from JSLint and compilation (ex : -e "jquery.js")
@@ -29,16 +27,17 @@
       --nojslint              will not run JSLint
       --nocompiler            will not run the compiler
       --norecursive           will not look for files recursively
+      
+    JsLintOptions:
+      You can use any jsLint options (http://bit.ly/jslintoptions) as an argument.
+      Example : readyjs /source /dest --evil --maxlen=80
 
     [Use a config file]
     readyjs path/to/config.file.js [options] (see http://j.mp/readyjsconfig)
 
-
-
 ## Continuous integration
 1. run `npm install ready.js`
 2. run `echo 'readyjs path/to/src path/to/dest' >> .git/hooks/pre-commit`
-
 
 ## Want to know more?
 

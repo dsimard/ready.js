@@ -210,7 +210,7 @@ var tests = {
   },
   
   "jslint with options" : function(onEnd) {
-    r.jslint("var f = new Function('');", function(success, jslint) {
+    r.jslint("var f = eval('1');", function(success, jslint) {
       a.ok(success);
       a.ok(jslint.errors.length == 0);
       onEnd();
@@ -546,6 +546,26 @@ var tests = {
       var code = fs.readFileSync(DEST + ALL).toString();
       a.equal(code.match(/\sbad\.js\s/).length, 1);
       a.equal(code.match(/\js\.js\s/).length, 1);
+      
+      onEnd();
+    }); 
+  },
+  "specify jslintOptions in argv"  : function(onEnd) {
+    createFile("evil.js", "eval('var i = 1;');");
+    
+    execNoConfig(SRC + " " + DEST + " --debug=true --evil=true", function(error, stdout, stderr) {
+      var code = fs.readFileSync(DEST + "all.js").toString();
+      a.equal(code.match(/\sevil\.js\s/).length, 1);
+      
+      onEnd();
+    }); 
+  },
+  "specify maxlen as integer"  : function(onEnd) {
+    createFile("evil.js", "eval('var i = 1;');");
+    
+    execNoConfig(SRC + " " + DEST + " --debug --evil --maxlen=1", function(error, stdout, stderr) {
+      a.equal(stdout.match(/eval is evil/g), null);
+      a.equal(stdout.match(/Line too long/g).length, 1);
       
       onEnd();
     }); 
