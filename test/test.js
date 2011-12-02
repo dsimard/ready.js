@@ -569,7 +569,16 @@ var tests = {
       
       onEnd();
     }); 
-  }
+  },
+  "same name in subdir" : function(onEnd) {
+    createFile("file.js", "function main() {}");
+    createFile("file.js", "function subdir1() {}", {subdir:"subdir1"});
+    createFile("file.js", "function subdir2() {}", {subdir:"subdir2"});
+    
+    execNoConfig(SRC + " " + DEST, function(err, stdout, stderr) {
+      
+    });
+  },
 };
 
 if (process.argv[2]) {
