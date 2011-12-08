@@ -1,8 +1,8 @@
 { 
   "name" : "ready.js",
   "version" : "1.3.4",
-  "description" : "continuous javascript integration using JSLint, Google Compiler and Node.js",
-  "keywords" : ["continuous integration", "jslint", "javascript", "minifier", "compiler"],
+  "description" : "continuous javascript integration",
+  "keywords" : ["continuous integration", "jslint", "javascript", "minifier", "compiler", "ci"],
   "author" : "dsimard <dsimard@azanka.ca> (http://github.com/dsimard)",
   "bin" : { "readyjs" : "./bin/ready.js" },
   "repository" : {
