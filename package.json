@@ -9,10 +9,5 @@
     "type" : "git",
     "url" : "https://dsimard@github.com/dsimard/ready.js.git"
   },
-  "dependencies" : {
-    "readyjslint" : "0.0.4",
-    "restler-aaronblohowiak" : "0.0.2",
-    "optimist" : "0.1.6"
-  },
   "engines" : {"node" : ">=0.4.0"}
 }

@@ -576,7 +576,7 @@ var tests = {
     createFile("file.js", "function subdir2() {}", {subdir:"subdir2"});
     
     execNoConfig(SRC + " " + DEST, function(err, stdout, stderr) {
-      
+      onEnd();
     });
   },
 };

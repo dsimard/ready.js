@@ -1,0 +1,18 @@
+#!/usr/bin/env node
+
+require.paths.push(process.cwd());
+
+var sys  = require('sys'),
+    rest = require('../lib/restler'),
+    repl = require('repl');
+  
+repl.start();
+
+var exportMethods = {
+  sys: sys,
+  rest: rest
+}
+
+Object.keys(exportMethods).forEach(function(exportMethod) {
+  repl.scope[exportMethod] = exportMethods[exportMethod]
+})
