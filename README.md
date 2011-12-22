@@ -8,7 +8,7 @@
 
 ## Installation
 
-`npm install ready.js`
+`npm install ready.js --global`
 
 ## Usage
 
