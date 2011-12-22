@@ -1,2 +1,0 @@
-require('./restler');
-require('./multipartform');
