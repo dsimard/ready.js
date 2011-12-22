@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 var r = require("../lib/ready"),
   fs = require("fs"),
-  sys = require("sys"),
+  sys = require("util"),
   util = require("../lib/utils"),
   argv = require('../node_modules/optimist').argv,
   logger = require("../lib/logger"),

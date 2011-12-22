@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-var sys = require("sys"),
+var sys = require("util"),
   fs = require("fs"),
   cp = require("child_process");
   a = require("assert"),
