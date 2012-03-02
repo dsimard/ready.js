@@ -1,4 +1,4 @@
-# Ready.js : continuous javascript integration
+![alt text](http://s3.amazonaws.com/files.posterous.com/headers/2452232/scaled500.png "ready.js - continuous javascript integration")
 
 ## What does it do?
 1. Check if your javascript are valid with [jslint](http://www.jslint.com/).
