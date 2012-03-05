@@ -81,7 +81,7 @@ function getConfig(extend) {
 function createFile(path, code, options) {
   options = options || {};
 
-  code = code || ["function load() {}"].join("");
+  code = code || ["function load() {} // not compiled"].join("");
 
   // Create the SRC directory if not exists
   var isDir = false;
@@ -369,7 +369,7 @@ var tests = {
     exec(getConfig({exclude:["a.js"]}), function(error, stdout) {
       var code = fs.readFileSync(DEST + ALL).toString();
       a.equal(code.match(/load\(\)\s\{\}/).length, 1);
-      a.equal(code.match(/load\(\)\{\}\;/g).length, 2);
+      a.equal(code.match(/load\(\)\{\}/g).length, 2);
       
       onEnd();
     });
@@ -380,7 +380,7 @@ var tests = {
     execArgv(getConfig(), "--exclude 'a.js'", function(error, stdout) {
       var code = fs.readFileSync(DEST + ALL).toString();
       a.equal(code.match(/load\(\)\s\{\}/).length, 1);
-      a.equal(code.match(/load\(\)\{\}\;/g).length, 2);
+      a.equal(code.match(/load\(\)\{\}/g).length, 2);
       
       onEnd();
     });

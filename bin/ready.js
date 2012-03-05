@@ -125,16 +125,6 @@ function aggregateAll() {
 }
 
 function startProcessing() {
-  // Warn that the offline compiler isn't installed
-  if (config.runGCompiler) {
-    r.searchOfflineCompiler(function(compiler) {
-      if (!compiler || compiler.length == 0) {
-        logger.info("Google Closure Compiler not installed (http://code.google.com/closure/compiler/)");
-        logger.info("Run " + "readyjs -i /path/to/compiler.jar".bold + " to install it locally");
-      }
-    });
-  }
-
   // Start the process
   util.forEachJs(function(file) {
     if (config.runJslint && !util.isExcluded(file)) {
