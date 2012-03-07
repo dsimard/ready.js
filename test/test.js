@@ -187,13 +187,6 @@ function getAggCode(config) {
 
 // All tests to run
 var tests = {
-  // Check if compiler.jar is present in vendor
-  "check compiler.jar"  : function(onEnd) {
-    path.exists("vendor/compiler.jar", function(exists) {
-      a.ok(exists, "Compiler.jar MUST exist in 'vendor'");
-      onEnd();
-    });
-  },
   // jslint
   "jslint" : function(onEnd) {
     r.jslint("function load() {}", function(success, jslint) {
@@ -400,31 +393,8 @@ var tests = {
       onEnd();
     });
   },
-  // Google compiler server error
-  "Google compiler server error" : function(onEnd) {
-    var _completed = r.compileCompleted;
-    
-    r.compileCompleted = function(data, code, callback) {
-      data = {serverErrors:[{code:22, error:"Too many compiles performed recently.  Try again later."}]};
-      _completed(data, code, callback);
-    }
-    
-    createTwoFiles();
-    exec(null, function(error, stdout) {
-      a.throws(function() {
-        fs.statSync(DEST + "js.min.js");
-      });
-      
-      a.throws(function() {
-        fs.statSync(DEST + "js2.min.js");
-      });
-    
-      r.compileCompleted = _completed;
-      onEnd();
-    });    
-  },
   // Google compiler error
-  "Google compiler error" : function(onEnd) {
+  "compiler error" : function(onEnd) {
     createBadFile();
     exec(getConfig({test:false, runJslint:false}), function(error, stdout) {
       a.throws(function() {
