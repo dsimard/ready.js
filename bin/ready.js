@@ -128,14 +128,14 @@ function startProcessing() {
   // Start the process
   util.forEachJs(function(file) {
     if (config.runJslint && !util.isExcluded(file)) {
-      // Run jslint
-      r.jslint(file, function(success, jslint) {
+      // Run analysis
+      r.analyse(file, function(success, jshint) {
         if (success) {
-          logger.log("JSLINT success : " + file);
+          logger.log("Analysis success : " + file);
           compile(file, aggregate);
         } else {
-          logger.log("JSLINT error : " + file);
-          util.showJslintErrors(jslint);
+          logger.log("Analysis error : " + file);
+          util.showAnalysisErrors(jshint);
           process.exit(1);
         }
       }, config.jslintOptions);
@@ -148,12 +148,12 @@ function startProcessing() {
 function watchFiles() {
   util.forEachJs(function(file) {
     if (!util.isExcluded(file)) {
-      r.watch(file, function(success, jslint) {
+      r.watch(file, function(success, jshint) {
         if (success) {
-          logger.log("JSLint on '" + file + "' : OK");
+          logger.log("Analysis on '" + file + "' : OK");
         } else {
-          logger.log("JSLint error on '" + file + "'");
-          util.showJslintErrors(jslint);
+          logger.log("Analysis error on '" + file + "'");
+          util.showAnalysisErrors(jshint);
         }
       });
     }

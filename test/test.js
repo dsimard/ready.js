@@ -187,13 +187,13 @@ function getAggCode(config) {
 
 // All tests to run
 var tests = {
-  // jslint
-  "jslint" : function(onEnd) {
-    r.jslint('function load() {}', function(success, jslint) {
+  // Analyse
+  "analyse" : function(onEnd) {
+    r.analyse('function load() {}', function(success, jslint) {
       a.ok(success);
       a.ok(jslint.errors.length == 0);
 
-      r.jslint("function load() {", function(success, jslint) {
+      r.analyse("function load() {", function(success, jslint) {
         a.ok(!success);
         a.ok(jslint.errors.length == 1);
         
@@ -203,7 +203,7 @@ var tests = {
   },
   
   "jslint with options" : function(onEnd) {
-    r.jslint("var f = eval('1');", function(success, jslint) {
+    r.analyse("var f = eval('1');", function(success, jslint) {
       a.ok(success);
       a.ok(jslint.errors.length == 0);
       onEnd();
@@ -514,6 +514,7 @@ var tests = {
     createBadFile();
     
     execArgv(getConfig(), "--nojslint --nocompiler", function(error, stdout, stderr) {
+
       // It just dumped to all.js
       var code = fs.readFileSync(DEST + ALL).toString();
       a.equal(code.match(/\sbad\.js\s/).length, 1);
