@@ -10,10 +10,10 @@
     "url" : "https://dsimard@github.com/dsimard/ready.js.git"
   },
   "dependencies" : {
-    "jslint" : "0.1.6",
     "optimist" : "~0.3.1",
     "colors" : "~0.6.0",
-    "uglify-js" : "~1.2.5"
+    "uglify-js" : "~1.2.5",
+    "jshint" : "~0.5.9"
   },
   "engines" : {"node" : ">=0.6.0"}
 }
