@@ -11,8 +11,7 @@
   },
   "dependencies" : {
     "jslint" : "0.1.6",
-    "restler" : "0.2.X",
-    "optimist" : "0.3.X",
+    "optimist" : "~0.3.1",
     "colors" : "~0.6.0",
     "uglify-js" : "~1.2.5"
   },
