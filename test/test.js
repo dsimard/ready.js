@@ -189,9 +189,7 @@ function getAggCode(config) {
 var tests = {
   // jslint
   "jslint" : function(onEnd) {
-    r.jslint('"use strict";function load() {}', function(success, jslint) {
-console.log(inspect(success));
-console.log(inspect(jslint));
+    r.jslint('function load() {}', function(success, jslint) {
       a.ok(success);
       a.ok(jslint.errors.length == 0);
 
