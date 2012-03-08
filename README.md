@@ -19,7 +19,6 @@
       -w | --watch            SRC       watch the files with JSLint in SRC
       -o | --order            FILES     specify an order (ex : --order "jquery.js, jquery.ui.js")
       -e | --exclude          FILES     exclude the FILES from JSLint and compilation (ex : -e "jquery.js")
-      -i | --installcompiler  PATH      install the google compiler specified by PATH
       -compiledext            EXT       the compiled javascripts will have EXT as an extension
       -aggregateto            FILENAME  the compiled javascripts will be aggregated to this FILENAME
       

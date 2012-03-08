@@ -393,7 +393,7 @@ var tests = {
       onEnd();
     });
   },
-  // Google compiler error
+  // compiler error
   "compiler error" : function(onEnd) {
     createBadFile();
     exec(getConfig({test:false, runJslint:false}), function(error, stdout) {
@@ -404,6 +404,8 @@ var tests = {
       a.throws(function() {
         fs.statSync(DEST + "js2.min.js");
       });
+      
+      a.ok(stdout.match(/Unexpected token/i))
     
       onEnd();
     }); 
