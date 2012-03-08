@@ -28,7 +28,7 @@ function sortAggregates(a, b) {
 }
 
 function compile(file, callback) {
-  if (config.runGCompiler && !util.isExcluded(file)) {
+  if (config.compile && !util.isExcluded(file)) {
     logger.log("Compiling '" + file + "'");
     r.compile(file, function(success, code, data) {
       if (success) {

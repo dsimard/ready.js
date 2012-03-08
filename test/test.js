@@ -5,6 +5,7 @@ var sys = require("util"),
   a = require("assert"),
   r = require("../lib/ready"),
   path = require("path"),
+  colors = require("../node_modules/colors"),
   inspect = require("util").inspect;
   
 const SRC = "./test/javascripts/";
@@ -560,7 +561,7 @@ if (process.argv[2]) {
     cleanUp();
     tests[t](cleanUp);
   } else {
-    console.log("ERROR : '"+t+"' does not exist")
+    console.log("ERROR : '".red+t+"' does not exist")
   }
 } else {
   var keys = [];
@@ -572,10 +573,9 @@ if (process.argv[2]) {
     cleanUp();
     var key = keys.shift();
     if (key) {
-      console.log("\n\nRunning " + key + "...");
+      console.log(("\nRunning " + key).bold);
       if (tests[key]) { 
         tests[key](execTest);
-        console.log("----------");
       }
     } 
   })();
