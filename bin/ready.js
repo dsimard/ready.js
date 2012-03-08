@@ -127,7 +127,7 @@ function aggregateAll() {
 function startProcessing() {
   // Start the process
   util.forEachJs(function(file) {
-    if (config.runJslint && !util.isExcluded(file)) {
+    if (config.analyse && !util.isExcluded(file)) {
       // Run analysis
       r.analyse(file, function(success, jshint) {
         if (success) {
@@ -138,7 +138,7 @@ function startProcessing() {
           util.showAnalysisErrors(jshint);
           process.exit(1);
         }
-      }, config.jslintOptions);
+      }, config.analysisOptions);
     } else {
       compile(file, aggregate);
     }

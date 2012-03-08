@@ -572,7 +572,7 @@ if (process.argv[2]) {
     cleanUp();
     var key = keys.shift();
     if (key) {
-      console.log("Running " + key + "...");
+      console.log("\n\nRunning " + key + "...");
       if (tests[key]) { 
         tests[key](execTest);
         console.log("----------");
