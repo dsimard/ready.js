@@ -10,7 +10,7 @@
     "url" : "https://dsimard@github.com/dsimard/ready.js.git"
   },
   "dependencies" : {
-    "readyjslint" : "0.0.4",
+    "jslint" : "0.1.6",
     "restler" : "0.2.X",
     "optimist" : "0.3.X",
     "colors" : "~0.6.0",
