@@ -551,8 +551,24 @@ var tests = {
     
     execNoConfig(SRC + " " + DEST, function(err, stdout, stderr) {
       var code = fs.readFileSync(DEST + ALL).toString();
-      a.equal(code.match(/\sfile\.js\s/).length, 1);
+      a.equal(code.match(/\sfile\.js\s/ig).length, 3);
       onEnd();
+    });
+  },
+  "no recursive" : function(onEnd) {
+    createFile("file.js", "function main() {}");
+    createFile("file.js", "function subdir1() {}", {subdir:"subdir1"});
+    createFile("file.js", "function subdir2() {}", {subdir:"subdir2"});
+    
+    execArgv(getConfig(), "--no-recursive", function(error, stdout, stderr) {
+      var code = fs.readFileSync(DEST + ALL).toString();
+      a.equal(code.match(/\sfile\.js\s/ig).length, 1);
+      
+      execArgv(getConfig(), "--norecursive", function(error, stdout, stderr) {
+        var code = fs.readFileSync(DEST + ALL).toString();
+        a.equal(code.match(/\sfile\.js\s/ig).length, 1);
+        onEnd();
+      });
     });
   },
   "try new options" : function(onEnd) {
@@ -577,7 +593,7 @@ if (process.argv[2]) {
     cleanUp();
     tests[t](cleanUp);
   } else {
-    console.log("ERROR : '".red+t+"' does not exist")
+    console.log(("ERROR : '"+t+"' does not exist").red)
   }
 } else {
   var keys = [];
