@@ -35,14 +35,12 @@
     readyjs path/to/config.file.js [options] (see http://j.mp/readyjsconfig)
 
 ## Continuous integration
-1. run `npm install ready.js`
+1. run `npm install ready.js --global`
 2. run `echo 'readyjs path/to/src path/to/dest' >> .git/hooks/pre-commit`
 
-## Want to know more?
+## Configuration file
 
-* [Alternatives installations](http://github.com/dsimard/ready.js/wiki)
 * [Configuration options](https://github.com/dsimard/ready.js/wiki/Configuration-options)
-* [FAQ](https://github.com/dsimard/ready.js/wiki/FAQ)
 
 
 
