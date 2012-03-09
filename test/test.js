@@ -553,6 +553,20 @@ var tests = {
       onEnd();
     });
   },
+  "try new options" : function(onEnd) {
+    createTwoFiles();
+    createBadFile();
+    
+    execArgv(getConfig(), "--no-analysis --no-compile", function(error, stdout, stderr) {
+
+      // It just dumped to all.js
+      var code = fs.readFileSync(DEST + ALL).toString();
+      a.equal(code.match(/\sbad\.js\s/).length, 1);
+      a.equal(code.match(/\js\.js\s/).length, 1);
+      
+      onEnd();
+    }); 
+  },
 };
 
 if (process.argv[2]) {
