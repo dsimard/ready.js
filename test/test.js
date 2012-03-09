@@ -550,6 +550,8 @@ var tests = {
     createFile("file.js", "function subdir2() {}", {subdir:"subdir2"});
     
     execNoConfig(SRC + " " + DEST, function(err, stdout, stderr) {
+      var code = fs.readFileSync(DEST + ALL).toString();
+      a.equal(code.match(/\sfile\.js\s/).length, 1);
       onEnd();
     });
   },
