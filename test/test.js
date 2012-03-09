@@ -5,6 +5,7 @@ var sys = require("util"),
   a = require("assert"),
   r = require("../lib/ready"),
   path = require("path"),
+  colors = require("../node_modules/colors"),
   inspect = require("util").inspect;
   
 const SRC = "./test/javascripts/";
@@ -81,7 +82,7 @@ function getConfig(extend) {
 function createFile(path, code, options) {
   options = options || {};
 
-  code = code || ["function load() {}"].join("");
+  code = code || ["function load() {} // not compiled"].join("");
 
   // Create the SRC directory if not exists
   var isDir = false;
@@ -187,20 +188,13 @@ function getAggCode(config) {
 
 // All tests to run
 var tests = {
-  // Check if compiler.jar is present in vendor
-  "check compiler.jar"  : function(onEnd) {
-    path.exists("vendor/compiler.jar", function(exists) {
-      a.ok(exists, "Compiler.jar MUST exist in 'vendor'");
-      onEnd();
-    });
-  },
-  // jslint
-  "jslint" : function(onEnd) {
-    r.jslint("function load() {}", function(success, jslint) {
+  // Analyse
+  "analyse" : function(onEnd) {
+    r.analyse('function load() {}', function(success, jslint) {
       a.ok(success);
       a.ok(jslint.errors.length == 0);
 
-      r.jslint("function load() {", function(success, jslint) {
+      r.analyse("function load() {", function(success, jslint) {
         a.ok(!success);
         a.ok(jslint.errors.length == 1);
         
@@ -210,7 +204,7 @@ var tests = {
   },
   
   "jslint with options" : function(onEnd) {
-    r.jslint("var f = eval('1');", function(success, jslint) {
+    r.analyse("var f = eval('1');", function(success, jslint) {
       a.ok(success);
       a.ok(jslint.errors.length == 0);
       onEnd();
@@ -369,7 +363,7 @@ var tests = {
     exec(getConfig({exclude:["a.js"]}), function(error, stdout) {
       var code = fs.readFileSync(DEST + ALL).toString();
       a.equal(code.match(/load\(\)\s\{\}/).length, 1);
-      a.equal(code.match(/load\(\)\{\}\;/g).length, 2);
+      a.equal(code.match(/load\(\)\{\}/g).length, 2);
       
       onEnd();
     });
@@ -380,7 +374,7 @@ var tests = {
     execArgv(getConfig(), "--exclude 'a.js'", function(error, stdout) {
       var code = fs.readFileSync(DEST + ALL).toString();
       a.equal(code.match(/load\(\)\s\{\}/).length, 1);
-      a.equal(code.match(/load\(\)\{\}\;/g).length, 2);
+      a.equal(code.match(/load\(\)\{\}/g).length, 2);
       
       onEnd();
     });
@@ -400,31 +394,8 @@ var tests = {
       onEnd();
     });
   },
-  // Google compiler server error
-  "Google compiler server error" : function(onEnd) {
-    var _completed = r.compileCompleted;
-    
-    r.compileCompleted = function(data, code, callback) {
-      data = {serverErrors:[{code:22, error:"Too many compiles performed recently.  Try again later."}]};
-      _completed(data, code, callback);
-    }
-    
-    createTwoFiles();
-    exec(null, function(error, stdout) {
-      a.throws(function() {
-        fs.statSync(DEST + "js.min.js");
-      });
-      
-      a.throws(function() {
-        fs.statSync(DEST + "js2.min.js");
-      });
-    
-      r.compileCompleted = _completed;
-      onEnd();
-    });    
-  },
-  // Google compiler error
-  "Google compiler error" : function(onEnd) {
+  // compiler error
+  "compiler error" : function(onEnd) {
     createBadFile();
     exec(getConfig({test:false, runJslint:false}), function(error, stdout) {
       a.throws(function() {
@@ -434,6 +405,8 @@ var tests = {
       a.throws(function() {
         fs.statSync(DEST + "js2.min.js");
       });
+      
+      a.ok(stdout.match(/Unexpected token/i))
     
       onEnd();
     }); 
@@ -542,6 +515,7 @@ var tests = {
     createBadFile();
     
     execArgv(getConfig(), "--nojslint --nocompiler", function(error, stdout, stderr) {
+
       // It just dumped to all.js
       var code = fs.readFileSync(DEST + ALL).toString();
       a.equal(code.match(/\sbad\.js\s/).length, 1);
@@ -576,8 +550,40 @@ var tests = {
     createFile("file.js", "function subdir2() {}", {subdir:"subdir2"});
     
     execNoConfig(SRC + " " + DEST, function(err, stdout, stderr) {
+      var code = fs.readFileSync(DEST + ALL).toString();
+      a.equal(code.match(/\sfile\.js\s/ig).length, 3);
       onEnd();
     });
+  },
+  "no recursive" : function(onEnd) {
+    createFile("file.js", "function main() {}");
+    createFile("file.js", "function subdir1() {}", {subdir:"subdir1"});
+    createFile("file.js", "function subdir2() {}", {subdir:"subdir2"});
+    
+    execArgv(getConfig(), "--no-recursive", function(error, stdout, stderr) {
+      var code = fs.readFileSync(DEST + ALL).toString();
+      a.equal(code.match(/\sfile\.js\s/ig).length, 1);
+      
+      execArgv(getConfig(), "--norecursive", function(error, stdout, stderr) {
+        var code = fs.readFileSync(DEST + ALL).toString();
+        a.equal(code.match(/\sfile\.js\s/ig).length, 1);
+        onEnd();
+      });
+    });
+  },
+  "try new options" : function(onEnd) {
+    createTwoFiles();
+    createBadFile();
+    
+    execArgv(getConfig(), "--no-analysis --no-compile", function(error, stdout, stderr) {
+
+      // It just dumped to all.js
+      var code = fs.readFileSync(DEST + ALL).toString();
+      a.equal(code.match(/\sbad\.js\s/).length, 1);
+      a.equal(code.match(/\js\.js\s/).length, 1);
+      
+      onEnd();
+    }); 
   },
 };
 
@@ -587,7 +593,7 @@ if (process.argv[2]) {
     cleanUp();
     tests[t](cleanUp);
   } else {
-    console.log("ERROR : '"+t+"' does not exist")
+    console.log(("ERROR : '"+t+"' does not exist").red)
   }
 } else {
   var keys = [];
@@ -599,10 +605,9 @@ if (process.argv[2]) {
     cleanUp();
     var key = keys.shift();
     if (key) {
-      console.log("Running " + key + "...");
+      console.log(("\n"+key).bold);
       if (tests[key]) { 
         tests[key](execTest);
-        console.log("----------");
       }
     } 
   })();

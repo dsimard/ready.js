@@ -28,7 +28,7 @@ function sortAggregates(a, b) {
 }
 
 function compile(file, callback) {
-  if (config.runGCompiler && !util.isExcluded(file)) {
+  if (config.compile && !util.isExcluded(file)) {
     logger.log("Compiling '" + file + "'");
     r.compile(file, function(success, code, data) {
       if (success) {
@@ -125,30 +125,20 @@ function aggregateAll() {
 }
 
 function startProcessing() {
-  // Warn that the offline compiler isn't installed
-  if (config.runGCompiler) {
-    r.searchOfflineCompiler(function(compiler) {
-      if (!compiler || compiler.length == 0) {
-        logger.info("Google Closure Compiler not installed (http://code.google.com/closure/compiler/)");
-        logger.info("Run " + "readyjs -i /path/to/compiler.jar".bold + " to install it locally");
-      }
-    });
-  }
-
   // Start the process
   util.forEachJs(function(file) {
-    if (config.runJslint && !util.isExcluded(file)) {
-      // Run jslint
-      r.jslint(file, function(success, jslint) {
+    if (config.analyse && !util.isExcluded(file)) {
+      // Run analysis
+      r.analyse(file, function(success, jshint) {
         if (success) {
-          logger.log("JSLINT success : " + file);
+          logger.log("Analysis success : " + file);
           compile(file, aggregate);
         } else {
-          logger.log("JSLINT error : " + file);
-          util.showJslintErrors(jslint);
+          logger.log("Analysis error : " + file);
+          util.showAnalysisErrors(jshint);
           process.exit(1);
         }
-      }, config.jslintOptions);
+      }, config.analysisOptions);
     } else {
       compile(file, aggregate);
     }
@@ -158,12 +148,12 @@ function startProcessing() {
 function watchFiles() {
   util.forEachJs(function(file) {
     if (!util.isExcluded(file)) {
-      r.watch(file, function(success, jslint) {
+      r.watch(file, function(success, jshint) {
         if (success) {
-          logger.log("JSLint on '" + file + "' : OK");
+          logger.log("Analysis on '" + file + "' : OK");
         } else {
-          logger.log("JSLint error on '" + file + "'");
-          util.showJslintErrors(jslint);
+          logger.log("Analysis error on '" + file + "'");
+          util.showAnalysisErrors(jshint);
         }
       });
     }

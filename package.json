@@ -1,8 +1,8 @@
 { 
   "name" : "ready.js",
-  "version" : "1.3.6",
+  "version" : "2.0.0",
   "description" : "continuous javascript integration",
-  "keywords" : ["continuous integration", "jslint", "javascript", "minifier", "compiler", "ci"],
+  "keywords" : ["continuous integration", "jslint", "javascript", "minifier", "compiler", "ci", "uglifier"],
   "author" : "dsimard <dsimard@azanka.ca> (http://github.com/dsimard)",
   "bin" : { "readyjs" : "./bin/ready.js" },
   "repository" : {
@@ -10,10 +10,10 @@
     "url" : "https://dsimard@github.com/dsimard/ready.js.git"
   },
   "dependencies" : {
-    "readyjslint" : "0.0.4",
-    "restler" : "0.2.X",
-    "optimist" : "0.3.X",
-    "colors" : "~0.6.0"
+    "optimist" : "~0.3.1",
+    "colors" : "~0.6.0",
+    "uglify-js" : "~1.2.5",
+    "jshint" : "~0.5.9"
   },
   "engines" : {"node" : ">=0.6.0"}
 }
