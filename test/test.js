@@ -585,6 +585,28 @@ var tests = {
       onEnd();
     }); 
   },
+  "no aggregation using aggregateTo" : function(onEnd) {
+    createTwoFiles();
+    
+    exec(getConfig({aggregateTo:""}), function(error, stdout, stderr) {
+      fs.stat(DEST + ALL, function(err, stats) {
+        a.equal(err.code, "ENOENT");
+      });
+      
+      onEnd()
+    }); 
+  },
+  "no aggregation" : function(onEnd) {
+    createTwoFiles();
+    
+    execArgv(getConfig(), "--no-aggregate", function(error, stdout, stderr) {
+      // It is not dumped to all.js
+      fs.stat(DEST + ALL, function(err, stats) {
+        a.equal(err.code, "ENOENT");
+        onEnd();
+      });
+    }); 
+  },
 };
 
 if (process.argv[2]) {
