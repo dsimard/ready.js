@@ -26,6 +26,7 @@
       --no-analysis           will not analyse the javascript files with jshint
       --no-compile            will not compile the javascript files with uglify-js
       --no-recursive          will not look for files recursively
+      --no-aggregate          will not aggregate files
       
     JsLintOptions:
       You can use any jsLint options (http://bit.ly/jslintoptions) as an argument.

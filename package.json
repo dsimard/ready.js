@@ -1,6 +1,6 @@
 { 
   "name" : "ready.js",
-  "version" : "2.0.0",
+  "version" : "2.0.1",
   "description" : "continuous javascript integration",
   "keywords" : ["continuous integration", "jslint", "javascript", "minifier", "compiler", "ci", "uglifier"],
   "author" : "dsimard <dsimard@azanka.ca> (http://github.com/dsimard)",
