@@ -600,6 +600,8 @@ var tests = {
     createTwoFiles();
     
     execArgv(getConfig(), "--no-aggregate", function(error, stdout, stderr) {
+      a.ok(!stdout.match(/aggregating/i));
+    
       // It is not dumped to all.js
       fs.stat(DEST + ALL, function(err, stats) {
         a.equal(err.code, "ENOENT");

@@ -57,7 +57,9 @@ function aggregate(file, code) {
   var filename = file.match(/[^\/]+$/g)[0];
   var minfilename = filename.replace(/\.js$/i, "."+config.compiledExtension+".js");
   
-  logger.log("Aggregating '" + file + "'")
+  if (config.aggregate) {
+    logger.log("Aggregating '" + file + "'")
+  }
   
   aggregates.push({filename : filename, code : code});
   
@@ -92,7 +94,7 @@ function aggregate(file, code) {
 
 // Aggregate all
 function aggregateAll() {
-  if (config.aggregateTo.length > 0) {
+  if (config.aggregate) {
     var createCode = function(agg) {
       return [["/*", agg.filename, "*/"].join(" "), agg.code].join("\n");
     }
