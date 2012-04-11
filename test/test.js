@@ -609,6 +609,17 @@ var tests = {
       });
     }); 
   },
+  "node_modules" : function(onEnd) {
+    createFile("express.js", "function express() {}", {subdir:"node_modules"});
+    createFile("notexpress.js", "function notexpress() {}", {subdir:"notexpress"});
+    
+    exec(getConfig(), function(error, stdout, stderr) {
+      var code = fs.readFileSync(DEST + ALL).toString();
+      a.ok(code.match(/\snotexpress\.js\s/ig));
+      a.ok(!code.match(/\sexpress\.js\s/ig));
+      onEnd();
+    });
+  }
 };
 
 if (process.argv[2]) {
