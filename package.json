@@ -9,6 +9,9 @@
     "type" : "git",
     "url" : "https://dsimard@github.com/dsimard/ready.js.git"
   },
+  "scripts": {
+    "test": "node test/test.js"
+  },
   "dependencies" : {
     "optimist" : "~0.3.1",
     "colors" : "~0.6.0",
