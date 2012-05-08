@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>{% if page.title %}{{page.title}}{% else %}Ready.js by dsimard{% endif %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <link href="/stylesheets/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="span12">
+          <p>
+            <img src="http://s3.amazonaws.com/files.posterous.com/headers/2452232/scaled500.png" alt="alt text" title="ready.js - continuous javascript integration" />
+            <a href="http://travis-ci.org/dsimard/ready.js"><img src="https://secure.travis-ci.org/dsimard/ready.js.png?branch=master" alt="Build Status" /></a>
+          </p>
+          <hr />
+        </div>
+      </div>
+      <div class="row">
+        <div class="span9">
+          {{ content }}
+        </div>
+        <div class="span3">
+          <div class="well sidebar-nav">
+            test
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html

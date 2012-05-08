@@ -1,0 +1,5 @@
+auto:         true
+server:       true
+markdown:     kramdown
+kramdown:
+  use_coderay: true
