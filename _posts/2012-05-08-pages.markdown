@@ -1,0 +1,5 @@
+---
+layout: main
+title: New github pages
+---
+Help for ready.js was spread at every corner of the planet which made me international but was difficult to maintain.

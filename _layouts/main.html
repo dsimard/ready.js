@@ -27,15 +27,32 @@
         </div>
         <div class="span3">
           <div class="well sidebar-nav">
-            <ul class="nav nav-list">
-              <li><a href="./">Homepage</a></li>
-              <li><a href="./configuration_file.html">Configuration file</a></li>
-              <li><a href="https://github.com/dsimard/ready.js">Source</a></li>
-              <li>
-                <a href="http://travis-ci.org/dsimard/ready.js"><img src="https://secure.travis-ci.org/dsimard/ready.js.png?branch=master" alt="Build Status" /></a>
-              </li>
-            </ul>
+            <p>
+              <ul class="nav nav-list">
+                <li><a href="./">Homepage</a></li>
+                <li><a href="./configuration_file.html">Configuration file</a></li>
+                <li><a href="https://github.com/dsimard/ready.js">Source</a></li>
+                <li>
+                  <a href="http://travis-ci.org/dsimard/ready.js"><img src="https://secure.travis-ci.org/dsimard/ready.js.png?branch=master" alt="Build Status" /></a>
+                </li>
+              </ul>
+            </p>
+            <p>
+              <ul class="nav nav-list">
+                <li class="nav-header">Blog</li>
+                {% for post in site.posts %}
+                  <li>{{ post.date | date: "%Y-%m-%d" }}</span> <a href="{{ post.url }}">{{ post.title }}</a></li>
+                {% endfor %}
+              </ul>
+            </p>
           </div>
+        </div>
+      </div>
+      <div class="row-fluid">
+        <div class="span12">
+          <hr />
+          <a href="https://github.com/dsimard/ready.js">ready.js</a> by 
+          <a href="https://github.com/dsimard/">dsimard</a>
         </div>
       </div>
     </div>
