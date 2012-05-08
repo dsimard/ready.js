@@ -3,28 +3,38 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>{% if page.title %}{{page.title}}{% else %}Ready.js by dsimard{% endif %}</title>
+    <title>{% if page.title %}{{page.title}} &raquo; ready.js{% else %}ready.js by dsimard{% endif %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <link href="/stylesheets/bootstrap.min.css" rel="stylesheet">
+    <link href="/stylesheets/bootstrap-responsive.min.css" rel="stylesheet">
   </head>
   <body>
-    <div class="container">
-      <div class="row">
+    <div class="container-fluid">
+      <div class="row-fluid">
         <div class="span12">
           <p>
-            <img src="http://s3.amazonaws.com/files.posterous.com/headers/2452232/scaled500.png" alt="alt text" title="ready.js - continuous javascript integration" />
-            <a href="http://travis-ci.org/dsimard/ready.js"><img src="https://secure.travis-ci.org/dsimard/ready.js.png?branch=master" alt="Build Status" /></a>
+            <a href="./"><img src="http://s3.amazonaws.com/files.posterous.com/headers/2452232/scaled500.png" alt="alt text" title="ready.js - continuous javascript integration" /></a>            
           </p>
           <hr />
         </div>
       </div>
-      <div class="row">
+      <div class="row-fluid">
         <div class="span9">
+          {% if page.title %}
+            <h1>{{page.title}}</h1>
+          {% endif %}
           {{ content }}
         </div>
         <div class="span3">
           <div class="well sidebar-nav">
-            test
+            <ul class="nav nav-list">
+              <li><a href="./">Homepage</a></li>
+              <li><a href="./configuration_file.html">Configuration file</a></li>
+              <li><a href="https://github.com/dsimard/ready.js">Source</a></li>
+              <li>
+                <a href="http://travis-ci.org/dsimard/ready.js"><img src="https://secure.travis-ci.org/dsimard/ready.js.png?branch=master" alt="Build Status" /></a>
+              </li>
+            </ul>
           </div>
         </div>
       </div>

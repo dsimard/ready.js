@@ -41,9 +41,3 @@ layout: main
 1. run `npm install ready.js --global`
 2. run `echo 'readyjs path/to/src path/to/dest' >> .git/hooks/pre-commit`
 
-## Configuration file
-
-* [Configuration options](https://github.com/dsimard/ready.js/wiki/Configuration-options)
-
-
-
