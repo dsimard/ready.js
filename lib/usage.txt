@@ -20,4 +20,4 @@ JsLintOptions:
   Example : readyjs /source /dest --evil --maxlen=80
 
 [Use a config file]
-readyjs path/to/config.file.js [options] (see http://j.mp/readyjsconfig)
+readyjs path/to/config.file.js [options] (see http://dsimard.github.com/ready.js/c)
