@@ -3,3 +3,12 @@ layout: main
 title: New github pages
 ---
 Help for ready.js was spread at every corner of the planet which made me international but was difficult to maintain.
+
+The [old blog was on Posterous][posterous] but I just don't understand what is going on since the _Spaces_ thing and their acquisition by Twitter.
+
+I will update the package to _v2.0.2_ but nothing will change except documentation. I will also remove the wiki because... I just hate to update it.
+
+By the way, I just reached **280 followers** today.
+
+
+[posterous]: http://readyjs.posterous.com/

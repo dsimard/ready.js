@@ -13,7 +13,7 @@
       <div class="row-fluid">
         <div class="span12">
           <p>
-            <a href="./"><img src="http://s3.amazonaws.com/files.posterous.com/headers/2452232/scaled500.png" alt="alt text" title="ready.js - continuous javascript integration" /></a>            
+            <a href="{{site.baseurl}}"><img src="http://s3.amazonaws.com/files.posterous.com/headers/2452232/scaled500.png" alt="alt text" title="ready.js - continuous javascript integration" /></a>            
           </p>
           <hr />
         </div>
@@ -21,7 +21,12 @@
       <div class="row-fluid">
         <div class="span9">
           {% if page.title %}
-            <h1>{{page.title}}</h1>
+            <h1>
+              {{page.title}}
+              {% if page.date %}
+                <small>{{page.date | date: "%Y-%m-%d"}}</small>
+              {% endif %}
+            </h1>
           {% endif %}
           {{ content }}
         </div>
@@ -53,6 +58,8 @@
           <hr />
           <a href="https://github.com/dsimard/ready.js">ready.js</a> by 
           <a href="https://github.com/dsimard/">dsimard</a>
+          |
+          <a href="mailto:dsimard@azanka.ca">dsimard@azanka.ca</a>
         </div>
       </div>
     </div>
