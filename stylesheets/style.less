@@ -1,0 +1,43 @@
+/* Inspired by http://blog.12spokes.com/web-design-development/simple-css-color-management-with-sass/ */
+@brand-color: #EBE4D1;
+@action-color: #DDC47E;
+@function-color: #f2f2f2;
+@alert-color: #b22727;
+
+@brand-color-light: lighten( @brand-color, 10% );
+@brand-color-lighter: lighten( @brand-color, 20% );
+@brand-color-dark: darken( @brand-color, 10% );
+@brand-color-darker: darken( @brand-color, 20% );
+
+.brand-gradient {
+  background: -moz-radial-gradient(center, ellipse cover, @brand-color 22%, @brand-color-darker 100%);
+  background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(22%,@brand-color), color-stop(100%,@brand-color-darker));
+  background: -webkit-radial-gradient(center, ellipse cover, @brand-color 22%,@brand-color-darker 100%);
+  background: -o-radial-gradient(center, ellipse cover, @brand-color 22%,@brand-color-darker 100%);
+  background: -ms-radial-gradient(center, ellipse cover, @brand-color 22%,@brand-color-darker 100%);
+  background: radial-gradient(center, ellipse cover, @brand-color 22%,@brand-color-darker 100%);
+}
+
+@action-color-light: lighten( @action-color, 10% );
+@action-color-lighter: lighten( @action-color, 20% );
+@action-color-dark: darken( @action-color, 10% );
+@action-color-darker: darken( @action-color, 20% );
+
+.action-gradient {
+  background: -moz-radial-gradient(center, ellipse cover, @action-color 22%, @action-color-darker 100%);
+  background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(22%,@action-color), color-stop(100%,@action-color-darker));
+  background: -webkit-radial-gradient(center, ellipse cover, @action-color 22%,@action-color-darker 100%);
+  background: -o-radial-gradient(center, ellipse cover, @action-color 22%,@action-color-darker 100%);
+  background: -ms-radial-gradient(center, ellipse cover, @action-color 22%,@action-color-darker 100%);
+  background: radial-gradient(center, ellipse cover, @action-color 22%,@action-color-darker 100%);
+}
+
+
+body {
+  .brand-gradient
+}
+
+.sidebar-nav2 {
+  .action-gradient
+}
+
