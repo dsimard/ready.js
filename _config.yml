@@ -1,5 +1,6 @@
 auto:         true
 server:       true
 markdown:     kramdown
+baseurl:      /ready.js/
 kramdown:
   use_coderay: true
