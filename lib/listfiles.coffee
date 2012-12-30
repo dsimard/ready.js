@@ -2,6 +2,7 @@ path = require 'path'
 fs = require 'fs'
 _ = require 'underscore'
 async = require 'async'
+fileExists = fs.exists or path.exists
 
 r = 
   # ## SourcesToFiles(sources, callback(err, files))
@@ -27,7 +28,7 @@ r =
   # Takes a single source (a file or a directory) and transforms it to resolved file paths
   sourceToFiles: (source, callback)->
     resolved = path.resolve source
-    fs.exists resolved, (exists)->
+    fileExists resolved, (exists)->
       return callback "`#{resolved}` doesn't exist" unless exists
       
       # Check if a directory
