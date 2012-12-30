@@ -153,7 +153,7 @@ function execArgv(config, argv, callback) {
   }
   
   callExec = function() {
-    var cmd = ["node bin/ready.js"];
+    var cmd = ["coffee bin/ready.coffee"];
     if (config != "") { cmd.push(confPath); }
     cmd.push(argv);
     cmd = cmd.join(" ").toString();
