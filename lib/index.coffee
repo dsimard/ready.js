@@ -12,10 +12,10 @@ r =
   #
   #     ready.compile(['./js', 'lib/cat.js'], function(err) {
   #     });
-  compile: (sources, options={}, callback=(->))->
-    callback = options if typeof options is 'function'
+  compile: (sources, options, callback=(->))->
+    [callback, options] = [options, {}] if typeof options is 'function'
   
-    sourcesToFiles sources, (err, files)->
+    sourcesToFiles sources, options, (err, files)->
       return callback(err) if err?
       
       async.forEach files, file.compile, (err)->

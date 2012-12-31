@@ -28,4 +28,16 @@ describe 'Simple', ->
       err.should.match /exist/
       done()
       
-
+  it 'is friend with recursive', (done)->
+    ready.compile 'tests/mastercat', (err, minified)->
+      should.not.exist err
+      minified.should.match /mastercat/i
+      minified.should.match /subcat/i
+      done()
+      
+  it 'can be non-recursive', (done)->
+    ready.compile 'tests/mastercat', {recursive:false}, (err, minified)->
+      should.not.exist err
+      minified.should.match /mastercat/i
+      minified.should.not.match /subcat/i
+      done()
