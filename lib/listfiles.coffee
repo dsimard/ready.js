@@ -50,7 +50,7 @@ r =
       fs.stat resolved, (err, stats)->
         if stats.isDirectory()
           # Run recursively or not
-          readdirpOptions = {root:resolved,fileFilter:'*.js'}
+          readdirpOptions = {root:resolved,fileFilter:r.fileFilter}
           readdirpOptions.depth = 0 if options.recursive? && !options.recursive
                     
           readdirp readdirpOptions, (err, res)->
@@ -60,5 +60,13 @@ r =
             callback null, files
         else
           callback null, [path.resolve(source)]
+          
+  # ## fileFilter(info)
+  #
+  # Filters the files
+  fileFilter: (info)->
+    # Keep only js files
+    keep = path.extname(info.name) is '.js'
+    keep
           
 module.exports = r

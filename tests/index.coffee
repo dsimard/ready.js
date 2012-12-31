@@ -41,3 +41,7 @@ describe 'Simple', ->
       minified.should.match /mastercat/i
       minified.should.not.match /subcat/i
       done()
+###      
+  it 'works with jquery', (done)->
+    ready.compile 'tests/jquery', (err, minified)->
+      done(err)
