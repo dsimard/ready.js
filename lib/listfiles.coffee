@@ -2,7 +2,7 @@ path = require 'path'
 fs = require 'fs'
 _ = require 'underscore'
 async = require 'async'
-fileExists = fs.exists or path.exists
+fileExists = fs.exists || path.exists
 
 r = 
   # ## SourcesToFiles(sources, callback(err, files))
