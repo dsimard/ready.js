@@ -3,6 +3,7 @@ path = require 'path'
 fs = require 'fs'
 jshint = require("jshint").JSHINT
 readyReporter = require './readyreporter'
+fileExists = fs.exists || path.exists
 
 
 r = 
@@ -15,7 +16,7 @@ r =
   compile : (file, callback)->
     # Load the file if it exists
     resolved = path.resolve(file) 
-    fs.exists resolved, (exists)->
+    fileExists resolved, (exists)->
       return callback("'#{resolved}' doesn't exist") unless exists
       
       # Load it in a string
