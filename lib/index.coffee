@@ -2,6 +2,7 @@
 {inspect} = require 'util'
 async = require '../node_modules/async'
 fileReady = require '../lib/fileready'
+{sourcesToFiles} = require '../lib/listfiles'
 
 r =
   # ## Compile(sources, callback(err))
@@ -11,10 +12,11 @@ r =
   #     ready.compile(['./js', 'lib/cat.js'], function(err) {
   #     });
   compile: (sources, callback)->
-    sources = [sources] if typeof sources is 'string'
-    
-    sources.forEach (file)->
-      fileReady.compile file, (err)->
-        callback(err)
+    sourcesToFiles sources, (err, files)->
+      return callback(err) if err?
+      
+      files.forEach (file)->
+        fileReady.compile file, (err)->
+          callback(err)
   
 module.exports = r

@@ -1,10 +1,10 @@
 {dir, log} = console
 path = require 'path'
 fs = require 'fs'
-jshint = require("jshint").JSHINT
+jshint = require("../node_modules/jshint").JSHINT
 readyReporter = require './readyreporter'
 fileExists = fs.exists || path.exists
-
+{minify} = require 'uglify-js'
 
 r = 
   # ## Compile(file, callback)
@@ -26,8 +26,7 @@ r =
         code = code.toString()
 
         # Call jshint
-        return callback(readyReporter.reporter(resolved, jshint.errors)) unless jshint(code)
-        
+        return callback(readyReporter.reporter(resolved, jshint.errors)) unless jshint(code)        
         callback()
   
 module.exports = r
