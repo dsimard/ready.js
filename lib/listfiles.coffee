@@ -47,4 +47,8 @@ r =
         else
           callback null, [path.resolve(source)]
           
+  # ## Files from dir
+  filesFromDir: (directory, callback)->
+    
+          
 module.exports = r

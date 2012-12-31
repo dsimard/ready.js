@@ -24,7 +24,8 @@
     "uglify-js" : "~2.2.2",
     "jshint" : "~0.9.1",
     "underscore" : "~1.4.3",
-    "async" : "~0.1.22"
+    "async" : "~0.1.22",
+    "readdirp" : "~0.2.1"
   },
   "devDependencies" : {
     "mocha" : "latest",

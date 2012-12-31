@@ -6,13 +6,15 @@ file = require '../lib/file'
 {sourcesToFiles} = require '../lib/listfiles'
 
 r =
-  # ## Compile(sources, callback(err, minified))
+  # ## Compile(sources, [options], callback(err, minified))
   #
   # Compile all .js files from the specified sources (can be directories and/or files)
   #
   #     ready.compile(['./js', 'lib/cat.js'], function(err) {
   #     });
-  compile: (sources, callback)->
+  compile: (sources, options={}, callback=(->))->
+    callback = options if typeof options is 'function'
+  
     sourcesToFiles sources, (err, files)->
       return callback(err) if err?
       
