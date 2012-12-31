@@ -20,8 +20,7 @@ r =
         return callback(err) if err?
         
         # Uglify them
-        min = minify files, {outSourceMap:"out.js.map", inSourceMap: "compiled.js.map"}
-        dir min
+        min = minify files
         callback null, min.code
           
   
