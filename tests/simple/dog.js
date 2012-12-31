@@ -1,1 +1,0 @@
-dogs = 'Dogs are stupid

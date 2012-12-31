@@ -1,11 +1,12 @@
 {dir, log} = console
 {inspect} = require 'util'
 async = require '../node_modules/async'
-fileReady = require '../lib/fileready'
+{minify} = require '../node_modules/uglify-js'
+file = require '../lib/file'
 {sourcesToFiles} = require '../lib/listfiles'
 
 r =
-  # ## Compile(sources, callback(err))
+  # ## Compile(sources, callback(err, minified))
   #
   # Compile all .js files from the specified sources (can be directories and/or files)
   #
@@ -15,8 +16,13 @@ r =
     sourcesToFiles sources, (err, files)->
       return callback(err) if err?
       
-      files.forEach (file)->
-        fileReady.compile file, (err)->
-          callback(err)
+      async.forEach files, file.compile, (err)->
+        return callback(err) if err?
+        
+        # Uglify them
+        min = minify files, {outSourceMap:"out.js.map", inSourceMap: "compiled.js.map"}
+        dir min
+        callback null, min.code
+          
   
 module.exports = r

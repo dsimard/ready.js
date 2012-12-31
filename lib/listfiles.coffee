@@ -1,3 +1,4 @@
+# This files takes the different sources and creates an array of every single file
 path = require 'path'
 fs = require 'fs'
 _ = require 'underscore'
