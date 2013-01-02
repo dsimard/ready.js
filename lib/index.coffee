@@ -24,7 +24,11 @@ r =
       # If there are no files, throw an error
       return callback('There are no files to readyjsize') if files.length == 0
       
-      async.forEach files, file.compile, (err)->
+      # Wrapper for analyze
+      analyzeWrapper = (filename, callback)->
+        file.analyze filename, options, callback
+      
+      async.forEach files, analyzeWrapper, (err)->
         return callback(err) if err?
         
         # Uglify them

@@ -65,3 +65,17 @@ describe 'Ready.js', ->
         should.exist err
         err.should.match /no files/
         done()
+
+  it 'analyze invalid files', (done)->
+    ready.compile 'tests/invalid', (err, minified)->
+      should.exist err
+      should.not.exist minified
+      done()
+  
+  it 'doesn\'t analyze files', (done)->
+    ready.compile 'tests/invalid', 
+      {analyze:false}, 
+      (err, minified)->
+        should.not.exist err
+        should.exist minified
+        done()
