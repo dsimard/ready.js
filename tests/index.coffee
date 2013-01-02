@@ -11,25 +11,22 @@ deleteTestFiles = (done)->
   fileExists 'tests/all.js', (exists)->
     if exists
       fs.unlink 'tests/all.js', (err)->
-        log "RM #{err}"
         done()
     else
       done()
 
 compile = (files, options={}, done, callback)->
   [callback, done, options] = [done, options, {}] unless callback?
-  #options.output = 'tests/all.js' unless options.output?
+  options.output = 'tests/all.js' unless options.output?
 
   # Test as a lib
   ready.compile files, options, (err, minified)->
     callback err, minified
-    done()
+      
     # Test as command-line
-    ###
     cli.execute files, options, (err, minified)->
       callback err, minified
       done()
-    ###
 
 describe 'Ready.js', ->
   beforeEach deleteTestFiles
@@ -75,6 +72,7 @@ describe 'Ready.js', ->
       #done()
       
   it 'skips jquery', (done)->
+    @timeout 10000
     compile ['tests/jquery', 'tests/single'], 
       {ignore:'jquery*.js'}, 
       done,
@@ -84,6 +82,7 @@ describe 'Ready.js', ->
         #done()
             
   it 'returns an error if there are no files to compile', (done)->
+    @timeout 10000
     compile 'tests/jquery', 
       {ignore:'jquery*'}, 
       done,
@@ -92,6 +91,7 @@ describe 'Ready.js', ->
         minified.should.match /jQuery/
         
   it 'returns an error if all files are ignored', (done)->
+    @timeout 10000
     compile ['tests/jquery', 'tests/single'], 
       {ignore:['jquery*','cat.js']}, 
       done,

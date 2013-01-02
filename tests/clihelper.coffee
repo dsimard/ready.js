@@ -23,13 +23,13 @@ r =
       fileExists 'tests/all.js', (exists)->
         if exists
           fs.readFile 'tests/all.js', (err, data)->
-            return callback(err) if err?
-            data = data.toString()
+            throw err if err?
+            callback null, data.toString()
         else              
           callback err, stdout
       
   optionsToArgs: (options)->
-    _.map _.pairs(options), (option)->
+    args = _.map _.pairs(options), (option)->
       switch option[0]
         when 'recursive'
           if option[1] then '' else '--no-recursive'
@@ -42,5 +42,7 @@ r =
           "--ignore '#{values.join ' '}'"
         
         else throw "Option `#{option[0]}` not mapped"
+        
+    args.join ' '
   
 module.exports = r
