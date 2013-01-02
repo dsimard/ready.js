@@ -1,88 +1,115 @@
 should = require '../node_modules/should'
 ready = require '../lib'
 cli = require './clihelper.coffee'
+{log} = console
+{inspect} = require 'util'
+fs = require 'fs'
+path = require 'path'
+fileExists = fs.exists || path.exists
 
-compile = (files, options={}, callback)->
+deleteTestFiles = (done)->
+  fileExists 'tests/all.js', (exists)->
+    if exists
+      fs.unlink 'tests/all.js', (err)->
+        log "RM #{err}"
+        done()
+    else
+      done()
+
+compile = (files, options={}, done, callback)->
+  [callback, done, options] = [done, options, {}] unless callback?
+  #options.output = 'tests/all.js' unless options.output?
+
   # Test as a lib
-  ready.compile files, options, callback
-  
-  # Test as command-line
-  cli.execute files, options, callback
+  ready.compile files, options, (err, minified)->
+    callback err, minified
+    
+    # Test as command-line
+    cli.execute files, options, (err, minified)->
+      callback err, minified
+      done()
 
 describe 'Ready.js', ->
-  it 'works with a valid file', ()->
-    compile 'tests/simple/cat.js', (err, minified)->
+  beforeEach deleteTestFiles
+  afterEach deleteTestFiles
+    
+
+  it 'works with a valid file', (done)->
+    compile 'tests/simple/cat.js', done, (err, minified)->
       should.not.exist err
       minified.should.match /cat1/
       minified.should.not.match /cat2/
-      #done()
       
-  it 'works with a dir containing two files', ()->
-    compile 'tests/simple', (err, minified)->
+  it 'works with a dir containing two files', (done)->
+    compile 'tests/simple', done, (err, minified)->
       should.not.exist err
       minified.should.match /cat1/
       minified.should.match /cat2/
       #done()
       
-  it 'show error with an invalid file', ()->
-    compile 'tests/not_working/dog.js', (err, minified)->
+  it 'shows error with an invalid file', (done)->
+    compile 'tests/not_working/dog.js', done, (err, minified)->
       should.exist err
       should.not.exist minified
       err.should.match /4\serrors/
       #done()
   
-  it 'returns error if file doesn\'t exist', ()->
-    compile '404.js', (err)->
+  it 'returns error if file doesn\'t exist', (done)->
+    compile '404.js', done, (err)->
       err.should.match /exist/
       #done()
       
-  it 'is friend with recursive', ()->
-    compile 'tests/mastercat', (err, minified)->
+  it 'is friend with recursive', (done)->
+    compile 'tests/mastercat', done, (err, minified)->
       should.not.exist err
       minified.should.match /mastercat/i
       minified.should.match /subcat/i
       #done()
       
-  it 'can be non-recursive', ()->
-    compile 'tests/mastercat', {recursive:false}, (err, minified)->
+  it 'can be non-recursive', (done)->
+    compile 'tests/mastercat', {recursive:false}, done, (err, minified)->
       should.not.exist err
       minified.should.match /mastercat/i
       minified.should.not.match /subcat/i
       #done()
       
-  it 'skips jquery', ()->
+  it 'skips jquery', (done)->
     compile ['tests/jquery', 'tests/single'], 
       {ignore:'jquery*.js'}, 
+      done,
       (err, minified)->
         should.not.exist err
         minified.should.match /singleCat/
         #done()
             
-  it 'returns an error if there are no files to compile', ()->
+  it 'returns an error if there are no files to compile', (done)->
     compile 'tests/jquery', 
       {ignore:'jquery*'}, 
+      done,
       (err, minified)->
         should.exist err
         err.should.match /no files/
         #done()
         
-  it 'returns an error if all files are ignored', ()->
+  it 'returns an error if all files are ignored', (done)->
     compile ['tests/jquery', 'tests/single'], 
       {ignore:['jquery*','cat.js']}, 
+      done,
       (err, minified)->
         should.exist err
         err.should.match /no files/
         #done()
 
-  it 'analyze invalid files', ()->
-    compile 'tests/invalid', (err, minified)->
+  it 'analyze invalid files', (done)->
+    compile 'tests/invalid', done, (err, minified)->
       should.exist err
       should.not.exist minified
       #done()
   
-  it 'doesn\'t analyze files', ()->
+  it 'doesn\'t analyze files', (done)->
     compile 'tests/invalid', 
       {analyze:false}, 
+      done,
       (err, minified)->
         should.not.exist err
         should.exist minified
