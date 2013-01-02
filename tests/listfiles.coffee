@@ -61,3 +61,11 @@ describe 'List files,', ->
         should.not.exists err
         files.length.should.equal 3
         done()
+        
+    it 'ignores files even if it\'s a js file', (done)->
+      listFiles.sourcesToFiles ['./tests/single', './tests/jquery'], 
+        {ignore:'jquery*.js'}
+        (err, files)->
+          should.not.exists err
+          files.length.should.equal 1
+          done()

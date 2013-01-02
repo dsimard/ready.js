@@ -1,13 +1,14 @@
 # This files takes the different sources and creates an array of every single file
 path = require 'path'
 fs = require 'fs'
+{log, dir} = console
+{inspect} = require 'util'
+fileExists = fs.exists || path.exists
+
 _ = require '../node_modules/underscore'
 async = require '../node_modules/async'
 readdirp = require '../node_modules/readdirp'
-fileExists = fs.exists || path.exists
-{log, dir} = console
-{inspect} = require 'util'
-
+minimatch = require 'minimatch'
 
 r = 
   # ## SourcesToFiles(sources, options, callback(err, files))
@@ -49,8 +50,12 @@ r =
       # Check if a directory
       fs.stat resolved, (err, stats)->
         if stats.isDirectory()
+          # Wrapper for file info
+          filterFileInfoWrapper = (info)->
+            r.filterFileInfo(info, options)
+        
           # Run recursively or not
-          readdirpOptions = {root:resolved,fileFilter:r.fileFilter}
+          readdirpOptions = {root:resolved,fileFilter:filterFileInfoWrapper}
           readdirpOptions.depth = 0 if options.recursive? && !options.recursive
                     
           readdirp readdirpOptions, (err, res)->
@@ -61,12 +66,24 @@ r =
         else
           callback null, [path.resolve(source)]
           
-  # ## fileFilter(info)
+  # ## filterFileInfo(info)
   #
-  # Filters the files
-  fileFilter: (info)->
-    # Keep only js files
-    keep = path.extname(info.name) is '.js'
-    keep
+  # Filters file info sent by readdirp
+  filterFileInfo: (info, options)->
+    r.filterFilename info.name, options
+    
+  # ## filterFilename(name)
+  filterFilename: (name, options)->
+    keep = minimatch(name, '*.js')
+    ignore = r.ignoreFile(name, options)
+    keep and not ignore
+    
+  # ## ignoreFile(name)
+  #
+  # If the file should be ignored
+  ignoreFile: (name, options)->
+    ignoreList = _.flatten [(options.ignore ? [])]
+    _.any ignoreList, (i)->
+      minimatch(name, i)
           
 module.exports = r
