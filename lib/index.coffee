@@ -39,7 +39,6 @@ r =
           return callback('There are no files to readyjsize') if allFiles.length == 0
           
           min = minify allFiles
-          callback null, min.code          
-          
+          callback null, min.code
   
 module.exports = r

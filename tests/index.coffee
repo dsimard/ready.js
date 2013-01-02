@@ -72,7 +72,6 @@ describe 'Ready.js', ->
       #done()
       
   it 'skips jquery', (done)->
-    @timeout 10000
     compile ['tests/jquery', 'tests/single'], 
       {ignore:'jquery*.js'}, 
       done,
@@ -82,7 +81,6 @@ describe 'Ready.js', ->
         #done()
             
   it 'returns an error if there are no files to compile', (done)->
-    @timeout 10000
     compile 'tests/jquery', 
       {ignore:'jquery*'}, 
       done,
@@ -91,7 +89,6 @@ describe 'Ready.js', ->
         minified.should.match /jQuery/
         
   it 'returns an error if all files are ignored', (done)->
-    @timeout 10000
     compile ['tests/jquery', 'tests/single'], 
       {ignore:['jquery*','cat.js']}, 
       done,
