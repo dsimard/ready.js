@@ -23,16 +23,17 @@ compile = (files, options={}, done, callback)->
   # Test as a lib
   ready.compile files, options, (err, minified)->
     callback err, minified
-    
+    done()
     # Test as command-line
+    ###
     cli.execute files, options, (err, minified)->
       callback err, minified
       done()
+    ###
 
 describe 'Ready.js', ->
   beforeEach deleteTestFiles
-  afterEach deleteTestFiles
-    
+  afterEach deleteTestFiles    
 
   it 'works with a valid file', (done)->
     compile 'tests/simple/cat.js', done, (err, minified)->
@@ -87,17 +88,17 @@ describe 'Ready.js', ->
       {ignore:'jquery*'}, 
       done,
       (err, minified)->
-        should.exist err
-        err.should.match /no files/
-        #done()
+        should.not.exist err
+        minified.should.match /jQuery/
         
   it 'returns an error if all files are ignored', (done)->
     compile ['tests/jquery', 'tests/single'], 
       {ignore:['jquery*','cat.js']}, 
       done,
       (err, minified)->
-        should.exist err
-        err.should.match /no files/
+        should.not.exist err
+        minified.should.match /jQuery/
+        minified.should.match /singleCat/
         #done()
 
   it 'analyze invalid files', (done)->
@@ -114,3 +115,8 @@ describe 'Ready.js', ->
         should.not.exist err
         should.exist minified
         #done()
+        
+  it 'throws an error on empty directory', (done)->
+    compile 'tests/empty', done, (err, minified)->
+      should.exist err
+      err.should.match /no file/

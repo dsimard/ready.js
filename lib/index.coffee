@@ -23,9 +23,6 @@ r =
     sourcesToFiles sources, options, (err, files)->
       return callback(err) if err?
       
-      # If there are no files, throw an error
-      return callback('There are no files to readyjsize') if files.length == 0
-      
       # Wrapper for analyze
       analyzeWrapper = (filename, callback)->
         file.analyze filename, options, callback
@@ -33,9 +30,16 @@ r =
       async.forEach files, analyzeWrapper, (err)->
         return callback(err) if err?
         
-        # Uglify them
-        min = minify files
-        callback null, min.code
+        # Uglify all files (no filter)
+        allFilesOptions = {recursive:(options.recursive ? true)}
+        sourcesToFiles sources, allFilesOptions, (err, allFiles)->
+          return callback(err) if err?
+          
+          # If there are no files, throw an error
+          return callback('There are no files to readyjsize') if allFiles.length == 0
+          
+          min = minify allFiles
+          callback null, min.code          
           
   
 module.exports = r
