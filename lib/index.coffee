@@ -14,7 +14,7 @@ r =
   #     });
   #
   # `options` are :
-  # - `ignore` default is `[]`) : A list of files to ignore. (ex : _jquery*.js)
+  # - `ignore` default is `[]` : A list of files to ignore. (ex : _jquery*.js)
   # - `analyze` default is `true` : If should analyze files through jshint
   # - `recursive` default is `true` : If should go through directory recursively
   compile: (sources, options, callback=(->))->

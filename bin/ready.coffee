@@ -17,6 +17,10 @@ argv = optimist.argv
 
 optimist.showHelp() if argv._.length == 0 || argv.help?
 
+# Create an array with ignore list
+argv.ignore = argv.ignore.split(' ') if argv.ignore?
+argv.i = argv.ignore
+
 if argv._.length > 0
   ready.compile argv._, argv, (err, minified)->
     # If there was an error in the compiled file, show and exit

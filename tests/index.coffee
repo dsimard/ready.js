@@ -1,81 +1,89 @@
 should = require '../node_modules/should'
 ready = require '../lib'
+cli = require './clihelper.coffee'
+
+compile = (files, options={}, callback)->
+  # Test as a lib
+  ready.compile files, options, callback
+  
+  # Test as command-line
+  cli.execute files, options, callback
 
 describe 'Ready.js', ->
-  it 'works with a valid file', (done)->
-    ready.compile 'tests/simple/cat.js', (err, minified)->
+  it 'works with a valid file', ()->
+    compile 'tests/simple/cat.js', (err, minified)->
       should.not.exist err
       minified.should.match /cat1/
       minified.should.not.match /cat2/
-      done()
+      #done()
       
-  it 'works with a dir containing two files', (done)->
-    ready.compile 'tests/simple', (err, minified)->
+  it 'works with a dir containing two files', ()->
+    compile 'tests/simple', (err, minified)->
       should.not.exist err
       minified.should.match /cat1/
       minified.should.match /cat2/
-      done()
+      #done()
       
-  it 'show error with an invalid file', (done)->
-    ready.compile 'tests/not_working/dog.js', (err, minified)->
+  it 'show error with an invalid file', ()->
+    compile 'tests/not_working/dog.js', (err, minified)->
       should.exist err
       should.not.exist minified
       err.should.match /4\serrors/
-      done()
+      #done()
   
-  it 'returns error if file doesn\'t exist', (done)->
-    ready.compile '404.js', (err)->
+  it 'returns error if file doesn\'t exist', ()->
+    compile '404.js', (err)->
       err.should.match /exist/
-      done()
+      #done()
       
-  it 'is friend with recursive', (done)->
-    ready.compile 'tests/mastercat', (err, minified)->
+  it 'is friend with recursive', ()->
+    compile 'tests/mastercat', (err, minified)->
       should.not.exist err
       minified.should.match /mastercat/i
       minified.should.match /subcat/i
-      done()
+      #done()
       
-  it 'can be non-recursive', (done)->
-    ready.compile 'tests/mastercat', {recursive:false}, (err, minified)->
+  it 'can be non-recursive', ()->
+    compile 'tests/mastercat', {recursive:false}, (err, minified)->
       should.not.exist err
       minified.should.match /mastercat/i
       minified.should.not.match /subcat/i
-      done()
+      #done()
       
-  it 'skips jquery', (done)->
-    ready.compile ['tests/jquery', 'tests/single'], 
+  it 'skips jquery', ()->
+    compile ['tests/jquery', 'tests/single'], 
       {ignore:'jquery*.js'}, 
       (err, minified)->
         should.not.exist err
         minified.should.match /singleCat/
-        done()
+        #done()
             
-  it 'returns an error if there are no files to compile', (done)->
-    ready.compile 'tests/jquery', 
+  it 'returns an error if there are no files to compile', ()->
+    compile 'tests/jquery', 
       {ignore:'jquery*'}, 
       (err, minified)->
         should.exist err
         err.should.match /no files/
-        done()
+        #done()
         
-  it 'returns an error if all files are ignored', (done)->
-    ready.compile ['tests/jquery', 'tests/single'], 
+  it 'returns an error if all files are ignored', ()->
+    compile ['tests/jquery', 'tests/single'], 
       {ignore:['jquery*','cat.js']}, 
       (err, minified)->
         should.exist err
         err.should.match /no files/
-        done()
+        #done()
 
-  it 'analyze invalid files', (done)->
-    ready.compile 'tests/invalid', (err, minified)->
+  it 'analyze invalid files', ()->
+    compile 'tests/invalid', (err, minified)->
       should.exist err
       should.not.exist minified
-      done()
+      #done()
   
-  it 'doesn\'t analyze files', (done)->
-    ready.compile 'tests/invalid', 
+  it 'doesn\'t analyze files', ()->
+    compile 'tests/invalid', 
       {analyze:false}, 
       (err, minified)->
         should.not.exist err
         should.exist minified
-        done()
+        #done()
