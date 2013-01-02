@@ -14,7 +14,8 @@ r =
   #     });
   #
   # `options` are :
-  # - `ignore` : A list of files to ignore. (ex : _jquery*.js_
+  # - `ignore` default is `[]`) : A list of files to ignore. (ex : _jquery*.js)
+  # - `analyze` default is `true` : If should analyze files through jshint
   compile: (sources, options, callback=(->))->
     [callback, options] = [options, {}] if typeof options is 'function'
     
