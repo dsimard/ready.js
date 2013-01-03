@@ -11,6 +11,8 @@ optimist = require('optimist')
   .describe('o', 'The file in which to write the output')
   .options('i', {alias:'ignore'})
   .describe('i', 'Ignore these files from JSHint but output them in the aggregated file')
+  .options('k', {alias:'keep'})
+  .describe('k', 'Keep individual minified files')
   .describe('no-recursive', 'Don\'t recurse in sub-directories')
   .options('h', {alias:'help'})
   .describe('h', 'Display this help')
@@ -22,6 +24,7 @@ optimist.showHelp() if argv._.length == 0 || argv.help?
 # Create an array with ignore list
 argv.ignore = argv.ignore.split(' ') if argv.ignore?
 argv.i = argv.ignore
+
 
 if argv._.length > 0
   ready.compile argv._, argv, (err, minified)->

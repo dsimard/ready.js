@@ -9,6 +9,9 @@ path = require 'path'
 fileExists = fs.exists || path.exists
 
 deleteTestFiles = (done)->
+  # Remove listeners
+  ready.removeAllListeners()
+
   extrafs.mkdir 'tests/minified', (err)->
     extrafs.remove 'tests/minified/all.js', (err)->    
       return done(err) if err?
@@ -65,6 +68,9 @@ describe 'Ready.js', ->
       fileCount.should.equal 0
       
   it 'is friend with recursive', (done)->
+    ready.on 'file.uglify', (file, minified)->
+      minified.code.should.match /cat/i
+  
     compile 'tests/mastercat', done, (err, minified)->
       should.not.exist err
       minified.should.match /mastercat/i

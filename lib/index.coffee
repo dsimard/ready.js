@@ -5,6 +5,11 @@ async = require '../node_modules/async'
 file = require '../lib/file'
 {sourcesToFiles} = require('../lib/listfiles')
 
+# ## Events
+#
+# - analyze(file, jshint) : Everytime a file is analyzed
+# - file.uglify(file, jshint)
+
 r =
   # ## Compile(sources, [options], callback(err, minified))
   #
@@ -17,7 +22,7 @@ r =
   # - `ignore` default is `[]` : A list of files to ignore. (ex : _jquery*.js)
   # - `analyze` default is `true` : If should analyze files through jshint
   # - `recursive` default is `true` : If should go through directory recursively
-  compile: (sources, options, callback=(->))->
+  compile: (sources, options, callback)->
     [callback, options] = [options, {}] if typeof options is 'function'
     
     sourcesToFiles sources, options, (err, files)->
@@ -30,16 +35,35 @@ r =
       async.forEach files, analyzeWrapper, (err)->
         return callback(err) if err?
         
-        # Uglify all files (no filter)
-        allFilesOptions = {recursive:(options.recursive ? true)}
-        sourcesToFiles sources, allFilesOptions, (err, allFiles)->
-          return callback(err) if err?
+        r.uglify sources, options, callback
           
-          # If there are no files, throw an error
-          return callback('There are no files to readyjsize') if allFiles.length == 0
-          
-          min = minify allFiles
-          callback null, min.code
+  # ## 
+  uglify: (sources, options, callback)->
+    allFilesOptions = {recursive:(options.recursive ? true)}
+    sourcesToFiles sources, allFilesOptions, (err, allFiles)->
+      return callback(err) if err?
+      
+      # If there are no files, throw an error
+      return callback('There are no files to readyjsize') if allFiles.length == 0
+      
+      # If there is a listener for 'file.uglify', uglify each file individually
+      if r.listeners('file.uglify').length > 0
+        async.forEach allFiles, r.uglifyFile, ->
+          r.uglifyBatch allFiles, callback
+      else
+        r.uglifyBatch allFiles, callback     
+      
+      
+  uglifyBatch: (files, callback)->
+    min = minify files
+    callback null, min.code
+      
+  uglifyFile: (filename, callback)->
+    minified = minify filename
+    r.emit 'file.uglify', filename, minified
+    callback null, minified
+    
+  
           
 r[k] = func for k, func of require('events').EventEmitter.prototype
 
