@@ -1,7 +1,9 @@
 #!/usr/bin/env coffee
-{dir} = console
+{dir, log} = console
+{inspect} = require 'util'
 fs = require 'fs'
 ready = require '../lib/'
+output = require '../lib/output'
 
 optimist = require('optimist')
   .usage('\nUsage: $0 [FILES OR DIRECTORIES] [options]')
@@ -22,23 +24,13 @@ argv.ignore = argv.ignore.split(' ') if argv.ignore?
 argv.i = argv.ignore
 
 if argv._.length > 0
-  log "TTTTTTTTTTTTT #{inspect argv}"
   ready.compile argv._, argv, (err, minified)->
     # If there was an error in the compiled file, show and exit
     if err?
       console.error err
       process.exit 1
     
-    # Output in stdout if no output file was specified
-    if argv.output?
-      # If it's a directory, output with default filename
-      fs.stats argv.output, (err, stats)->
-        return callback err if err?
-      
-        fs.writeFile argv.output, minified, (err)->
-          if err?
-            console.error err
-            process.exit 1
-      
-    else  
-      console.log minified
+    output.write minified, argv.output, (err)->
+      if err?
+        console.error err
+        process.exit 1 

@@ -8,7 +8,7 @@ fileExists = fs.exists || path.exists
 _ = require '../node_modules/underscore'
 async = require '../node_modules/async'
 readdirp = require '../node_modules/readdirp'
-minimatch = require 'minimatch'
+minimatch = require '../node_modules/minimatch'
 
 r = 
   # ## SourcesToFiles(sources, options, callback(err, files))

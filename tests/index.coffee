@@ -117,8 +117,9 @@ describe 'Ready.js', ->
     compile 'tests/empty', done, (err, minified)->
       should.exist err
       err.should.match /no file/
-      
-  it 'outputs all.js if output is a directory', (done)->
-    compile 'tests/simple', {output:'./tests/'}, done, (err, minified)->
-      should.exist err
-      err.should.match /no file/
+
+  it 'writes all.js if output is a directory', (done)->
+    compile 'tests/single', {output:'./tests/'}, done, (err, minified)->
+      should.not.exist err
+      minified.should.match /singleCat/
+
