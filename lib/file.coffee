@@ -6,6 +6,9 @@ fs = require 'fs'
 jshint = require("../node_modules/jshint").JSHINT
 readyReporter = require './reporter'
 
+# ## Events
+# 
+# analyze(filename, jshint, err)
 r = 
   # ## analyze(file, callback)
   #
@@ -24,9 +27,13 @@ r =
       analyze = options.analyze ? true
 
       if analyze
-        return callback(readyReporter.reporter(file, jshint.errors)) unless jshint(code)        
+        jshintOk = jshint(code)
+        r.emit 'analyze', file, jshint
+        return callback(readyReporter.reporter(file, jshint.errors)) unless jshintOk       
         
       callback()
+  
+r[k] = func for k, func of require('events').EventEmitter.prototype
   
 module.exports = r
     

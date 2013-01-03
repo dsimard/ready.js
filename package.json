@@ -31,7 +31,8 @@
   "devDependencies" : {
     "mocha" : "latest",
     "should" : "latest",
-    "coffee-script" : "latest"
+    "coffee-script" : "latest",
+    "fs-extra" : "latest"
   },
   "engines" : {"node" : ">=0.6.0"}
 }

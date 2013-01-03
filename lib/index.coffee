@@ -40,5 +40,11 @@ r =
           
           min = minify allFiles
           callback null, min.code
+          
+r[k] = func for k, func of require('events').EventEmitter.prototype
+
+# Re-emit the analyze event from file
+file.on 'analyze', (file, jshint)->
+  r.emit 'analyze', file, jshint
   
 module.exports = r

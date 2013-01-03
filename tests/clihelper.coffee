@@ -19,7 +19,7 @@ r =
       err = null if err is ''
       stdout = null if stdout is ''
       
-      log "STDOUT : #{stdout}"
+      #log "STDOUT : #{stdout}"
       
       # Read 'test/all.js' for stdout
       fileExists 'tests/all.js', (exists)->

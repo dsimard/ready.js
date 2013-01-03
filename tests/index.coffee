@@ -39,11 +39,15 @@ describe 'Ready.js', ->
       minified.should.not.match /cat2/
       
   it 'works with a dir containing two files', (done)->
+    fileCount = 0
+    ready.on 'analyze', ->
+      fileCount+=1
+  
     compile 'tests/simple', done, (err, minified)->
       should.not.exist err
       minified.should.match /cat1/
       minified.should.match /cat2/
-      #done()
+      fileCount.should.equal 2
       
   it 'shows error with an invalid file', (done)->
     compile 'tests/not_working/dog.js', done, (err, minified)->
@@ -53,9 +57,13 @@ describe 'Ready.js', ->
       #done()
   
   it 'returns error if file doesn\'t exist', (done)->
+    fileCount = 0
+    ready.on 'analyze', ->
+      fileCount+=1  
+  
     compile '404.js', done, (err)->
       err.should.match /exist/
-      #done()
+      fileCount.should.equal 0
       
   it 'is friend with recursive', (done)->
     compile 'tests/mastercat', done, (err, minified)->
