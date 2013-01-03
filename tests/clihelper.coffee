@@ -22,9 +22,9 @@ r =
       #log "STDOUT : #{stdout}"
       
       # Read 'test/all.js' for stdout
-      fileExists 'tests/all.js', (exists)->
+      fileExists 'tests/minified/all.js', (exists)->
         if exists
-          fs.readFile 'tests/all.js', (err, data)->
+          fs.readFile 'tests/minified/all.js', (err, data)->
             throw err if err?
             callback null, data.toString()
         else              

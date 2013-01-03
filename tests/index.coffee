@@ -4,20 +4,19 @@ cli = require './clihelper.coffee'
 {log} = console
 {inspect} = require 'util'
 fs = require 'fs'
+extrafs = require 'fs-extra'
 path = require 'path'
 fileExists = fs.exists || path.exists
 
 deleteTestFiles = (done)->
-  fileExists 'tests/all.js', (exists)->
-    if exists
-      fs.unlink 'tests/all.js', (err)->
-        done()
-    else
-      done()
+  extrafs.mkdir 'tests/minified', (err)->
+    extrafs.remove 'tests/minified/all.js', (err)->    
+      return done(err) if err?
+      done()      
 
 compile = (files, options={}, done, callback)->
   [callback, done, options] = [done, options, {}] unless callback?
-  options.output = 'tests/all.js' unless options.output?
+  options.output = 'tests/minified/all.js' unless options.output?
 
   # Test as a lib
   ready.compile files, options, (err, minified)->
@@ -127,7 +126,7 @@ describe 'Ready.js', ->
       err.should.match /no file/
 
   it 'writes all.js if output is a directory', (done)->
-    compile 'tests/single', {output:'./tests/'}, done, (err, minified)->
+    compile 'tests/single', {output:'./tests/minified/'}, done, (err, minified)->
       should.not.exist err
       minified.should.match /singleCat/
 
