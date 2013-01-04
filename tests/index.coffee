@@ -28,7 +28,13 @@ compile = (files, options={}, done, callback)->
     # Test as command-line
     cli.execute files, options, (err, minified)->
       callback err, minified
-      done()
+      
+      deleteTestFiles ->
+        # Test as json config
+        cli.optionsToJson options, (err)->
+          cli.execute files, "tests/minified/readyjs.json", (err, minified)->
+            callback err, minified
+            done()
 
 describe 'Ready.js', ->
   beforeEach deleteTestFiles
@@ -136,3 +142,6 @@ describe 'Ready.js', ->
       should.not.exist err
       minified.should.match /singleCat/
 
+  it 'can load a json for options', (done)->
+    done()
+    #cli.execute 'tests/simple'

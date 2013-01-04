@@ -14,12 +14,14 @@ r =
     cmd = "./node_modules/.bin/coffee ./bin/ready.coffee #{files.join ' '}"
     cwd = path.resolve './'
     args = r.optionsToArgs options
-    log "CMD : #{cmd} #{args}"
+    #log "CMD : #{cmd} #{args}"
     exec "#{cmd} #{args}", {cwd:cwd}, (err, stdout, stderr)->
       err = null if err is ''
       stdout = null if stdout is ''
+      stderr = null if stderr is ''
       
-      #log "STDOUT : #{stdout}"
+      #log "STDOUT : #{stdout}" if stdout?
+      #log "STDERR : #{stderr}"  if stderr?
       
       # Read 'test/all.js' for stdout
       fileExists 'tests/minified/all.js', (exists)->
@@ -28,23 +30,33 @@ r =
             throw err if err?
             callback null, data.toString()
         else              
-          callback err, stdout
+          callback stderr, stdout
       
   optionsToArgs: (options)->
-    args = _.map _.pairs(options), (option)->
-      switch option[0]
-        when 'recursive'
-          if option[1] then '' else '--no-recursive'
-        when 'analyze' 
-          if option[1] then '' else '--no-analyze'
-        when 'output'
-          "--output #{option[1]}"
-        when 'ignore'
-          values = _.flatten [option[1]]
-          "--ignore '#{values.join ' '}'"
-        
-        else throw "Option `#{option[0]}` not mapped"
-        
-    args.join ' '
+    # if options is a string, use it as a json config
+    if typeof options is 'string'
+      "-c #{options}"
+    else
+      args = _.map _.pairs(options), (option)->
+        switch option[0]
+          when 'recursive'
+            if option[1] then '' else '--no-recursive'
+          when 'analyze' 
+            if option[1] then '' else '--no-analyze'
+          when 'output'
+            "--output #{option[1]}"
+          when 'ignore'
+            values = _.flatten [option[1]]
+            "--ignore '#{values.join ' '}'"
+          
+          else throw "Option `#{option[0]}` not mapped"
+          
+      args.join ' '
+      
+  optionsToJson: (options, callback)->
+    json = JSON.stringify(options)
+    fs.writeFile 'tests/minified/readyjs.json', json, (err)->
+      return callback(err) if err?
+      callback()
   
 module.exports = r

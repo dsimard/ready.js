@@ -10,7 +10,7 @@ r =
   #
   # callback(`err`)
   write: (content, destination, callback)->
-    return console.log destination unless destination?
+    return console.log content unless destination?
 
     # If it's not a js file, it's a directory
     if minimatch destination, '**/*.js'
@@ -20,7 +20,6 @@ r =
       r.writeToFile content, "#{destination}/all.js", callback
 
   writeToFile: (content, destination, callback)->
-    log "WRITE TO FILE : #{destination}"
     fs.writeFile destination, content, (err)->
       return callback(err) if err?
       

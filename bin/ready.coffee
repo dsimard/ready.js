@@ -10,6 +10,8 @@ optimist = require('optimist')
   .usage('\nUsage: $0 [FILES OR DIRECTORIES] [options]')
   .options('o', {alias:'output'})
   .describe('o', 'The file in which to write the output')
+  .option('c', {alias:'config'})
+  .describe('c', 'Specify a config.json file')
   .options('i', {alias:'ignore'})
   .describe('i', 'Ignore these files from JSHint but output them in the aggregated file')
   .options('k', {alias:'keep'})
@@ -34,7 +36,14 @@ if argv.k and argv.o
       if err?
         console.error err
         process.exit 1
-
+        
+# Override argv with a config file
+if argv.c?
+  argv_ = argv._
+  config = fs.readFileSync argv.c
+  argv = JSON.parse config
+  argv._ = argv_
+       
 if argv._.length > 0
   ready.compile argv._, argv, (err, minified)->
     # If there was an error in the compiled file, show and exit
