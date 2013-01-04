@@ -5,6 +5,7 @@ path = require 'path'
 fs = require 'fs'
 ready = require '../lib/'
 output = require '../lib/output'
+extrafs = require 'fs-extra'
 
 optimist = require('optimist')
   .usage('\nUsage: $0 [FILES OR DIRECTORIES] [options]')
@@ -19,10 +20,18 @@ optimist = require('optimist')
   .describe('no-recursive', 'Don\'t recurse in sub-directories')
   .options('h', {alias:'help'})
   .describe('h', 'Display this help')
+  .options('v', {alias:'version'})
+  .describe('v', 'Display the current version')
 
 argv = optimist.argv
 
-optimist.showHelp() if argv._.length == 0 || argv.help?
+# Display version
+if argv.v?
+  extrafs.readJSONFile './package.json', (err, pack)->
+    log pack.version
+  return
+
+return optimist.showHelp() if argv._.length == 0 || argv.help?
 
 # Create an array with ignore list
 argv.ignore = argv.ignore.split(' ') if argv.ignore?

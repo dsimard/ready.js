@@ -13,15 +13,16 @@
 
 ## Usage
 
-Usage: coffee ./bin/ready.coffee [FILES OR DIRECTORIES] [options]
+    Usage: coffee readyjs [FILES OR DIRECTORIES] [options]
 
     Options:
-      -o, --output    The file in which to write the output
-      -c, --config    Specify a config.json file
+      -o, --output    The file in which to write the output                                
+      -c, --config    Specify a config.json file                                           
       -i, --ignore    Ignore these files from JSHint but output them in the aggregated file
-      -k, --keep      Keep individual minified files
-      --no-recursive  Don't recurse in sub-directories
-      -h, --help      Display this help
+      -k, --keep      Keep individual minified files                                       
+      --no-recursive  Don't recurse in sub-directories                                     
+      -h, --help      Display this help                                                    
+      -v, --version   Display the current version  
 
 ## Continuous integration
 1. run `npm install ready.js --global`
