@@ -13,7 +13,7 @@
 
 ## Usage
 
-    Usage: coffee readyjs [FILES OR DIRECTORIES] [options]
+    Usage: readyjs [FILES OR DIRECTORIES] [options]
 
     Options:
       -o, --output    The file in which to write the output                                
