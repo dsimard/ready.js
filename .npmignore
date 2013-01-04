@@ -2,6 +2,6 @@ tests/*
 vendor/*
 **/*.coffee
 Cakefile
-README.md
+*.md
 .npmignore
 .travis.yml

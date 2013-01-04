@@ -10,7 +10,7 @@ extrafs = require 'fs-extra'
 optimist = require('optimist')
   .usage('\nUsage: $0 [FILES OR DIRECTORIES] [options]')
   .options('o', {alias:'output'})
-  .describe('o', 'The file in which to write the output')
+  .describe('o', 'The file or directory in which to write the output')
   .option('c', {alias:'config'})
   .describe('c', 'Specify a config.json file')
   .options('i', {alias:'ignore'})

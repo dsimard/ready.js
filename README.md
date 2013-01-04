@@ -16,7 +16,7 @@
     Usage: readyjs [FILES OR DIRECTORIES] [options]
 
     Options:
-      -o, --output    The file in which to write the output                                
+      -o, --output    The file or directory in which to write the output                                
       -c, --config    Specify a config.json file                                           
       -i, --ignore    Ignore these files from JSHint but output them in the aggregated file
       -k, --keep      Keep individual minified files                                       
@@ -30,7 +30,14 @@
 
 ## Configuration file
 
-* [Configuration options](https://github.com/dsimard/ready.js/wiki/Configuration-options)
+You can use a configuration file with ready.js. It has to be a JSON with that format :
+
+    {
+      "output" : "path/to/destination", // The file in which to write the output
+      "ignore" : [], // Ignore these files from JSHint but output them in the aggregated file
+      "keep" : false, // Keep individual minified files
+      "no-recursive" : false // Don't recurse in sub-directories
+    }
 
 
 
