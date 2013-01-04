@@ -5,7 +5,6 @@ fileExists = fs.exists || path.exists
 minimatch = require '../node_modules/minimatch'
 {log} = console
 
-
 r =
   # ## Write
   #
@@ -21,9 +20,24 @@ r =
       r.writeToFile content, "#{destination}/all.js", callback
 
   writeToFile: (content, destination, callback)->
+    log "WRITE TO FILE : #{destination}"
     fs.writeFile destination, content, (err)->
       return callback(err) if err?
       
       callback()
+  
+  # ## writeToDir(content, options callback)
+  #
+  # Writes a file to the output directory
+  writeToDir: (content, filename, options, callback)->
+    output = options.output
+    
+    # If output is a file, extract dir
+    outputDir = output
+    if minimatch output, '**/*.js'
+      outputDir = path.dirname output
+
+    r.writeToFile content, "#{outputDir}/#{filename}", callback
+    
       
 module.exports = r

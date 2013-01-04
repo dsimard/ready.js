@@ -13,13 +13,13 @@
 
 ## Usage
 
-  Usage: coffee ./bin/ready.coffee [FILES OR DIRECTORIES] [options]
+    Usage: coffee ./bin/ready.coffee [FILES OR DIRECTORIES] [options]
 
-  Options:
-    -o, --output    The file in which to write the output
-    -i, --ignore    Ignore these files from JSHint but output them in the aggregated file
-    --no-recursive  Don't recurse in sub-directories
-    -h, --help      Display this help 
+    Options:
+      -o, --output    The file in which to write the output
+      -i, --ignore    Ignore these files from JSHint but output them in the aggregated file
+      --no-recursive  Don't recurse in sub-directories
+      -h, --help      Display this help 
 
 ## Continuous integration
 1. run `npm install ready.js --global`

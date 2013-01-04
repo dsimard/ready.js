@@ -1,6 +1,7 @@
 #!/usr/bin/env coffee
 {dir, log} = console
 {inspect} = require 'util'
+path = require 'path'
 fs = require 'fs'
 ready = require '../lib/'
 output = require '../lib/output'
@@ -25,6 +26,14 @@ optimist.showHelp() if argv._.length == 0 || argv.help?
 argv.ignore = argv.ignore.split(' ') if argv.ignore?
 argv.i = argv.ignore
 
+# If should keep individual files
+if argv.k and argv.o
+  ready.on 'file.uglify', (file, uglify)->
+    minFilename = path.basename(file).replace /\.js$/, '.min.js'
+    output.writeToDir uglify.code, minFilename, argv, (err)->
+      if err?
+        console.error err
+        process.exit 1
 
 if argv._.length > 0
   ready.compile argv._, argv, (err, minified)->
