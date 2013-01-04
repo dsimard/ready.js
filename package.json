@@ -10,7 +10,9 @@
     "url" : "https://dsimard@github.com/dsimard/ready.js.git"
   },
   "scripts": {
-    "test": "node ./node_modules/.bin/mocha --compilers coffee:coffee-script tests/*.coffee"
+    "test": "node ./node_modules/.bin/mocha --compilers coffee:coffee-script tests/*.coffee",
+    "prepublish": "cake build",
+    "publish": "cake clean"
   },
   "licenses": [
     {

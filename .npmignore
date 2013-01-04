@@ -1,2 +1,7 @@
-test/*
+tests/*
 vendor/*
+**/*.coffee
+Cakefile
+README.md
+.npmignore
+.travis.yml

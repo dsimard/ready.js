@@ -14,7 +14,7 @@ r =
     cmd = "./node_modules/.bin/coffee ./bin/ready.coffee #{files.join ' '}"
     cwd = path.resolve './'
     args = r.optionsToArgs options
-    #log "CMD : #{cmd} #{args}"
+    log "CMD : #{cmd} #{args}"
     exec "#{cmd} #{args}", {cwd:cwd}, (err, stdout, stderr)->
       err = null if err is ''
       stdout = null if stdout is ''
