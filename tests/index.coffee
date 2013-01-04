@@ -13,9 +13,11 @@ deleteTestFiles = (done)->
   ready.removeAllListeners()
 
   extrafs.mkdir 'tests/minified', (err)->
-    extrafs.remove 'tests/minified/all.js', (err)->    
-      return done(err) if err?
-      done()      
+    extrafs.remove 'tests/minified/readyjs.json', (err)-> 
+      return done(err) if err?   
+      extrafs.remove 'tests/minified/all.js', (err)->    
+        return done(err) if err?
+        done()      
 
 compile = (files, options={}, done, callback)->
   [callback, done, options] = [done, options, {}] unless callback?
