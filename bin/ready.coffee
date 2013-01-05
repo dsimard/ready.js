@@ -27,8 +27,9 @@ argv = optimist.argv
 
 # Display version
 if argv.v?
-  extrafs.readJSONFile './package.json', (err, pack)->
-    log pack.version
+  require('../lib/version') (version)->
+    log version
+    
   return
 
 return optimist.showHelp() if argv._.length == 0 || argv.help?
