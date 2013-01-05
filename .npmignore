@@ -3,5 +3,6 @@ vendor/*
 **/*.coffee
 Cakefile
 *.md
+*.log
 .npmignore
 .travis.yml

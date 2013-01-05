@@ -3,9 +3,9 @@
 {inspect} = require 'util'
 path = require 'path'
 fs = require 'fs'
+extrafs = require '../node_modules/fs-extra'
 ready = require '../lib/'
 output = require '../lib/output'
-extrafs = require 'fs-extra'
 
 optimist = require('optimist')
   .usage('\nUsage: $0 [FILES OR DIRECTORIES] [options]')

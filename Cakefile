@@ -4,9 +4,13 @@ util = require 'util'
 {inspect} = util
 fs = require 'fs'
 path = require 'path'
-extrafs = require './node_modules/fs-extra'
+#extrafs = require './node_modules/fs-extra'
 coffee = require './node_modules/coffee-script'
 _ = require './node_modules/underscore'
+
+exec = (cmd, options, callback=null)->
+  log "Executing `#{cmd}`"
+  require('child_process').exec cmd, options, callback
 
 # ## compileCoffeescripts(directory, option={})
 #
@@ -43,10 +47,6 @@ compileCoffeescripts = (directory, options={})->
 # Generate doc with [docco-husky](https://github.com/mbrevoort/docco-husky)
 # and push it to the `gh-pages` branch.
 generateDoccoHusky = (directories)->
-  exec = (cmd, options, callback=null)->
-    log "Executing `#{cmd}`"
-    require('child_process').exec cmd, options, callback
-    
   directories = (_.flatten([directories])).join ' '
   directory = path.resolve './'
   
@@ -60,8 +60,7 @@ generateDoccoHusky = (directories)->
       error err if err?
       log stdout
       
-      # Change branch to gh-pages
-      
+      # Change branch to gh-pages      
       exec "git checkout gh-pages", {cwd:tmp}, (err, stdout, stderr)->
         log 'testststst #{err}' 
         error err if err?
@@ -88,7 +87,7 @@ generateDoccoHusky = (directories)->
                 log stdout
                 
                 # Remove the docs directory
-                extrafs.remove 'docs', ->
+                exec "rm docs" 
   
 
 task 'doc', 'Regenerate doc', (options)->
@@ -99,6 +98,8 @@ task 'build', 'build scripts to be compatible with js', ->
   compileCoffeescripts 'lib'
       
 task 'clean', 'Remove all js files', ->
-  extrafs.remove 'bin/ready.js', ->
-    exec 'rm lib/*.js'
+  exec 'rm bin/ready.js', (err, stdout, stderr)->
+    log stderr
+    exec 'rm lib/*.js', (err, stdout, stderr)->
+      log stdout
 

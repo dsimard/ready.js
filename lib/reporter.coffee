@@ -1,5 +1,5 @@
 {inspect} = require 'util'
-_ = require 'underscore'
+_ = require '../node_modules/underscore'
 
 # Format jshint errors (see <https://github.com/jshint/jshint/tree/master/src/reporters>)
 reporter = (filename, errors)->
