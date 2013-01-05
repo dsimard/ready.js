@@ -62,7 +62,6 @@ generateDoccoHusky = (directories)->
       
       # Change branch to gh-pages      
       exec "git checkout gh-pages", {cwd:tmp}, (err, stdout, stderr)->
-        log 'testststst #{err}' 
         error err if err?
         log stdout
         
@@ -98,7 +97,7 @@ task 'build', 'build scripts to be compatible with js', ->
   compileCoffeescripts 'lib'
       
 task 'clean', 'Remove all js files', ->
-  exec 'rm bin/ready.js', (err, stdout, stderr)->
+  exec 'rm bin/*.js', (err, stdout, stderr)->
     log stderr
     exec 'rm lib/*.js', (err, stdout, stderr)->
       log stdout
