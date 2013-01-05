@@ -1,0 +1,36 @@
+<!DOCTYPE html><html><head><title>file.coffee</title><meta http-equiv="Content-Type" content="text/html" charset="UTF-8"><link rel="stylesheet" media="all" href="../docco.css"></head><body><div id="container"><div id="background"></div><div id="jump_to">Jump To &hellip;<div id="jump_wrapper"><div id="jump_page"><a href="../index.html" class="source"><span class="file_name">README</span></a><a href="../bin/ready.coffee.html" class="source "><span class="base_path">bin / </span><span class="file_name">ready.coffee</span></a><a href="../lib/reporter.coffee.html" class="source "><span class="base_path">lib / </span><span class="file_name">reporter.coffee</span></a><a href="../lib/index.coffee.html" class="source "><span class="base_path">lib / </span><span class="file_name">index.coffee</span></a><a href="../lib/output.coffee.html" class="source "><span class="base_path">lib / </span><span class="file_name">output.coffee</span></a><a href="../lib/listfiles.coffee.html" class="source "><span class="base_path">lib / </span><span class="file_name">listfiles.coffee</span></a><a href="../lib/file.coffee.html" class="source selected"><span class="base_path">lib / </span><span class="file_name">file.coffee</span></a></div></div></div><table cellpadding="0" cellspacing="0"><thead><tr><th class="docs"><h1>file.coffee</h1><div class="filepath">lib/</div></th><th class="code"></th></tr></thead><tbody><tr id="section-1"><td class="docs"><div class="pilwrap"><a href="#section-1" class="pilcrow">&#182;</a></div><p>This file contains everything related to a single file specifed in the source</p>
+</td><td class="code"><div class="highlight"><pre><span class="p">{</span><span class="nx">dir</span><span class="p">,</span> <span class="nx">log</span><span class="p">}</span> <span class="o">=</span> <span class="nx">console</span>
+<span class="p">{</span><span class="nx">inspect</span><span class="p">}</span> <span class="o">=</span> <span class="nx">require</span> <span class="s1">&#39;util&#39;</span>
+<span class="nv">path = </span><span class="nx">require</span> <span class="s1">&#39;path&#39;</span>
+<span class="nv">fs = </span><span class="nx">require</span> <span class="s1">&#39;fs&#39;</span>
+<span class="nv">jshint = </span><span class="nx">require</span><span class="p">(</span><span class="s2">&quot;../node_modules/jshint&quot;</span><span class="p">).</span><span class="nx">JSHINT</span>
+<span class="nv">readyReporter = </span><span class="nx">require</span> <span class="s1">&#39;./reporter&#39;</span></pre></div></td></tr><tr id="section-2"><td class="docs"><div class="pilwrap"><a href="#section-2" class="pilcrow">&#182;</a></div><h2>Events</h2>
+
+<p>analyze(filename, jshint, err)</p>
+</td><td class="code"><div class="highlight"><pre><span class="nv">r = </span></pre></div></td></tr><tr id="section-3"><td class="docs"><div class="pilwrap"><a href="#section-3" class="pilcrow">&#182;</a></div><h2>analyze(file, callback)</h2>
+
+<p>Analyze a single file with jshint</p>
+
+<pre><code>fileReady.analyze('cat.js', function(err) {
+}); 
+</code></pre>
+</td><td class="code"><div class="highlight"><pre>  <span class="nv">analyze : </span><span class="nf">(file, options, callback)-&gt;</span></pre></div></td></tr><tr id="section-4"><td class="docs"><div class="pilwrap"><a href="#section-4" class="pilcrow">&#182;</a></div><p>Load it in a string</p>
+</td><td class="code"><div class="highlight"><pre>    <span class="nx">fs</span><span class="p">.</span><span class="nx">readFile</span> <span class="nx">file</span><span class="p">,</span> <span class="nf">(err, code)-&gt;</span>
+      <span class="k">return</span> <span class="nx">callback</span> <span class="nx">err</span> <span class="k">if</span> <span class="nx">err</span><span class="o">?</span>
+      
+      <span class="nv">code = </span><span class="nx">code</span><span class="p">.</span><span class="nx">toString</span><span class="p">()</span></pre></div></td></tr><tr id="section-5"><td class="docs"><div class="pilwrap"><a href="#section-5" class="pilcrow">&#182;</a></div><p>Call jshint if should analyze code</p>
+</td><td class="code"><div class="highlight"><pre>      <span class="nv">analyze = </span><span class="nx">options</span><span class="p">.</span><span class="nx">analyze</span> <span class="o">?</span> <span class="kc">true</span>
+
+      <span class="k">if</span> <span class="nx">analyze</span>
+        <span class="nv">jshintOk = </span><span class="nx">jshint</span><span class="p">(</span><span class="nx">code</span><span class="p">)</span>
+        <span class="nx">r</span><span class="p">.</span><span class="nx">emit</span> <span class="s1">&#39;analyze&#39;</span><span class="p">,</span> <span class="nx">file</span><span class="p">,</span> <span class="nx">jshint</span>
+        <span class="k">return</span> <span class="nx">callback</span><span class="p">(</span><span class="nx">readyReporter</span><span class="p">.</span><span class="nx">reporter</span><span class="p">(</span><span class="nx">file</span><span class="p">,</span> <span class="nx">jshint</span><span class="p">.</span><span class="nx">errors</span><span class="p">))</span> <span class="nx">unless</span> <span class="nx">jshintOk</span>       
+        
+      <span class="nx">callback</span><span class="p">()</span>
+  
+<span class="nx">r</span><span class="p">[</span><span class="nx">k</span><span class="p">]</span> <span class="o">=</span> <span class="nx">func</span> <span class="k">for</span> <span class="nx">k</span><span class="p">,</span> <span class="nx">func</span> <span class="k">of</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;events&#39;</span><span class="p">).</span><span class="nx">EventEmitter</span><span class="p">.</span><span class="nx">prototype</span>
+  
+<span class="nv">module.exports = </span><span class="nx">r</span>
+    
+
+</pre></div></td></tr></tbody></table><div id="generated">generated Sat Jan 05 2013 09:50:58 GMT-0500 (EST)  </div></div></body></html>

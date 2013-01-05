@@ -1,0 +1,84 @@
+<!DOCTYPE html><html><head><title>README</title><meta http-equiv="Content-Type" content="text/html" charset="UTF-8"><link rel="stylesheet" media="all" href="./docco.css"></head><body><div id="container"><div id="background"></div><div id="jump_to">Jump To &hellip;<div id="jump_wrapper"><div id="jump_page"><a href="./index.html" class="source"><span class="file_name">README</span></a><a href="./bin/ready.coffee.html" class="source "><span class="base_path">bin / </span><span class="file_name">ready.coffee</span></a><a href="./lib/reporter.coffee.html" class="source "><span class="base_path">lib / </span><span class="file_name">reporter.coffee</span></a><a href="./lib/index.coffee.html" class="source "><span class="base_path">lib / </span><span class="file_name">index.coffee</span></a><a href="./lib/output.coffee.html" class="source "><span class="base_path">lib / </span><span class="file_name">output.coffee</span></a><a href="./lib/listfiles.coffee.html" class="source "><span class="base_path">lib / </span><span class="file_name">listfiles.coffee</span></a><a href="./lib/file.coffee.html" class="source "><span class="base_path">lib / </span><span class="file_name">file.coffee</span></a></div></div></div><table cellpadding="0" cellspacing="0"><thead><tr><th class="docs"></th><th class="code"></th></tr></thead><tbody><tr id="section"><td class="docs"><h1>ready.js
+</h1><p>continuous javascript integration</p><h3>Version</h3><p>3.0.0</p><h3>Author</h3><p><span class="gravatar"><img src="http://www.gravatar.com/avatar/974319b5337d4e023d670b2431037f7d"/><span>dsimard &lt;dsimard@azanka.ca&gt; (http://github.com/dsimard)</span></span></p><h3>Repository</h3><p>git - https://dsimard@github.com/dsimard/ready.js.git</p><h3>Dependencies </h3><ul><li><b>optimist </b><span>~0.3.1</span></li><li><b>colors </b><span>~0.6.0</span></li><li><b>uglify-js </b><span>~2.2.2</span></li><li><b>jshint </b><span>~0.9.1</span></li><li><b>underscore </b><span>~1.4.3</span></li><li><b>async </b><span>~0.1.22</span></li><li><b>readdirp </b><span>&gt;= 0.2.2</span></li><li><b>minimatch </b><span>~0.2.9</span></li></ul><p><h3>Stats</h3><pre class="code_stats">
+http://cloc.sourceforge.net v 1.55  T=0.5 s (12.0 files/s, 648.0 lines/s)
+-------------------------------------------------------------------------------
+Language                     files          blank        comment           code
+-------------------------------------------------------------------------------
+CoffeeScript                     6             63             76            185
+-------------------------------------------------------------------------------
+SUM:                             6             63             76            185
+-------------------------------------------------------------------------------
+</pre></p></td><td id="content" class="code"><p><img src="http://s3.amazonaws.com/files.posterous.com/headers/2452232/scaled500.png" alt="alt text" title="ready.js - continuous javascript integration" />
+<a href="https://travis-ci.org/dsimard/ready.js"><img src="https://travis-ci.org/dsimard/ready.js.png?branch=2012-12-30_v3.0" alt="Build Status" title="" /></a></p>
+
+<h2>What does it do?</h2>
+
+<ol>
+<li>Check if your javascript files are valid with <a href="http://www.jshint.com/">jshint</a>.</li>
+<li>Compile your javascript files with <a href="http://marijnhaverbeke.nl/uglifyjs">Uglify JS</a>.</li>
+<li><em>(Later)</em> Watch your javascript files for jshint while you're coding.</li>
+<li>Create an aggregated file of all your javascripts.</li>
+</ol>
+
+<h2>Installation</h2>
+
+<p><code>npm install ready.js --global</code></p>
+
+<h2>Usage</h2>
+
+<pre><code>Usage: readyjs [FILES OR DIRECTORIES] [options]
+
+Options:
+  -o, --output    The file or directory in which to write the output                                
+  -c, --config    Specify a config.json file                                           
+  -i, --ignore    Ignore these files from JSHint but output them in the aggregated file
+  -k, --keep      Keep individual minified files                                       
+  --no-recursive  Don't recurse in sub-directories                                     
+  -h, --help      Display this help                                                    
+  -v, --version   Display the current version  
+</code></pre>
+
+<h2>Continuous integration</h2>
+
+<ol>
+<li>run <code>npm install ready.js --global</code></li>
+<li>run <code>echo 'readyjs path/to/src -o path/to/dest' &gt;&gt; .git/hooks/pre-commit</code></li>
+</ol>
+
+<h2>Configuration file</h2>
+
+<p>You can use a configuration file with ready.js. It has to be a JSON with that format :</p>
+
+<pre><code>{
+  "output" : "path/to/destination", // The file in which to write the output
+  "ignore" : [], // Ignore these files from JSHint but output them in the aggregated file
+  "keep" : false, // Keep individual minified files
+  "no-recursive" : false // Don't recurse in sub-directories
+}
+</code></pre>
+
+<h2>Contribute</h2>
+
+<p>Give what you want to contribute to open-source : </p>
+
+<p><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=5Q2QAJSHP8Y8Y"><img src="https://www.paypalobjects.com/en_US/i/btn/btn_paynowCC_LG.gif" alt="Donate" title="" /></a></p>
+
+<p>You can create <a href="https://github.com/dsimard/ready.js/issues">issues</a>.</p>
+
+<p>You can also contribute code :</p>
+
+<ol>
+<li>Fork the code on GitHub</li>
+<li>Clone your fork in your environment : <code>git clone git@github.com:USERNAME/undone.git</code></li>
+<li>Create a branch for your feature : <code>git checkout -b your_branch_name</code></li>
+<li>Write and delete code and commit as often as you can : <code>git commit -am "A descriptive message"</code></li>
+<li>Push the branch to your fork : <code>git push origin your_branch_name</code></li>
+<li>Create a pull request on GitHub (click the <strong>Pull request</strong> button on your fork page)</li>
+</ol>
+
+<h2>Need more help?</h2>
+
+<ul>
+<li>Create an <a href="https://github.com/dsimard/ready.js/issues">issue</a>.</li>
+<li>Write me an email at <a href="&#x6D;&#97;&#105;&#x6C;t&#111;:d&#x73;&#x69;&#x6D;&#x61;&#114;&#x64;&#x40;a&#x7A;&#x61;&#x6E;&#107;&#x61;&#x2E;&#x63;&#x61;">d&#x73;&#x69;&#x6D;&#x61;&#114;&#x64;&#x40;a&#x7A;&#x61;&#x6E;&#107;&#x61;&#x2E;&#x63;&#x61;</a></li>
+</ul>  </td></tr></tbody></table><div id="generated">generated Sat Jan 05 2013 09:50:58 GMT-0500 (EST)  </div></div></body></html>
