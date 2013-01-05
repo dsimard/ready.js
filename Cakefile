@@ -86,7 +86,7 @@ generateDoccoHusky = (directories)->
                 log stdout
                 
                 # Remove the docs directory
-                exec "rm docs" 
+                exec "rm docs/" 
   
 
 task 'doc', 'Regenerate doc', (options)->

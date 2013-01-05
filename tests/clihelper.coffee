@@ -11,7 +11,7 @@ r =
     files = _.flatten [files]
     [callback, options] = [options, {}] unless callback?
     
-    cmd = "./node_modules/.bin/coffee ./bin/readyjs.coffee #{files.join ' '}"
+    cmd = "./node_modules/.bin/coffee ./bin/ready.coffee #{files.join ' '}"
     cwd = path.resolve './'
     args = r.optionsToArgs options
     #log "CMD : #{cmd} #{args}"
