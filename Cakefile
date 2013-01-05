@@ -33,7 +33,7 @@ compileCoffeescripts = (directory, options={})->
           js = coffee.compile(data.toString())
           
           # Add a shebang on top
-          js = "#!/usr/bin/env node\n#{js}" if options.shebangs
+          js = "#!/usr/bin/env node\n#{js}" if options.shebang
           
           # Save to file
           filename = filename.replace /\.coffee$/, '.js'
@@ -94,7 +94,7 @@ task 'doc', 'Regenerate doc', (options)->
   generateDoccoHusky ['lib/', 'bin/']
       
 task 'build', 'build scripts to be compatible with js', ->
-  compileCoffeescripts 'bin'
+  compileCoffeescripts 'bin', shebang:true
   compileCoffeescripts 'lib'
       
 task 'clean', 'Remove all js files', ->
