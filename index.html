@@ -1,12 +1,12 @@
 <!DOCTYPE html><html><head><title>README</title><meta http-equiv="Content-Type" content="text/html" charset="UTF-8"><link rel="stylesheet" media="all" href="./docco.css"></head><body><div id="container"><div id="background"></div><div id="jump_to">Jump To &hellip;<div id="jump_wrapper"><div id="jump_page"><a href="./index.html" class="source"><span class="file_name">README</span></a><a href="./bin/ready.coffee.html" class="source "><span class="base_path">bin / </span><span class="file_name">ready.coffee</span></a><a href="./lib/reporter.coffee.html" class="source "><span class="base_path">lib / </span><span class="file_name">reporter.coffee</span></a><a href="./lib/index.coffee.html" class="source "><span class="base_path">lib / </span><span class="file_name">index.coffee</span></a><a href="./lib/output.coffee.html" class="source "><span class="base_path">lib / </span><span class="file_name">output.coffee</span></a><a href="./lib/listfiles.coffee.html" class="source "><span class="base_path">lib / </span><span class="file_name">listfiles.coffee</span></a><a href="./lib/file.coffee.html" class="source "><span class="base_path">lib / </span><span class="file_name">file.coffee</span></a></div></div></div><table cellpadding="0" cellspacing="0"><thead><tr><th class="docs"></th><th class="code"></th></tr></thead><tbody><tr id="section"><td class="docs"><h1>ready.js
 </h1><p>continuous javascript integration</p><h3>Version</h3><p>3.0.0</p><h3>Author</h3><p><span class="gravatar"><img src="http://www.gravatar.com/avatar/974319b5337d4e023d670b2431037f7d"/><span>dsimard &lt;dsimard@azanka.ca&gt; (http://github.com/dsimard)</span></span></p><h3>Repository</h3><p>git - https://dsimard@github.com/dsimard/ready.js.git</p><h3>Dependencies </h3><ul><li><b>optimist </b><span>~0.3.1</span></li><li><b>colors </b><span>~0.6.0</span></li><li><b>uglify-js </b><span>~2.2.2</span></li><li><b>jshint </b><span>~0.9.1</span></li><li><b>underscore </b><span>~1.4.3</span></li><li><b>async </b><span>~0.1.22</span></li><li><b>readdirp </b><span>&gt;= 0.2.2</span></li><li><b>minimatch </b><span>~0.2.9</span></li></ul><p><h3>Stats</h3><pre class="code_stats">
-http://cloc.sourceforge.net v 1.55  T=0.5 s (12.0 files/s, 648.0 lines/s)
+http://cloc.sourceforge.net v 1.55  T=0.5 s (12.0 files/s, 692.0 lines/s)
 -------------------------------------------------------------------------------
 Language                     files          blank        comment           code
 -------------------------------------------------------------------------------
-CoffeeScript                     6             63             76            185
+CoffeeScript                     6             63             98            185
 -------------------------------------------------------------------------------
-SUM:                             6             63             76            185
+SUM:                             6             63             98            185
 -------------------------------------------------------------------------------
 </pre></p></td><td id="content" class="code"><p><img src="http://s3.amazonaws.com/files.posterous.com/headers/2452232/scaled500.png" alt="alt text" title="ready.js - continuous javascript integration" />
 <a href="https://travis-ci.org/dsimard/ready.js"><img src="https://travis-ci.org/dsimard/ready.js.png?branch=2012-12-30_v3.0" alt="Build Status" title="" /></a></p>
@@ -35,7 +35,7 @@ Options:
   -k, --keep      Keep individual minified files                                       
   --no-recursive  Don't recurse in sub-directories                                     
   -h, --help      Display this help                                                    
-  -v, --version   Display the current version  
+  -v, --version   Display the current version
 </code></pre>
 
 <h2>Continuous integration</h2>
@@ -76,9 +76,34 @@ Options:
 <li>Create a pull request on GitHub (click the <strong>Pull request</strong> button on your fork page)</li>
 </ol>
 
+<h2>API Reference</h2>
+
+<p>You can use this function <code>readyjs.compile(sources, [options], callback(err, minified))</code></p>
+
+<pre><code>ready.compile(['./js', 'lib/cat.js'], {analyse:false}, function(err, minified) {
+});
+</code></pre>
+
+<p>See <a href="http://dsimard.github.com/ready.js/lib/index.coffee.html">main file</a> for more information.</p>
+
+<h3><code>options</code></h3>
+
+<ul>
+<li><code>ignore</code> default is <code>[]</code> : A list of files to ignore. (ex : _jquery*.js)</li>
+<li><code>analyze</code> default is <code>true</code> : If should analyze files through jshint</li>
+<li><code>recursive</code> default is <code>true</code> : If should go through directory recursively</li>
+</ul>
+
+<h3><code>callback(err, minified)</code></h3>
+
+<ul>
+<li><code>err</code> : The errors that happened. If jshint didn't pass, <code>err</code> will contain formatted jshint errors</li>
+<li><code>minified</code> : The aggregated minified code for all files</li>
+</ul>
+
 <h2>Need more help?</h2>
 
 <ul>
 <li>Create an <a href="https://github.com/dsimard/ready.js/issues">issue</a>.</li>
-<li>Write me an email at <a href="&#109;&#x61;i&#108;t&#x6F;:&#100;&#x73;&#105;&#109;&#x61;&#x72;&#100;&#x40;&#x61;&#122;&#x61;&#x6E;&#x6B;&#97;.&#99;&#97;">&#100;&#x73;&#105;&#109;&#x61;&#x72;&#100;&#x40;&#x61;&#122;&#x61;&#x6E;&#x6B;&#97;.&#99;&#97;</a></li>
-</ul>  </td></tr></tbody></table><div id="generated">generated Sat Jan 05 2013 09:52:07 GMT-0500 (EST)  </div></div></body></html>
+<li>Write me an email at <a href="m&#97;&#x69;l&#x74;&#111;:&#x64;&#x73;&#105;m&#97;&#x72;&#100;&#64;a&#122;&#97;&#x6E;&#107;a&#46;&#x63;&#97;">&#x64;&#x73;&#105;m&#97;&#x72;&#100;&#64;a&#122;&#97;&#x6E;&#107;a&#46;&#x63;&#97;</a></li>
+</ul>  </td></tr></tbody></table><div id="generated">generated Sat Jan 05 2013 10:19:03 GMT-0500 (EST)  </div></div></body></html>

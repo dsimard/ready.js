@@ -6,22 +6,34 @@
 <span class="nv">file = </span><span class="nx">require</span> <span class="s1">&#39;../lib/file&#39;</span>
 <span class="p">{</span><span class="nx">sourcesToFiles</span><span class="p">}</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;../lib/listfiles&#39;</span><span class="p">)</span></pre></div></td></tr><tr id="section-2"><td class="docs"><div class="pilwrap"><a href="#section-2" class="pilcrow">&#182;</a></div><h2>Events</h2>
 
+<p>Ready.js emits these events :</p>
+
 <ul>
 <li>analyze(file, jshint) : Everytime a file is analyzed</li>
-<li>file.uglify(file, jshint)</li>
+<li>file.uglify(file, jshint) : For every uglified file</li>
 </ul>
-</td><td class="code"><div class="highlight"><pre><span class="nv">r =</span></pre></div></td></tr><tr id="section-3"><td class="docs"><div class="pilwrap"><a href="#section-3" class="pilcrow">&#182;</a></div><h2>Compile(sources, [options], callback(err, minified))</h2>
+</td><td class="code"><div class="highlight"><pre><span class="nv">r =</span></pre></div></td></tr><tr id="section-3"><td class="docs"><div class="pilwrap"><a href="#section-3" class="pilcrow">&#182;</a></div><h2>compile(sources, [options], callback(err, minified))</h2>
 
 <p>Compile all .js files from the specified sources (can be directories and/or files)</p>
 
-<pre><code>ready.compile(['./js', 'lib/cat.js'], function(err) {
+<pre><code>ready.compile(['./js', 'lib/cat.js'], {analyse:false}, function(err, minified) {
 });
 </code></pre>
 
-<p><code>options</code> are :
-- <code>ignore</code> default is <code>[]</code> : A list of files to ignore. (ex : _jquery*.js)
-- <code>analyze</code> default is <code>true</code> : If should analyze files through jshint
-- <code>recursive</code> default is <code>true</code> : If should go through directory recursively</p>
+<h3><code>options</code></h3>
+
+<ul>
+<li><code>ignore</code> default is <code>[]</code> : A list of files to ignore. (ex : _jquery*.js)</li>
+<li><code>analyze</code> default is <code>true</code> : If should analyze files through jshint</li>
+<li><code>recursive</code> default is <code>true</code> : If should go through directory recursively</li>
+</ul>
+
+<h3><code>callback(err, minified)</code></h3>
+
+<ul>
+<li><code>err</code> : The errors that happened. If jshint didn't pass, <code>err</code> will contain formatted jshint errors</li>
+<li><code>minified</code> : The aggregated minified code for all files</li>
+</ul>
 </td><td class="code"><div class="highlight"><pre>  <span class="nv">compile: </span><span class="nf">(sources, options, callback)-&gt;</span>
     <span class="p">[</span><span class="nx">callback</span><span class="p">,</span> <span class="nx">options</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nx">options</span><span class="p">,</span> <span class="p">{}]</span> <span class="k">if</span> <span class="k">typeof</span> <span class="nx">options</span> <span class="o">is</span> <span class="s1">&#39;function&#39;</span>
     
@@ -35,7 +47,26 @@
         <span class="k">return</span> <span class="nx">callback</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="k">if</span> <span class="nx">err</span><span class="o">?</span>
         
         <span class="nx">r</span><span class="p">.</span><span class="nx">uglify</span> <span class="nx">sources</span><span class="p">,</span> <span class="nx">options</span><span class="p">,</span> <span class="nx">callback</span>
-          </pre></div></td></tr><tr id="section-5"><td class="docs"><div class="pilwrap"><a href="#section-5" class="pilcrow">&#182;</a></div><h2> </h2>
+          </pre></div></td></tr><tr id="section-5"><td class="docs"><div class="pilwrap"><a href="#section-5" class="pilcrow">&#182;</a></div><h2>uglify(sources, options, callback)</h2>
+
+<p>Uglify all files from the sources</p>
+
+<pre><code>ready.uglify(['./js', 'lib/cat.js'], {recursive:false}, function(err, minified) {
+});
+</code></pre>
+
+<h3><code>options</code></h3>
+
+<ul>
+<li><code>recursive</code> default is <code>true</code> : If should go through directory recursively</li>
+</ul>
+
+<h3><code>callback(err, minified)</code></h3>
+
+<ul>
+<li><code>err</code> : The errors that happened. If jshint didn't pass, <code>err</code> will contain formatted jshint errors</li>
+<li><code>minified</code> : The aggregated minified code for all files</li>
+</ul>
 </td><td class="code"><div class="highlight"><pre>  <span class="nv">uglify: </span><span class="nf">(sources, options, callback)-&gt;</span>
     <span class="nv">allFilesOptions = </span><span class="p">{</span><span class="nx">recursive</span><span class="o">:</span><span class="p">(</span><span class="nx">options</span><span class="p">.</span><span class="nx">recursive</span> <span class="o">?</span> <span class="kc">true</span><span class="p">)}</span>
     <span class="nx">sourcesToFiles</span> <span class="nx">sources</span><span class="p">,</span> <span class="nx">allFilesOptions</span><span class="p">,</span> <span class="nf">(err, allFiles)-&gt;</span>
@@ -49,7 +80,7 @@
       <span class="k">else</span>
         <span class="nx">r</span><span class="p">.</span><span class="nx">uglifyBatch</span> <span class="nx">allFiles</span><span class="p">,</span> <span class="nx">callback</span>     
       
-      
+  
   <span class="nv">uglifyBatch: </span><span class="nf">(files, callback)-&gt;</span>
     <span class="nv">min = </span><span class="nx">minify</span> <span class="nx">files</span>
     <span class="nx">callback</span> <span class="kc">null</span><span class="p">,</span> <span class="nx">min</span><span class="p">.</span><span class="nx">code</span>
@@ -67,4 +98,4 @@
   
 <span class="nv">module.exports = </span><span class="nx">r</span>
 
-</pre></div></td></tr></tbody></table><div id="generated">generated Sat Jan 05 2013 09:52:07 GMT-0500 (EST)  </div></div></body></html>
+</pre></div></td></tr></tbody></table><div id="generated">generated Sat Jan 05 2013 10:19:03 GMT-0500 (EST)  </div></div></body></html>

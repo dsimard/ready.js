@@ -43,19 +43,5 @@
         </pre></div></td></tr><tr id="section-5"><td class="docs"><div class="pilwrap"><a href="#section-5" class="pilcrow">&#182;</a></div><p>Override argv with a config file</p>
 </td><td class="code"><div class="highlight"><pre><span class="k">if</span> <span class="nx">argv</span><span class="p">.</span><span class="nx">c</span><span class="o">?</span>
   <span class="nv">argv_ = </span><span class="nx">argv</span><span class="p">.</span><span class="nx">_</span>
-  <span class="nv">config = </span><span class="nx">fs</span><span class="p">.</span><span class="nx">readFileSync</span> <span class="nx">argv</span><span class="p">.</span><span class="nx">c</span>
-  <span class="nv">argv = </span><span class="nx">JSON</span><span class="p">.</span><span class="nx">parse</span> <span class="nx">config</span>
-  <span class="nv">argv._ = </span><span class="nx">argv_</span>
-       
-<span class="k">if</span> <span class="nx">argv</span><span class="p">.</span><span class="nx">_</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span>
-  <span class="nx">ready</span><span class="p">.</span><span class="nx">compile</span> <span class="nx">argv</span><span class="p">.</span><span class="nx">_</span><span class="p">,</span> <span class="nx">argv</span><span class="p">,</span> <span class="nf">(err, minified)-&gt;</span></pre></div></td></tr><tr id="section-6"><td class="docs"><div class="pilwrap"><a href="#section-6" class="pilcrow">&#182;</a></div><p>If there was an error in the compiled file, show and exit</p>
-</td><td class="code"><div class="highlight"><pre>    <span class="k">if</span> <span class="nx">err</span><span class="o">?</span>
-      <span class="nx">console</span><span class="p">.</span><span class="nx">error</span> <span class="nx">err</span>
-      <span class="nx">process</span><span class="p">.</span><span class="nx">exit</span> <span class="mi">1</span>
-    
-    <span class="nx">output</span><span class="p">.</span><span class="nx">write</span> <span class="nx">minified</span><span class="p">,</span> <span class="nx">argv</span><span class="p">.</span><span class="nx">output</span><span class="p">,</span> <span class="nf">(err)-&gt;</span>
-      <span class="k">if</span> <span class="nx">err</span><span class="o">?</span>
-        <span class="nx">console</span><span class="p">.</span><span class="nx">error</span> <span class="nx">err</span>
-        <span class="nx">process</span><span class="p">.</span><span class="nx">exit</span> <span class="mi">1</span> 
-
-</pre></div></td></tr></tbody></table><div id="generated">generated Sat Jan 05 2013 09:52:07 GMT-0500 (EST)  </div></div></body></html>
+  <span class="nv">config = </span><span class="nx">fs</span><span class="p">.</span><span class="nx">readFileSync</span> <sp</pre></div></td></tr><tr id="section-6"><td class="docs"><div class="pilwrap"><a href="#section-6" class="pilcrow">&#182;</a></div><p>If there was an error in the compiled file, show and exit</p>
+</td><td class="code"><div class="highlight"><pre>undefined</pre></div></td></tr></tbody></table><div id="generated">generated Sat Jan 05 2013 10:19:03 GMT-0500 (EST)  </div></div></body></html>
