@@ -37,5 +37,5 @@
     "fs-extra" : "latest",
     "docco-husky" : "latest"
   },
-  "engines" : {"node" : ">=0.6.0"}
+  "engines" : {"node" : ">=0.4.0"}
 }
