@@ -1,5 +1,5 @@
 {exec} = require 'child_process'
-{log} = console
+{log, error} = console
 util = require 'util'
 {inspect} = util
 fs = require 'fs'
@@ -43,7 +43,11 @@ compileCoffeescripts = (directory, options={})->
 # Generate doc with [docco-husky](https://github.com/mbrevoort/docco-husky)
 # and push it to the `gh-pages` branch.
 generateDoccoHusky = (directories)->
-  directories = (_.flatten([directories])).join ''
+  exec = (cmd, options, callback=null)->
+    log "Executing `#{cmd}`"
+    require('child_process').exec cmd, options, callback
+    
+  directories = (_.flatten([directories])).join ' '
   directory = path.resolve './'
   
   # Create a tmp directoryectory
@@ -57,17 +61,19 @@ generateDoccoHusky = (directories)->
       log stdout
       
       # Change branch to gh-pages
+      
       exec "git checkout gh-pages", {cwd:tmp}, (err, stdout, stderr)->
+        log 'testststst #{err}' 
         error err if err?
         log stdout
         
-        # Create doc        
-        exec 'docco-husky #{directories}', (err, stdout, stderr)->
+        # Create doc       
+        exec "./node_modules/.bin/docco-husky #{directories}", (err, stdout, stderr)->
           error err if err?
           log stdout
           
           # Move the doc to the tmp directory
-          exec "cp #{directory}/docco-husky/* #{tmp} -r", (err, stdout, stderr)->
+          exec "cp #{directory}/docs/* #{tmp} -r", (err, stdout, stderr)->
             error err if err?
             log stdout
             
@@ -77,10 +83,12 @@ generateDoccoHusky = (directories)->
               log stdout
               
               # Push to gh-pages
-              if pushDoc
-                exec "git push origin gh-pages", {cwd:tmp}, (err, stdout, stderr)->
-                  error err if err?
-                  log stdout
+              exec "git push origin gh-pages", {cwd:tmp}, (err, stdout, stderr)->
+                error err if err?
+                log stdout
+                
+                # Remove the docs directory
+                extrafs.remove 'docs', ->
   
 
 task 'doc', 'Regenerate doc', (options)->

@@ -22,7 +22,8 @@
       -k, --keep      Keep individual minified files                                       
       --no-recursive  Don't recurse in sub-directories                                     
       -h, --help      Display this help                                                    
-      -v, --version   Display the current version  
+      -v, --version   Display the current version
+      
 
 ## Continuous integration
 1. run `npm install ready.js --global`
@@ -55,6 +56,25 @@ You can also contribute code :
 4. Write and delete code and commit as often as you can : `git commit -am "A descriptive message"`
 5. Push the branch to your fork : `git push origin your_branch_name`
 6. Create a pull request on GitHub (click the __Pull request__ button on your fork page)
+
+## API Reference
+
+You can use this function `readyjs.compile(sources, [options], callback(err, minified))`
+
+    ready.compile(['./js', 'lib/cat.js'], {analyse:false}, function(err, minified) {
+    });
+    
+See [main file](http://dsimard.github.com/ready.js/lib/index.coffee.html) for more information.
+
+### `options`
+- `ignore` default is `[]` : A list of files to ignore. (ex : _jquery*.js)
+- `analyze` default is `true` : If should analyze files through jshint
+- `recursive` default is `true` : If should go through directory recursively
+
+### `callback(err, minified)`
+
+- `err` : The errors that happened. If jshint didn't pass, `err` will contain formatted jshint errors
+- `minified` : The aggregated minified code for all files
 
 ## Need more help?
 

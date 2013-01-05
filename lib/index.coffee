@@ -7,21 +7,29 @@ file = require '../lib/file'
 
 # ## Events
 #
+# Ready.js emits these events :
+#
 # - analyze(file, jshint) : Everytime a file is analyzed
-# - file.uglify(file, jshint)
+# - file.uglify(file, jshint) : For every uglified file
 
 r =
-  # ## Compile(sources, [options], callback(err, minified))
+  # ## compile(sources, [options], callback(err, minified))
   #
   # Compile all .js files from the specified sources (can be directories and/or files)
   #
-  #     ready.compile(['./js', 'lib/cat.js'], function(err) {
+  #     ready.compile(['./js', 'lib/cat.js'], {analyse:false}, function(err, minified) {
   #     });
   #
-  # `options` are :
+  # ### `options`
+  #
   # - `ignore` default is `[]` : A list of files to ignore. (ex : _jquery*.js)
   # - `analyze` default is `true` : If should analyze files through jshint
   # - `recursive` default is `true` : If should go through directory recursively
+  #
+  # ### `callback(err, minified)`
+  #
+  # - `err` : The errors that happened. If jshint didn't pass, `err` will contain formatted jshint errors
+  # - `minified` : The aggregated minified code for all files
   compile: (sources, options, callback)->
     [callback, options] = [options, {}] if typeof options is 'function'
     
@@ -37,7 +45,21 @@ r =
         
         r.uglify sources, options, callback
           
-  # ## 
+  # ## uglify(sources, options, callback)
+  #
+  # Uglify all files from the sources
+  #
+  #     ready.uglify(['./js', 'lib/cat.js'], {recursive:false}, function(err, minified) {
+  #     });
+  #
+  # ### `options`
+  #  
+  # - `recursive` default is `true` : If should go through directory recursively
+  #
+  # ### `callback(err, minified)`
+  #
+  # - `err` : The errors that happened. If jshint didn't pass, `err` will contain formatted jshint errors
+  # - `minified` : The aggregated minified code for all files
   uglify: (sources, options, callback)->
     allFilesOptions = {recursive:(options.recursive ? true)}
     sourcesToFiles sources, allFilesOptions, (err, allFiles)->
@@ -53,7 +75,7 @@ r =
       else
         r.uglifyBatch allFiles, callback     
       
-      
+  
   uglifyBatch: (files, callback)->
     min = minify files
     callback null, min.code
