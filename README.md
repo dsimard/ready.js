@@ -51,7 +51,7 @@ You can create [issues](https://github.com/dsimard/ready.js/issues).
 You can also contribute code :
 
 1. Fork the code on GitHub
-2. Clone your fork in your environment : `git clone git@github.com:USERNAME/undone.git`
+2. Clone your fork in your environment : `git clone git@github.com:USERNAME/ready.js.git`
 3. Create a branch for your feature : `git checkout -b your_branch_name`
 4. Write and delete code and commit as often as you can : `git commit -am "A descriptive message"`
 5. Push the branch to your fork : `git push origin your_branch_name`
