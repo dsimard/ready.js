@@ -36,7 +36,8 @@
     "should" : "latest",
     "coffee-script" : "latest",
     "fs-extra" : "latest",
-    "docco-husky" : "latest"
+    "docco-husky" : "latest",
+    "bakerhelper" : "~0.0.1"
   },
   "engines" : {"node" : ">=0.4.0"}
 }
