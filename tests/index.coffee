@@ -39,6 +39,8 @@ compile = (files, options={}, done, callback)->
             done()
 
 describe 'Ready.js', ->
+  this.timeout(5000)
+
   beforeEach deleteTestFiles
   afterEach deleteTestFiles    
 
