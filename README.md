@@ -1,4 +1,5 @@
-![alt text](http://s3.amazonaws.com/files.posterous.com/headers/2452232/scaled500.png "ready.js - continuous javascript integration")
+# ready.js - continuous javascript integration
+
 [![Build Status](https://travis-ci.org/dsimard/ready.js.png?branch=master)](https://travis-ci.org/dsimard/ready.js)
 
 ## What does it do?
