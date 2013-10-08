@@ -42,10 +42,6 @@ You can use a configuration file with ready.js. It has to be a JSON with that fo
     
 ## Contribute
 
-Give what you want to contribute to open-source : 
-
-[![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_paynowCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=5Q2QAJSHP8Y8Y)
-
 You can create [issues](https://github.com/dsimard/ready.js/issues).
 
 You can also contribute code :

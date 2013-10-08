@@ -1,13 +1,23 @@
-{ 
-  "name" : "ready.js",
-  "version" : "3.0.0",
-  "description" : "continuous javascript integration",
-  "keywords" : ["continuous integration", "jslint", "javascript", "minifier", "compiler", "ci", "uglifier"],
-  "author" : "dsimard <dsimard@azanka.ca> (http://github.com/dsimard)",
-  "bin" : { "readyjs" : "./bin/ready.js" },
-  "repository" : {
-    "type" : "git",
-    "url" : "https://dsimard@github.com/dsimard/ready.js.git"
+{
+  "name": "ready.js",
+  "version": "3.0.1",
+  "description": "continuous javascript integration",
+  "keywords": [
+    "continuous integration",
+    "jslint",
+    "javascript",
+    "minifier",
+    "compiler",
+    "ci",
+    "uglifier"
+  ],
+  "author": "dsimard <dsimard@azanka.ca> (http://github.com/dsimard)",
+  "bin": {
+    "readyjs": "./bin/ready.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://dsimard@github.com/dsimard/ready.js.git"
   },
   "scripts": {
     "test": "node ./node_modules/.bin/mocha --compilers coffee:coffee-script tests/*.coffee",
@@ -20,24 +30,23 @@
       "url": "https://raw.github.com/dsimard/ready.js/master/LICENSE"
     }
   ],
-  "dependencies" : {
-    "optimist" : "~0.3.1",
-    "colors" : "~0.6.0",
-    "uglify-js" : "~2.2.2",
-    "jshint" : "~0.9.1",
-    "underscore" : "~1.4.3",
-    "async" : "~0.1.22",
-    "readdirp" : ">= 0.2.2",
-    "minimatch" : "~0.2.9",
-    "fs-extra" : "~0.3.2"
+  "dependencies": {
+    "optimist": "~0.3.1",
+    "colors": "~0.6.0",
+    "uglify-js": "~2.2.2",
+    "jshint": "~0.9.1",
+    "underscore": "~1.4.3",
+    "async": "~0.1.22",
+    "readdirp": ">= 0.2.2",
+    "minimatch": "~0.2.9",
+    "fs-extra": "~0.6.0"
   },
-  "devDependencies" : {
-    "mocha" : "latest",
-    "should" : "latest",
-    "coffee-script" : "latest",
-    "fs-extra" : "latest",
-    "docco-husky" : "latest",
-    "bakerhelper" : "~0.0.1"
+  "devDependencies": {
+    "mocha": "latest",
+    "should": "latest",
+    "coffee-script": "latest"
   },
-  "engines" : {"node" : ">=0.4.0"}
+  "engines": {
+    "node": ">=0.4.0"
+  }
 }
