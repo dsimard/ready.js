@@ -1,6 +1,10 @@
 # CHANGELOG
 
-## 0.3.0
+## 3.0.1
+
+* There's a problem with npm modules and [bakerhelper](https://github.com/dsimard/bakerhelper) is not being installed correctly. Use a local copy for the moment.
+
+## 3.0.0
 
 This version is not compatible with previous versions of ready.js
 

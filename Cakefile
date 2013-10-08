@@ -2,12 +2,7 @@
 {log, error} = console
 util = require 'util'
 {inspect} = util
-fs = require 'fs'
-path = require 'path'
-#extrafs = require './node_modules/fs-extra'
-coffee = require './node_modules/coffee-script'
-_ = require './node_modules/underscore'
-bakerhelper = require './node_modules/bakerhelper'
+bakerhelper = require './lib/cake_module/bakerhelper.coffee'
 
 task 'doc', 'Regenerate doc', (options)->
   bakerhelper.generateDoccoHusky ['lib/', 'bin/']
