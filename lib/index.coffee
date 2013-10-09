@@ -67,25 +67,34 @@ r =
       
       # If there are no files, throw an error
       return callback('There are no files to readyjsize') if allFiles.length == 0
+
+      r.uglifyBatch allFiles, callback
       
+      ###
       # If there is a listener for 'file.uglify', uglify each file individually
       if r.listeners('file.uglify').length > 0
         async.forEach allFiles, r.uglifyFile, ->
           r.uglifyBatch allFiles, callback
       else
-        r.uglifyBatch allFiles, callback     
-      
+        r.uglifyBatch allFiles, callback    
+      ###
   
   uglifyBatch: (files, callback)->
-    min = minify files
-    callback null, min.code
+    # Read js code for each file
+    async.map files, file.readFileForceJs, (err, codes)->
+      return callback(err) if err?
+
+      # Uglify the code
+      minified_codes = codes.map (code)->
+        min = minify code, fromString:true
+        min.code
+
+      callback null, minified_codes.join("\n")
       
   uglifyFile: (filename, callback)->
     minified = minify filename
     r.emit 'file.uglify', filename, minified
-    callback null, minified
-    
-  
+    callback null, minified  
           
 r[k] = func for k, func of require('events').EventEmitter.prototype
 

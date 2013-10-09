@@ -149,3 +149,10 @@ describe 'Ready.js', ->
   it 'can load a json for options', (done)->
     done()
     #cli.execute 'tests/simple'
+
+  it "compile coffeescripts", (done)->
+    compile 'tests/coffeescript', {output:'./tests/minified'}, done, (err, minified)->
+      should.not.exist err
+      minified.should.exists
+      minified.should.match /"working"/
+      done()

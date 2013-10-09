@@ -74,7 +74,7 @@ r =
     
   # ## filterFilename(name)
   filterFilename: (name, options)->
-    keep = minimatch(name, '*.js')
+    keep = minimatch(name, '*.{js,coffee}')
     ignore = r.ignoreFile(name, options)
     keep and not ignore
     

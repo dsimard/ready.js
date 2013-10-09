@@ -22,6 +22,13 @@ describe 'List files,', ->
         should.exist files
         files.length.should.equal 2
         done()
+
+    it 'returns coffeescript', (done)->
+      listFiles.sourceToFiles './tests/coffeescript', (err, files)->
+        should.not.exist err
+        files.length.should.equal 2
+        files[0].should.include "index.coffee"
+        done()
         
   describe 'sourceS to file', ->
     it 'works with a single file', (done)->

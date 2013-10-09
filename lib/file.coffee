@@ -4,6 +4,7 @@
 path = require 'path'
 fs = require 'fs'
 jshint = require("../node_modules/jshint").JSHINT
+coffee = require "../node_modules/coffee-script"
 readyReporter = require './reporter'
 
 # ## Events
@@ -18,10 +19,8 @@ r =
   #     }); 
   analyze : (file, options, callback)->
     # Load it in a string
-    fs.readFile file, (err, code)->
+    r.readFileForceJs file, (err, code)->
       return callback err if err?
-      
-      code = code.toString()
 
       # Call jshint if should analyze code
       analyze = options.analyze ? true
@@ -32,6 +31,25 @@ r =
         return callback(readyReporter.reporter(file, jshint.errors)) unless jshintOk       
         
       callback()
+
+  isCoffee : (file)->
+    path.extname(file).toLowerCase() is '.coffee'
+
+  # ## readJsFile
+  #
+  # Return the code from a js or coffee file and return js
+  readFileForceJs : (file, callback)->
+    fs.readFile file, (err, code)->
+      return callback err if err?
+
+      code = code.toString()
+
+      try
+        code = coffee.compile(code) if r.isCoffee(file)
+      catch error
+        return callback error
+
+      callback null, code
   
 r[k] = func for k, func of require('events').EventEmitter.prototype
   
