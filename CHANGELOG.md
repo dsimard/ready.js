@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 3.1.0
+
+* Compiles coffeescript
+
 ## 3.0.1
 
 * There's a problem with npm modules and [bakerhelper](https://github.com/dsimard/bakerhelper) is not being installed correctly. Use a local copy for the moment.
