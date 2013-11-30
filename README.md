@@ -1,3 +1,7 @@
+# OBSOLETE
+
+This project is now obsolete, see why in [issue #18](https://github.com/dsimard/ready.js/issues/18).
+
 # ready.js - continuous javascript integration
 
 [![Build Status](https://travis-ci.org/dsimard/ready.js.png?branch=master)](https://travis-ci.org/dsimard/ready.js)
